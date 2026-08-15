@@ -2300,7 +2300,8 @@ function aiBlockHtml(lead,rec){
   return '<div class="aibox">'+
     '<div class="aiscore"><b>'+Number(r.leadScore||0)+'</b><span>/ 100 · '+esc(t('aiScore'))+'</span>'+
       (r.grade?'<span class="gbadge '+esc(r.grade)+'" style="margin-left:auto">'+esc(r.grade)+'</span>':'')+'</div>'+
-    (r.grade?'<div class="aifoot" style="margin-top:6px">'+esc(t('aiSuggest'))+' · '+gradeNote+'</div>':'')+
+    (r.grade?'<div class="aifoot" style="margin-top:6px">'+esc(t('aiSuggest'))+
+      (gradeNote?' · '+gradeNote:'')+'</div>':'')+
     (r.summary?'<div class="airow"><em>'+esc(t('aiSummaryL'))+'</em><p>'+esc(r.summary)+'</p></div>':'')+
     (r.nextAction?'<div class="airow"><em>'+esc(t('aiNextL'))+'</em><p>'+esc(r.nextAction)+'</p></div>':'')+
     (r.reason?'<div class="airow"><em>'+esc(t('aiWhy'))+'</em><p>'+esc(r.reason)+'</p></div>':'')+
