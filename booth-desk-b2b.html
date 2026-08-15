@@ -258,6 +258,29 @@ section[hidden]{display:none}
 #rowProfile.lock input,#rowProfile.lock textarea,#rowProfile.lock select,#rowProfile.lock #pf-save,#rowProfile.lock #pf-load,#rowProfile.lock #pf-apply{opacity:.45;pointer-events:none}
 #rowProfile.lock #pf-lock,#rowProfile.lock #pf-copy{opacity:1;pointer-events:auto}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+/* ── 전시회 바 (Ver 3.0) ── */
+.eventbar{padding:0 22px 4px}
+.eventbar>button{width:100%;display:flex;align-items:center;gap:10px;padding:11px 15px;
+  border-radius:12px;background:var(--card);box-shadow:var(--sh);text-align:left}
+.eventbar .evlabel{font-size:.58rem;font-weight:800;letter-spacing:.09em;color:var(--mut)}
+.eventbar b{flex:1;font-size:.78rem;font-weight:800;color:var(--ink);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.eventbar.unset b{color:var(--brand)}
+.eventbar i{font-style:normal;font-size:.72rem}
+.evlist{max-height:44vh;overflow:auto;margin-bottom:4px}
+.evlist button{position:relative}
+.evlist button.on{background:var(--soft);box-shadow:inset 0 0 0 2px var(--brand)}
+.evmeta{display:block;font-size:.62rem;font-weight:600;color:var(--mut);margin-top:4px}
+.evlock{display:block;padding:12px 4px;font-size:.68rem;font-weight:600;color:var(--sub);line-height:1.5}
+.evlock input{width:auto;margin-right:8px;vertical-align:-2px}
+.sheetbox h5{margin:6px 4px 10px;font-size:.74rem;font-weight:800;color:var(--ink)}
+.sheetbox .fld{margin-bottom:10px}
+.sheetbox .fld label{display:block;font-size:.63rem;font-weight:700;color:var(--sub);margin-bottom:5px}
+.sheetbox .fld input{width:100%;padding:12px 13px;border-radius:10px;background:var(--bg);
+  border:1px solid var(--line);font-size:.76rem;color:var(--ink)}
+.sheetbox .fld.two{display:flex;gap:8px}
+.sheetbox .fld.two>div{flex:1}
+.sheetbox button.pri{background:var(--dark);color:#fff;text-align:center;font-weight:800}
 </style>
 </head>
 <body>
@@ -271,6 +294,14 @@ section[hidden]{display:none}
   </div>
   <div class="cnt"><b id="count">0</b><span data-i18n="scans">접수</span><span class="syncpill" id="syncPill" hidden></span></div>
 </header>
+
+<div class="eventbar" id="eventBar">
+  <button type="button" id="evPick">
+    <span class="evlabel" data-i18n="evCurrent">현재 전시회</span>
+    <b id="evName">—</b>
+    <i id="evLockIcon" hidden>🔒</i>
+  </button>
+</div>
 
 <nav role="tablist">
   <button role="tab" id="t-new" aria-selected="true" data-no="01" data-i18n="tabNew">접수</button>
@@ -502,6 +533,31 @@ section[hidden]{display:none}
   </div>
 </div>
 
+<div class="sheet" id="evSheet" hidden>
+  <div class="sheetbox">
+    <h5 data-i18n="evPickTitle">전시회 선택</h5>
+    <div class="evlist" id="evList"></div>
+    <button id="evNew" data-i18n="evNew">+ 새 전시회 만들기</button>
+    <label class="evlock"><input type="checkbox" id="evLock"><span data-i18n="evLock">전시회 잠그기</span></label>
+    <button class="cancel" id="evClose" data-i18n="dClose">닫기</button>
+  </div>
+</div>
+
+<div class="sheet" id="evFormSheet" hidden>
+  <div class="sheetbox">
+    <h5 id="evFormTitle" data-i18n="evFormNew">새 전시회</h5>
+    <div class="fld"><label data-i18n="evNameL">전시회명</label><input id="ev-name" type="text" lang="ko" autocomplete="off" placeholder="K-PRINT 2026"></div>
+    <div class="fld two">
+      <div><label data-i18n="evStart">시작일</label><input id="ev-start" type="date"></div>
+      <div><label data-i18n="evEnd">종료일</label><input id="ev-end" type="date"></div>
+    </div>
+    <div class="fld"><label data-i18n="evVenue">장소</label><input id="ev-venue" type="text" lang="ko" autocomplete="off" placeholder="KINTEX"></div>
+    <div class="fld"><label data-i18n="evCountryL">국가</label><input id="ev-country" type="text" lang="ko" autocomplete="off" placeholder="Korea"></div>
+    <button class="pri" id="ev-save" data-i18n="bSave">저장</button>
+    <button class="cancel" id="ev-cancel" data-i18n="dClose">닫기</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -619,6 +675,33 @@ zh:{sub:'展位登记台',staffLbl:'负责人',unset:'未设置',scans:'登记',
  scanOnBtn:'自动优化已开启 — 点击关闭',scanOffBtn:'自动优化已关闭 — 点击开启',
  syncOn:'已共享',syncWait:'待发送',syncOff:'离线',syncing:'发送中'}
 };
+/* Ver 3.0 strings. Kept in one block so the three languages stay in sync
+   and nothing new gets hardcoded into the markup. */
+const I18N_V3={
+ko:{evCurrent:'현재 전시회',evPickTitle:'전시회 선택',evNew:'+ 새 전시회 만들기',
+ evNameL:'전시회명',evStart:'시작일',evEnd:'종료일',evVenue:'장소',evCountryL:'국가',
+ evFormNew:'새 전시회',evFormEdit:'전시회 수정',evEdit:'수정',evLeads:'건',
+ evLock:'전시회 잠그기 — 현장에서 실수로 바뀌는 것을 막습니다',
+ evLocked:'전시회가 잠겨 있습니다. 아래에서 잠금을 풀어 주세요',
+ evNeedName:'전시회명을 입력해 주세요',evSwitched:'전시회를 바꿨습니다',
+ evCreated:'전시회를 만들었습니다',evSaved:'전시회를 저장했습니다',evUnset:'전시회 설정 필요'},
+en:{evCurrent:'Current event',evPickTitle:'Select event',evNew:'+ New event',
+ evNameL:'Event name',evStart:'Start',evEnd:'End',evVenue:'Venue',evCountryL:'Country',
+ evFormNew:'New event',evFormEdit:'Edit event',evEdit:'Edit',evLeads:' leads',
+ evLock:'Lock event — prevents changing it by mistake at the booth',
+ evLocked:'The event is locked. Unlock it below to change.',
+ evNeedName:'Please enter an event name',evSwitched:'Event changed',
+ evCreated:'Event created',evSaved:'Event saved',evUnset:'No event set'},
+zh:{evCurrent:'当前展会',evPickTitle:'选择展会',evNew:'+ 新建展会',
+ evNameL:'展会名称',evStart:'开始日期',evEnd:'结束日期',evVenue:'场馆',evCountryL:'国家',
+ evFormNew:'新建展会',evFormEdit:'编辑展会',evEdit:'编辑',evLeads:'条',
+ evLock:'锁定展会 — 防止现场误改',
+ evLocked:'展会已锁定，请先在下方解锁。',
+ evNeedName:'请输入展会名称',evSwitched:'已切换展会',
+ evCreated:'已创建展会',evSaved:'已保存展会',evUnset:'尚未设置展会'}
+};
+Object.keys(I18N_V3).forEach(l=>Object.assign(I18N[l],I18N_V3[l]));
+
 function t(k){ const L=I18N[cfg.lang]||I18N.ko; return (L[k]!==undefined?L[k]:I18N.ko[k])||''; }
 function itemLabel(id){ return id; }
 function applyLang(){
@@ -923,14 +1006,82 @@ function backupBlob(rows){
   },null,2)],{type:'application/json'});
 }
 
+/* ---- Events -------------------------------------------------------- */
+async function events(){
+  return (await live('events')).sort((a,b)=>
+    String(b.startDate||'').localeCompare(String(a.startDate||''))||(b.createdAt||0)-(a.createdAt||0));
+}
+/* Every lead belongs to an event (spec 10). If the booth is running before
+   anyone set one up, make one rather than refuse to save: losing a visitor
+   because of a settings screen is the one failure this product cannot have. */
+async function ensureEvent(eventId){
+  if(eventId){ const e=await get('events',eventId); if(e&&!e.deleted)return e; }
+  const list=await events();
+  if(list.length)return list[0];
+  const profile=(typeof P==='function')?P():{};
+  return save('events',{eventName:(profile.event||'').trim()||'전시회 미설정',
+    startDate:'',endDate:'',venue:'',country:'',status:'active',description:''});
+}
+
+/* ---- One Ver 2.0 row -> Company + Lead + Interaction + Attachment ---- */
+async function importRow(r,eventId,opt){
+  opt=opt||{};
+  const src=r.uid||('legacy-'+r.id);
+  const found=(await byIndex('leads','sourceUid',src)).filter(x=>!x.deleted)[0];
+  if(found&&!opt.update)return {lead:found,created:false,newCompany:false};
+
+  let companyId=found?found.companyId:'', newCompany=false;
+  const cname=(r.company||'').trim();
+  if(cname){
+    const key=normalizeName(cname);
+    let co=key?(await byIndex('companies','normalizedName',key)).filter(c=>!c.deleted)[0]:null;
+    if(!co){
+      co=await save('companies',{companyName:cname,normalizedName:key,website:'',country:'',
+        city:'',address:r.addr||'',industry:'',businessType:'',products:[],markets:[],
+        employeeSize:'',description:'',aiSummary:'',aiFitScore:null,aiIndustry:'',aiProducts:[],
+        aiResearchStatus:'none',researchSource:'',researchedAt:null});
+      newCompany=true;
+    }
+    companyId=co.id;
+  }
+
+  const when=Date.parse(String(r.at||'').replace(' ','T'))||r.id||Date.now();
+  const lead=await save('leads',{...(found||{}),
+    eventId:found?found.eventId:eventId, companyId, sourceUid:src,
+    firstName:'',lastName:'',fullName:(r.name||'').trim(),jobTitle:r.title||'',
+    phone:r.phone||'',mobile:'',email:r.email||'',address:r.addr||'',country:'',city:'',
+    website:'',source:'business_card',leadGrade:r.grade||'',
+    interests:r.items||[],requests:r.books||[],notes:r.memo||'',
+    assignedTo:r.staff||'',status:(found&&found.status)||'new',
+    createdAt:(found&&found.createdAt)||when});
+
+  /* Interactions are append-only (spec 68). Editing a record must not
+     rewrite what was actually said at the booth, so one is written on the
+     first import only. */
+  if(!found){
+    await save('interactions',{leadId:lead.id,eventId:lead.eventId,type:'booth_visit',
+      summary:(r.memo||'').slice(0,200),notes:r.memo||'',interests:r.items||[],
+      requests:r.books||[],attachments:[],createdBy:r.staff||'',createdAt:when},{queue:false});
+    if(r.photo)await save('attachments',{leadId:lead.id,kind:'business_card',
+      blob:r.photo,name:(cname||'card')+'.jpg'},{queue:false});
+  }
+  return {lead,created:!found,newCompany};
+}
+
+/* Called from the Ver 2.0 save path, so the booth flow keeps its speed and
+   still produces B2B records (spec 26, 85). */
+async function captureFromV2(rec,eventId){
+  const ev=await ensureEvent(eventId);
+  return importRow(rec,ev.id,{update:true});
+}
+
 /* ---- Migration (spec 86) ------------------------------------------------
-   One Ver 2.0 row becomes Company + Lead + Interaction (+ Attachment).
-   Re-running is safe: leads carry the source row's uid and are skipped on a
-   second pass, so nothing is duplicated. */
+   Re-running is safe: leads carry the source row's uid, so a second pass
+   imports nothing. */
 async function migrate(opt){
   opt=opt||{};
   const rows=await readLegacyRows();
-  if(!rows.length)return {status:'nothing',leads:0,companies:0,interactions:0,skipped:0};
+  if(!rows.length)return {status:'nothing',leads:0,companies:0,skipped:0};
 
   const backup=backupBlob(rows);
   if(opt.backup!==false&&typeof dl==='function')
@@ -942,56 +1093,13 @@ async function migrate(opt){
   if(!ev)ev=await save('events',{eventName,startDate:'',endDate:'',venue:'',country:'',
     status:'completed',description:'Ver 2.0 기록에서 자동 생성'});
 
-  const leads=await all('leads');
-  const seen=new Set(leads.map(l=>l.sourceUid).filter(Boolean));
-  const byName=new Map((await all('companies')).map(c=>[c.normalizedName,c.id]));
-
-  let nLead=0,nCo=0,nInt=0,skipped=0;
-
+  let nLead=0,nCo=0,skipped=0;
   for(const r of rows){
-    const src=r.uid||('legacy-'+r.id);
-    if(seen.has(src)){ skipped++; continue; }
-    seen.add(src);
-
-    let companyId='';
-    if((r.company||'').trim()){
-      const key=normalizeName(r.company);
-      if(key&&byName.has(key))companyId=byName.get(key);
-      else{
-        const co=await save('companies',{companyName:r.company.trim(),normalizedName:key,
-          website:'',country:'',city:'',address:r.addr||'',industry:'',businessType:'',
-          products:[],markets:[],employeeSize:'',description:'',aiSummary:'',aiFitScore:null,
-          aiResearchStatus:'none',researchSource:'',researchedAt:null});
-        if(key)byName.set(key,co.id);
-        companyId=co.id; nCo++;
-      }
-    }
-
-    const lead=await save('leads',{
-      eventId:ev.id, companyId, sourceUid:src,
-      firstName:'', lastName:'', fullName:(r.name||'').trim(),
-      jobTitle:r.title||'', phone:r.phone||'', mobile:'', email:r.email||'',
-      address:r.addr||'', country:'', city:'', website:'',
-      source:'business_card', leadGrade:r.grade||'', leadScore:null,
-      interests:r.items||[], requests:r.books||[], notes:r.memo||'',
-      assignedTo:r.staff||'', status:'new', nextAction:'', nextActionDate:null,
-      createdAt:Date.parse(String(r.at||'').replace(' ','T'))||r.id||Date.now(),
-      syncedAt:null, syncStatus:'pending'
-    });
-    nLead++;
-
-    await save('interactions',{leadId:lead.id, eventId:ev.id, type:'booth_visit',
-      summary:(r.memo||'').slice(0,200), notes:r.memo||'',
-      interests:r.items||[], requests:r.books||[], attachments:[],
-      createdBy:r.staff||'', createdAt:lead.createdAt}, {queue:false});
-    nInt++;
-
-    if(r.photo)await save('attachments',{leadId:lead.id, kind:'business_card',
-      blob:r.photo, name:(r.company||'card')+'.jpg'}, {queue:false});
+    const out=await importRow(r,ev.id);
+    if(out.created)nLead++; else skipped++;
+    if(out.newCompany)nCo++;
   }
-
-  return {status:'done',leads:nLead,companies:nCo,interactions:nInt,skipped,
-          eventId:ev.id,eventName,backup};
+  return {status:'done',leads:nLead,companies:nCo,skipped,eventId:ev.id,eventName,backup};
 }
 
 async function counts(){
@@ -1002,6 +1110,7 @@ async function counts(){
 
 return {NS,AI_CONFIG,SCHEMA,LEGACY_DB,open,get,all,byIndex,live,save,remove,
         enqueue,normalizeName,readLegacyRows,migrate,counts,newId,plain,
+        events,ensureEvent,importRow,captureFromV2,
         error:()=>lastError};
 })();
 
@@ -1370,6 +1479,8 @@ $('saveBtn').addEventListener('click',async()=>{
       r.items=draft.items;r.books=draft.books||[];r.grade=draft.grade;r.spec=spec;
       r.uid=r.uid||uid(); r.updated=Date.now(); r.dirty=true;
       await dbPut(r); mirrorSave(); pill(); if(cfg.sync)syncNow(true);
+      try{ await B2B.captureFromV2(r,cfg.eventId); }
+      catch(err){ console.warn('B2B capture (edit) failed:',err); }
     }
     draft=null;$('draft').hidden=true;$('saveBtn').textContent=t('save');
     render();toast(t('tEdited'));$('t-list').click();return;
@@ -1383,6 +1494,8 @@ $('saveBtn').addEventListener('click',async()=>{
     if(!confirm('회사명·이름·메모가 모두 비어 있습니다. 사진만 저장할까요?'))return;
   }
   rows.unshift(rec); filterStaff=''; const okw=await dbPut(rec); mirrorSave();
+  try{ await B2B.captureFromV2(rec,cfg.eventId); }
+  catch(err){ console.warn('B2B capture failed:',err); }
   if(!okw)toast(t('tNoStore'));
   stamp(pad(rows.length)+' 번');
   pill(); if(cfg.sync)syncNow(true);
@@ -1437,6 +1550,73 @@ document.addEventListener('compositionstart',()=>{composing=true});
 document.addEventListener('compositionend',()=>{composing=false});
 
 
+
+/* ═════ 전시회 (Ver 3.0) ═════
+   The current event is shown at all times and can be locked, because
+   picking the wrong one at a busy booth misfiles every lead taken after. */
+let evEditId=null;
+
+async function evPaint(){
+  const ev=await B2B.ensureEvent(cfg.eventId);
+  if(cfg.eventId!==ev.id){ cfg.eventId=ev.id; cfgSave(); }
+  const n=$('evName'); if(n)n.textContent=ev.eventName||t('evUnset');
+  const bar=$('eventBar'); if(bar)bar.classList.toggle('unset',!ev.eventName);
+  const lk=$('evLockIcon'); if(lk)lk.hidden=!cfg.eventLock;
+  const cb=$('evLock'); if(cb)cb.checked=!!cfg.eventLock;
+  return ev;
+}
+
+async function evRenderList(){
+  const list=await B2B.events(), leads=await B2B.live('leads'), box=$('evList');
+  if(!box)return;
+  box.innerHTML=list.map(e=>{
+    const n=leads.filter(l=>l.eventId===e.id).length;
+    const meta=[e.startDate,e.venue].filter(Boolean).join(' · ');
+    return '<button class="evitem'+(e.id===cfg.eventId?' on':'')+'" data-id="'+esc(e.id)+'">'+
+      esc(e.eventName)+'<span class="evmeta">'+(meta?esc(meta)+' · ':'')+n+esc(t('evLeads'))+'</span></button>';
+  }).join('');
+}
+
+$('evPick').addEventListener('click',async()=>{ await evRenderList(); $('evSheet').hidden=false; });
+$('evClose').addEventListener('click',()=>{ $('evSheet').hidden=true; });
+$('evLock').addEventListener('change',e=>{ cfg.eventLock=e.target.checked; cfgSave(); evPaint(); });
+
+$('evList').addEventListener('click',async e=>{
+  const b=e.target.closest('.evitem'); if(!b)return;
+  if(cfg.eventLock){ toast(t('evLocked')); return; }
+  if(b.dataset.id===cfg.eventId){ evFormOpen(cfg.eventId); return; }
+  cfg.eventId=b.dataset.id; cfgSave();
+  await evPaint(); $('evSheet').hidden=true; toast(t('evSwitched'));
+});
+
+async function evFormOpen(id){
+  evEditId=id||null;
+  const V=(i,v)=>{ const e=$(i); if(e)e.value=v||''; };
+  const ev=id?await B2B.get('events',id):null;
+  $('evFormTitle').textContent=t(ev?'evFormEdit':'evFormNew');
+  V('ev-name',ev&&ev.eventName); V('ev-start',ev&&ev.startDate); V('ev-end',ev&&ev.endDate);
+  V('ev-venue',ev&&ev.venue);    V('ev-country',ev&&ev.country);
+  $('evSheet').hidden=true; $('evFormSheet').hidden=false;
+  setTimeout(()=>$('ev-name').focus(),80);
+}
+$('evNew').addEventListener('click',()=>{
+  if(cfg.eventLock){ toast(t('evLocked')); return; }
+  evFormOpen(null);
+});
+$('ev-cancel').addEventListener('click',()=>{ $('evFormSheet').hidden=true; });
+
+$('ev-save').addEventListener('click',async()=>{
+  const g=i=>$(i).value.trim();
+  const name=g('ev-name');
+  if(!name){ toast(t('evNeedName')); $('ev-name').focus(); return; }
+  const prev=evEditId?await B2B.get('events',evEditId):null;
+  const ev=await B2B.save('events',{...(prev||{}),eventName:name,
+    startDate:g('ev-start'),endDate:g('ev-end'),venue:g('ev-venue'),country:g('ev-country'),
+    status:(prev&&prev.status)||'active',description:(prev&&prev.description)||''});
+  cfg.eventId=ev.id; cfgSave();
+  await evPaint(); $('evFormSheet').hidden=true;
+  toast(t(prev?'evSaved':'evCreated'));
+});
 
 /* ═════ 실시간 공유 (구글 시트) ═════
    폰 저장이 먼저, 서버 전송은 나중. 끊겨도 기록은 남습니다. */
@@ -2256,6 +2436,7 @@ paintBar('new');
   }
   mirrorSave();
   render(); usage(); renderChips(); renderBooks(); paintScanBtn(); paintBar('new');
+  evPaint();
   $('s-sync').value=cfg.sync||''; pill();
   if(cfg.sync)syncNow(true);
   paintKeyState();
