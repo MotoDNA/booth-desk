@@ -261,6 +261,28 @@ section[hidden]{display:none}
 #rowProfile.lock input,#rowProfile.lock textarea,#rowProfile.lock select,#rowProfile.lock #pf-save,#rowProfile.lock #pf-load,#rowProfile.lock #pf-apply{opacity:.45;pointer-events:none}
 #rowProfile.lock #pf-lock,#rowProfile.lock #pf-copy{opacity:1;pointer-events:auto}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+/* ── 후속 연락 (Ver 3.0) ── */
+.fugrp{margin-bottom:18px}
+.fugrp>h4{margin:0 0 10px;font-size:.7rem;font-weight:800;letter-spacing:.04em;color:var(--sub);
+  display:flex;align-items:center;gap:7px}
+.fugrp>h4 u{text-decoration:none;font-size:.62rem;font-weight:700;padding:3px 8px;border-radius:6px;
+  background:var(--bg);color:var(--mut)}
+.fugrp.late>h4{color:#C8342A}
+.fugrp.late>h4 u{background:#FBEDEB;color:#C8342A}
+.fucard{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:15px 16px;margin-bottom:11px}
+.fucard .top{display:flex;align-items:baseline;gap:9px}
+.fucard h3{flex:1;margin:0;font-size:.86rem;font-weight:800;letter-spacing:-.02em;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}
+.fucard .who{margin:5px 0 0;font-size:.72rem;color:var(--mut)}
+.fucard .why{margin:10px 0 0;font-size:.7rem;color:var(--sub);line-height:1.55}
+.fucard .why b{color:var(--ink)}
+.fucard .acts{margin-top:12px;display:flex;gap:7px}
+.fucard .acts button{flex:1;padding:11px 0;border-radius:10px;font-size:.7rem;font-weight:700;
+  background:var(--bg);color:var(--sub)}
+.fucard .acts button.pri{background:var(--dark);color:#fff}
+.fudate{font-family:var(--mono);font-size:.62rem;font-weight:600;color:var(--mut)}
+.fudate.late{color:#C8342A}
+
 /* ── 대시보드 (Ver 3.0) ── */
 .hev{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:17px 18px;margin-bottom:14px}
 .hev b{display:block;font-size:1rem;font-weight:800;letter-spacing:-.02em}
@@ -363,10 +385,11 @@ section[hidden]{display:none}
 <nav role="tablist">
   <button role="tab" id="t-home" aria-selected="false" data-no="01" data-i18n="tabHome">홈</button>
   <button role="tab" id="t-new" aria-selected="true" data-no="02" data-i18n="tabNew">접수</button>
-  <button role="tab" id="t-list" aria-selected="false" data-no="03" data-i18n="tabList">명부</button>
-  <button role="tab" id="t-lead" aria-selected="false" data-no="04" data-i18n="tabLead">리드</button>
-  <button role="tab" id="t-co" aria-selected="false" data-no="05" data-i18n="tabCo">회사</button>
-  <button role="tab" id="t-set" aria-selected="false" data-no="06" data-i18n="tabSet">설정</button>
+  <button role="tab" id="t-fu" aria-selected="false" data-no="03" data-i18n="tabFu">후속</button>
+  <button role="tab" id="t-list" aria-selected="false" data-no="04" data-i18n="tabList">명부</button>
+  <button role="tab" id="t-lead" aria-selected="false" data-no="05" data-i18n="tabLead">리드</button>
+  <button role="tab" id="t-co" aria-selected="false" data-no="06" data-i18n="tabCo">회사</button>
+  <button role="tab" id="t-set" aria-selected="false" data-no="07" data-i18n="tabSet">설정</button>
 </nav>
 
 <main>
@@ -447,6 +470,10 @@ section[hidden]{display:none}
     <button id="selClear" data-i18n="selNone">선택 해제</button>
   </div>
   <div id="slips"></div>
+</section>
+
+<section id="p-fu" hidden>
+  <div id="fuBody"></div>
 </section>
 
 <section id="p-lead" hidden>
@@ -772,7 +799,17 @@ ko:{evCurrent:'현재 전시회',evPickTitle:'전시회 선택',evNew:'+ 새 전
  evLocked:'전시회가 잠겨 있습니다. 아래에서 잠금을 풀어 주세요',
  evNeedName:'전시회명을 입력해 주세요',evSwitched:'전시회를 바꿨습니다',
  evCreated:'전시회를 만들었습니다',evSaved:'전시회를 저장했습니다',evUnset:'전시회 설정 필요',
- tabHome:'홈',tabLead:'리드',tabCo:'회사',
+ tabHome:'홈',tabFu:'후속',tabLead:'리드',tabCo:'회사',
+ fuOverdue:'지연',fuToday:'오늘',fuWeek:'이번 주',fuLater:'예정',
+ fuEmpty:'예정된 후속 연락이 없습니다',fuEmptyS:'접수한 리드에 자동으로 일정이 잡힙니다',
+ fuSnooze:'3일 연기',fuDone:'완료',fuDoneMsg:'완료 처리했습니다',fuSnoozeMsg:'3일 뒤로 미뤘습니다',
+ fuMade:'후속 일정 %n건을 만들었습니다',fuWhy:'사유',fuDue:'예정일',
+ fuPrio_high:'높음',fuPrio_normal:'보통',fuPrio_low:'낮음',
+ fu_req_hot:'요청 있음 · A등급',fu_req:'요청 있음',fu_grade_a:'A등급',
+ fu_grade_b:'B등급',fu_grade_c:'C등급 · 장기 관리',fu_default:'기본 일정',
+ ft_thank_you:'감사 인사',ft_sample_followup:'샘플 후속',ft_quotation_followup:'견적 후속',
+ ft_general_followup:'일반 후속',ft_recontact:'재연락',
+ hFollow:'후속 연락',
  hTotal:'전체',hToday:'오늘',hGradeA:'A등급',hReq:'요청 있음',
  hGrade:'등급 분포',hPipe:'진행 단계',hConv:'전환율',hAttention:'먼저 챙길 리드',
  hAttentionS:'A등급인데 아직 연락 전인 리드입니다',hAttentionNone:'A등급 리드를 모두 챙겼습니다',
@@ -798,7 +835,17 @@ en:{evCurrent:'Current event',evPickTitle:'Select event',evNew:'+ New event',
  evLocked:'The event is locked. Unlock it below to change.',
  evNeedName:'Please enter an event name',evSwitched:'Event changed',
  evCreated:'Event created',evSaved:'Event saved',evUnset:'No event set',
- tabHome:'Home',tabLead:'Leads',tabCo:'Companies',
+ tabHome:'Home',tabFu:'Follow-up',tabLead:'Leads',tabCo:'Companies',
+ fuOverdue:'Overdue',fuToday:'Today',fuWeek:'This week',fuLater:'Later',
+ fuEmpty:'No follow-ups scheduled',fuEmptyS:'Captured leads get a date automatically',
+ fuSnooze:'Snooze 3d',fuDone:'Done',fuDoneMsg:'Marked done',fuSnoozeMsg:'Pushed back 3 days',
+ fuMade:'Scheduled %n follow-ups',fuWhy:'Reason',fuDue:'Due',
+ fuPrio_high:'High',fuPrio_normal:'Normal',fuPrio_low:'Low',
+ fu_req_hot:'Requests · grade A',fu_req:'Has requests',fu_grade_a:'Grade A',
+ fu_grade_b:'Grade B',fu_grade_c:'Grade C · long term',fu_default:'Default',
+ ft_thank_you:'Thank you',ft_sample_followup:'Sample',ft_quotation_followup:'Quotation',
+ ft_general_followup:'General',ft_recontact:'Re-contact',
+ hFollow:'Follow-up',
  hTotal:'Total',hToday:'Today',hGradeA:'Grade A',hReq:'With requests',
  hGrade:'Grades',hPipe:'Pipeline',hConv:'Conversion',hAttention:'Needs attention',
  hAttentionS:'Grade A leads with no contact yet',hAttentionNone:'Every grade A lead has been picked up',
@@ -824,7 +871,17 @@ zh:{evCurrent:'当前展会',evPickTitle:'选择展会',evNew:'+ 新建展会',
  evLocked:'展会已锁定，请先在下方解锁。',
  evNeedName:'请输入展会名称',evSwitched:'已切换展会',
  evCreated:'已创建展会',evSaved:'已保存展会',evUnset:'尚未设置展会',
- tabHome:'首页',tabLead:'客户',tabCo:'公司',
+ tabHome:'首页',tabFu:'跟进',tabLead:'客户',tabCo:'公司',
+ fuOverdue:'逾期',fuToday:'今天',fuWeek:'本周',fuLater:'稍后',
+ fuEmpty:'暂无跟进计划',fuEmptyS:'登记的客户会自动安排日期',
+ fuSnooze:'延后3天',fuDone:'完成',fuDoneMsg:'已标记完成',fuSnoozeMsg:'已延后3天',
+ fuMade:'已安排%n条跟进',fuWhy:'原因',fuDue:'预定日',
+ fuPrio_high:'高',fuPrio_normal:'中',fuPrio_low:'低',
+ fu_req_hot:'有需求 · A级',fu_req:'有需求',fu_grade_a:'A级',
+ fu_grade_b:'B级',fu_grade_c:'C级 · 长期跟进',fu_default:'默认',
+ ft_thank_you:'致谢',ft_sample_followup:'样品跟进',ft_quotation_followup:'报价跟进',
+ ft_general_followup:'常规跟进',ft_recontact:'再联系',
+ hFollow:'跟进',
  hTotal:'合计',hToday:'今日',hGradeA:'A级',hReq:'有需求',
  hGrade:'等级分布',hPipe:'进展阶段',hConv:'转化率',hAttention:'优先跟进',
  hAttentionS:'A级但尚未联系的客户',hAttentionNone:'A级客户均已跟进',
@@ -1216,7 +1273,77 @@ async function importRow(r,eventId,opt){
    still produces B2B records (spec 26, 85). */
 async function captureFromV2(rec,eventId){
   const ev=await ensureEvent(eventId);
-  return importRow(rec,ev.id,{update:true});
+  const out=await importRow(rec,ev.id,{update:true});
+  if(out&&out.created&&out.lead)await scheduleFollowUp(out.lead);
+  return out;
+}
+
+/* ---- Follow-up scheduling ------------------------------------------------
+   Rule-based for now. Each rule stores the key it fired on rather than a
+   sentence, so the reason shown on screen is translated like everything
+   else, and so a later AI step can replace the rule while leaving the
+   record's shape alone. */
+const FU_KEYWORDS={
+  sample:['샘플','시료','实物','样品','sample','swatch'],
+  quotation:['견적','단가','报价','价格','quotation','quote','pricing']
+};
+function fuType(requests){
+  const hay=(requests||[]).join(' ').toLowerCase();
+  if(FU_KEYWORDS.quotation.some(w=>hay.includes(w)))return 'quotation_followup';
+  if(FU_KEYWORDS.sample.some(w=>hay.includes(w)))return 'sample_followup';
+  return (requests||[]).length?'general_followup':'recontact';
+}
+/* Days come from what the visitor asked for and how they were graded, which
+   is all Ver 2.0 ever recorded. Spec 29's wider spread needs the AI step. */
+function fuPlan(lead){
+  const req=(lead.requests||[]).length, g=lead.leadGrade;
+  if(req&&g==='A')return {days:2,reason:'req_hot',priority:'high'};
+  if(req)         return {days:3,reason:'req',    priority:'normal'};
+  if(g==='A')     return {days:3,reason:'grade_a',priority:'high'};
+  if(g==='B')     return {days:7,reason:'grade_b',priority:'normal'};
+  if(g==='C')     return {days:30,reason:'grade_c',priority:'low'};
+  return {days:7,reason:'default',priority:'normal'};
+}
+const FU_OPEN=['pending','ready','approved'];
+
+/* Spec 63: one open follow-up of a given type per lead, so re-saving a
+   record at the booth cannot stack up duplicates. */
+async function scheduleFollowUp(lead,opt){
+  opt=opt||{};
+  if(!lead||lead.deleted)return null;
+  if(['won','lost'].includes(lead.status||''))return null;
+  const plan=fuPlan(lead), type=opt.type||fuType(lead.requests);
+  const open=(await byIndex('followups','leadId',lead.id))
+    .filter(f=>!f.deleted&&f.type===type&&FU_OPEN.includes(f.status));
+  if(open.length)return open[0];
+  const base=lead.createdAt||Date.now();
+  return save('followups',{leadId:lead.id,eventId:lead.eventId,type,
+    scheduledAt:base+plan.days*86400000,status:'pending',priority:plan.priority,
+    reason:plan.reason,aiRecommended:false,aiReason:'',
+    emailSubject:'',emailBody:'',approvedAt:null,sentAt:null,sentBy:'',
+    gmailMessageId:'',errorMessage:''});
+}
+
+/* Backfill for leads captured before this existed. It only reaches leads
+   that have never had a follow-up: re-creating one the moment an old one is
+   closed would mean the list could never be emptied, so finishing a
+   follow-up finishes it. Scheduling the next one is a deliberate act. */
+async function ensureFollowUps(eventId){
+  const leads=(await live('leads')).filter(l=>!eventId||l.eventId===eventId);
+  let made=0;
+  for(const l of leads){
+    const any=(await byIndex('followups','leadId',l.id)).filter(f=>!f.deleted);
+    if(any.length)continue;
+    if(await scheduleFollowUp(l))made++;
+  }
+  return made;
+}
+
+async function openFollowUps(eventId){
+  return (await live('followups'))
+    .filter(f=>FU_OPEN.includes(f.status))
+    .filter(f=>!eventId||f.eventId===eventId)
+    .sort((a,b)=>(a.scheduledAt||0)-(b.scheduledAt||0));
 }
 
 /* ---- Migration (spec 86) ------------------------------------------------
@@ -1255,6 +1382,7 @@ async function counts(){
 return {NS,AI_CONFIG,SCHEMA,LEGACY_DB,open,get,all,byIndex,live,save,remove,
         enqueue,normalizeName,readLegacyRows,migrate,counts,newId,plain,
         events,ensureEvent,importRow,captureFromV2,
+        fuPlan,fuType,scheduleFollowUp,ensureFollowUps,openFollowUps,FU_OPEN,
         error:()=>lastError};
 })();
 
@@ -1762,6 +1890,84 @@ $('ev-save').addEventListener('click',async()=>{
   toast(t(prev?'evSaved':'evCreated'));
 });
 
+/* ═════ 후속 연락 (Ver 3.0) ═════
+   Dates come from the rules in B2B.fuPlan and the reason is shown on every
+   card, so the schedule is something the user can check rather than trust. */
+function dayStart(ms){ const d=new Date(ms); d.setHours(0,0,0,0); return d.getTime(); }
+
+function fuBucket(f,now){
+  const today=dayStart(now), due=dayStart(f.scheduledAt||now);
+  if(due<today)return 'fuOverdue';
+  if(due===today)return 'fuToday';
+  if(due<=today+7*86400000)return 'fuWeek';
+  return 'fuLater';
+}
+
+async function renderFollowUps(){
+  const box=$('fuBody'); if(!box)return;
+  const made=await B2B.ensureFollowUps(cfg.eventId);
+  if(made)toast(t('fuMade').replace('%n',made));
+
+  const [list,leads,cos]=await Promise.all(
+    [B2B.openFollowUps(cfg.eventId),B2B.live('leads'),B2B.live('companies')]);
+  const leadById=new Map(leads.map(l=>[l.id,l]));
+  const coName=new Map(cos.map(c=>[c.id,c.companyName]));
+
+  if(!list.length){
+    box.innerHTML='<div class="empty"><b>'+t('fuEmpty')+'</b>'+t('fuEmptyS')+'</div>';
+    return;
+  }
+  const now=Date.now(), groups={fuOverdue:[],fuToday:[],fuWeek:[],fuLater:[]};
+  list.forEach(f=>{ if(leadById.has(f.leadId))groups[fuBucket(f,now)].push(f); });
+
+  box.innerHTML=['fuOverdue','fuToday','fuWeek','fuLater'].filter(k=>groups[k].length).map(k=>
+    '<div class="fugrp'+(k==='fuOverdue'?' late':'')+'"><h4>'+esc(t(k))+
+      '<u>'+groups[k].length+'</u></h4>'+
+    groups[k].map(f=>{
+      const l=leadById.get(f.leadId);
+      return '<article class="fucard" data-fu="'+esc(f.id)+'">'+
+        '<div class="top"><h3 data-lead="'+esc(l.id)+'">'+
+          esc(coName.get(l.companyId)||t('coNoName'))+'</h3>'+
+          (l.leadGrade?'<span class="gbadge '+esc(l.leadGrade)+'">'+esc(l.leadGrade)+'</span>':'')+
+        '</div>'+
+        '<p class="who">'+esc([l.fullName,l.jobTitle].filter(Boolean).join(' · ')||'—')+'</p>'+
+        '<p class="why"><b>'+esc(t('ft_'+f.type))+'</b> · '+esc(t('fu_'+f.reason))+
+          '<br><span class="fudate'+(k==='fuOverdue'?' late':'')+'">'+
+          esc(t('fuDue'))+' '+esc(shortDate(f.scheduledAt))+'</span></p>'+
+        '<div class="acts">'+
+          '<button data-act="snooze">'+esc(t('fuSnooze'))+'</button>'+
+          '<button data-act="done" class="pri">'+esc(t('fuDone'))+'</button>'+
+        '</div></article>';
+    }).join('')+'</div>').join('');
+}
+
+$('fuBody').addEventListener('click',async e=>{
+  const open=e.target.closest('[data-lead]');
+  if(open)return openLead(open.dataset.lead);
+  const btn=e.target.closest('[data-act]'); if(!btn)return;
+  const card=btn.closest('[data-fu]'); if(!card)return;
+  const f=await B2B.get('followups',card.dataset.fu); if(!f)return;
+
+  if(btn.dataset.act==='snooze'){
+    f.scheduledAt=(f.scheduledAt||Date.now())+3*86400000;
+    f.status='pending';
+    await B2B.save('followups',f);
+    toast(t('fuSnoozeMsg'));
+  }else{
+    /* Completed by hand rather than emailed. 'sent' is reserved for a real
+       send in a later step, so this records what actually happened and
+       leaves a dated entry on the lead's timeline. */
+    f.status='done';
+    await B2B.save('followups',f);
+    const l=await B2B.get('leads',f.leadId);
+    if(l)await B2B.save('interactions',{leadId:l.id,eventId:l.eventId,type:'followup',
+      summary:t('ft_'+f.type),notes:'',interests:[],requests:[],attachments:[],
+      createdBy:cfg.staff||'',createdAt:Date.now()},{queue:false});
+    toast(t('fuDoneMsg'));
+  }
+  renderFollowUps();
+});
+
 /* ═════ 대시보드 (Ver 3.0) ═════
    Answers "what do I do now?" from data that is actually recorded. Nothing
    here is inferred or estimated; the AI-scored version arrives in a later
@@ -1842,7 +2048,14 @@ async function renderHome(){
           '<span class="gbadge A">A</span></div>').join('')
       : '<p class="hnote">'+t('hAttentionNone')+'</p>')+'</div>';
 
-  box.innerHTML=head+stats+grades+pipe+conv+attention;
+  const fus=await B2B.openFollowUps(ev.id);
+  const now=Date.now();
+  const cnt=k=>fus.filter(f=>fuBucket(f,now)===k).length;
+  const follow=fus.length?'<div class="hblock"><h4>'+t('hFollow')+'</h4><div class="hconv">'+
+    ['fuOverdue','fuToday','fuWeek'].map(k=>
+      '<div><b>'+cnt(k)+'</b><span>'+esc(t(k))+'</span></div>').join('')+'</div></div>':'';
+
+  box.innerHTML=head+stats+follow+grades+pipe+conv+attention;
 }
 
 $('homeBody').addEventListener('click',e=>{
@@ -2514,12 +2727,13 @@ function paintBar(k){
   document.body.style.paddingBottom = (k==='list')
     ? 'calc(84px + env(safe-area-inset-bottom))' : '24px';
 }
-const TABS=['home','new','list','lead','co','set'];
+const TABS=['home','new','fu','list','lead','co','set'];
 TABS.forEach(k=>$('t-'+k).addEventListener('click',()=>{
   TABS.forEach(x=>{$('t-'+x).setAttribute('aria-selected',String(x===k));$('p-'+x).hidden=x!==k});
   paintBar(k);
   if(k==='set')usage();
   if(k==='home')renderHome();
+  if(k==='fu')renderFollowUps();
   if(k==='lead')renderLeads();
   if(k==='co')renderCompanies();
 }));
