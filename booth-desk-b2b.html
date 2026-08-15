@@ -258,6 +258,33 @@ section[hidden]{display:none}
 #rowProfile.lock input,#rowProfile.lock textarea,#rowProfile.lock select,#rowProfile.lock #pf-save,#rowProfile.lock #pf-load,#rowProfile.lock #pf-apply{opacity:.45;pointer-events:none}
 #rowProfile.lock #pf-lock,#rowProfile.lock #pf-copy{opacity:1;pointer-events:auto}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+/* ── 리드 · 회사 (Ver 3.0) ── */
+.lcard{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:15px 16px;margin-bottom:11px;cursor:pointer}
+.lcard .top{display:flex;align-items:baseline;gap:9px}
+.lcard h3{flex:1;margin:0;font-size:.88rem;font-weight:800;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lcard .who{margin:5px 0 0;font-size:.74rem;color:var(--mut)}
+.lcard .meta{margin-top:9px;display:flex;flex-wrap:wrap;gap:5px;align-items:center}
+.lcard .meta i{font-style:normal;font-size:.62rem;font-weight:700;padding:5px 9px;border-radius:7px;background:var(--bg);color:var(--sub)}
+.lcard .meta i.st{background:#EAF1F6;color:#3E7AA6}
+.lcard .meta i.b{background:#EFEBE6;color:var(--ink)}
+.gbadge{font-size:.64rem;font-weight:800;padding:4px 9px;border-radius:7px;background:var(--bg);color:var(--mut)}
+.gbadge.A{background:var(--soft);color:var(--brand)}
+.gbadge.B{background:#EAF1F6;color:#3E7AA6}
+.gbadge.C{background:var(--bg);color:var(--mut)}
+.lfilter{display:flex;gap:6px;overflow-x:auto;padding-bottom:11px;-webkit-overflow-scrolling:touch}
+.lfilter button{flex:0 0 auto;padding:8px 13px;border-radius:9px;background:var(--card);box-shadow:var(--sh);font-size:.68rem;font-weight:700;color:var(--sub)}
+.lfilter button[aria-pressed=true]{background:var(--dark);color:#fff}
+.tline{position:relative;padding-left:19px}
+.tline:before{content:"";position:absolute;left:4px;top:6px;bottom:6px;width:2px;background:var(--line)}
+.titem{position:relative;padding:0 0 16px}
+.titem:before{content:"";position:absolute;left:-19px;top:5px;width:10px;height:10px;border-radius:50%;background:var(--brand);box-shadow:0 0 0 3px var(--bg)}
+.titem .tw{font-family:var(--mono);font-size:.6rem;font-weight:600;color:var(--mut)}
+.titem b{display:block;margin:3px 0 2px;font-size:.76rem;font-weight:800;color:var(--ink)}
+.titem p{margin:0;font-size:.73rem;color:var(--sub);line-height:1.55;white-space:pre-wrap}
+.dsel{width:100%;padding:12px 13px;border-radius:10px;background:var(--card);border:1px solid var(--line);font-size:.78rem;font-weight:700;color:var(--ink);margin-top:7px}
+.dcard{width:100%;max-width:320px;border-radius:12px;display:block;margin-top:8px;background:var(--line)}
+.dlink{color:var(--brand);font-weight:700;cursor:pointer}
+
 /* ── 전시회 바 (Ver 3.0) ── */
 .eventbar{padding:0 22px 4px}
 .eventbar>button{width:100%;display:flex;align-items:center;gap:10px;padding:11px 15px;
@@ -306,7 +333,9 @@ section[hidden]{display:none}
 <nav role="tablist">
   <button role="tab" id="t-new" aria-selected="true" data-no="01" data-i18n="tabNew">접수</button>
   <button role="tab" id="t-list" aria-selected="false" data-no="02" data-i18n="tabList">명부</button>
-  <button role="tab" id="t-set" aria-selected="false" data-no="03" data-i18n="tabSet">설정</button>
+  <button role="tab" id="t-lead" aria-selected="false" data-no="03" data-i18n="tabLead">리드</button>
+  <button role="tab" id="t-co" aria-selected="false" data-no="04" data-i18n="tabCo">회사</button>
+  <button role="tab" id="t-set" aria-selected="false" data-no="05" data-i18n="tabSet">설정</button>
 </nav>
 
 <main>
@@ -383,6 +412,21 @@ section[hidden]{display:none}
     <button id="selClear" data-i18n="selNone">선택 해제</button>
   </div>
   <div id="slips"></div>
+</section>
+
+<section id="p-lead" hidden>
+  <div class="searchrow">
+    <div class="sbox"><span>⌕</span><input id="ldQ" type="search" lang="ko" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="ldSearchPh" placeholder="이름, 회사명, 연락처 검색"></div>
+  </div>
+  <div class="lfilter" id="ldFilter"></div>
+  <div id="ldList"></div>
+</section>
+
+<section id="p-co" hidden>
+  <div class="searchrow">
+    <div class="sbox"><span>⌕</span><input id="coQ" type="search" lang="ko" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="ldSearchPh" placeholder="회사명 검색"></div>
+  </div>
+  <div id="coList"></div>
 </section>
 
 <section id="p-set" hidden>
@@ -531,6 +575,14 @@ section[hidden]{display:none}
     <button id="dCard" data-i18n="dCard">정보카드 저장</button>
     <button id="dEdit" class="pri" data-i18n="dEdit">수정</button>
   </div>
+</div>
+
+<div class="detail" id="b2bDetail" hidden>
+  <div class="dhead">
+    <b id="b2bTitle">리드 상세</b>
+    <button id="b2bClose" data-i18n="dClose">닫기</button>
+  </div>
+  <div class="dbody" id="b2bBody"></div>
 </div>
 
 <div class="sheet" id="evSheet" hidden>
@@ -684,21 +736,60 @@ ko:{evCurrent:'현재 전시회',evPickTitle:'전시회 선택',evNew:'+ 새 전
  evLock:'전시회 잠그기 — 현장에서 실수로 바뀌는 것을 막습니다',
  evLocked:'전시회가 잠겨 있습니다. 아래에서 잠금을 풀어 주세요',
  evNeedName:'전시회명을 입력해 주세요',evSwitched:'전시회를 바꿨습니다',
- evCreated:'전시회를 만들었습니다',evSaved:'전시회를 저장했습니다',evUnset:'전시회 설정 필요'},
+ evCreated:'전시회를 만들었습니다',evSaved:'전시회를 저장했습니다',evUnset:'전시회 설정 필요',
+ tabLead:'리드',tabCo:'회사',
+ ldSearchPh:'이름, 회사명, 연락처 검색',ldAll:'전체',ldCurEvent:'현재 전시회',
+ ldAllGrade:'전체 등급',ldEmpty:'아직 리드가 없습니다',ldEmptyS:'접수 탭에서 명함을 촬영하면 여기에 쌓입니다',
+ coEmpty:'아직 회사가 없습니다',coPeople:'명',coNoName:'(회사 미상)',
+ dLead:'리드 상세',dCo:'회사 상세',dPerson:'고객 정보',dCompanyS:'회사',
+ dStatus:'진행 상태',dAssigned:'담당자',dInterest:'관심 항목',dRequest:'요청 사항',
+ dSummary:'상담 요약',dTimeline:'상담 이력',dCard2:'명함',dPeople:'이 회사의 담당자',
+ dNoCompany:'회사 정보 없음',stSaved:'상태를 바꿨습니다',
+ st_new:'신규',st_qualified:'검증됨',st_contacted:'연락함',st_sample_requested:'샘플 요청',
+ st_quotation_requested:'견적 요청',st_quotation_sent:'견적 발송',st_negotiation:'협상 중',
+ st_won:'성사',st_lost:'실패',st_nurture:'장기 관리',
+ it_booth_visit:'부스 방문',it_phone:'전화',it_email:'이메일',it_meeting:'미팅',
+ it_sample:'샘플',it_quotation:'견적',it_followup:'후속 연락',it_note:'메모'},
 en:{evCurrent:'Current event',evPickTitle:'Select event',evNew:'+ New event',
  evNameL:'Event name',evStart:'Start',evEnd:'End',evVenue:'Venue',evCountryL:'Country',
  evFormNew:'New event',evFormEdit:'Edit event',evEdit:'Edit',evLeads:' leads',
  evLock:'Lock event — prevents changing it by mistake at the booth',
  evLocked:'The event is locked. Unlock it below to change.',
  evNeedName:'Please enter an event name',evSwitched:'Event changed',
- evCreated:'Event created',evSaved:'Event saved',evUnset:'No event set'},
+ evCreated:'Event created',evSaved:'Event saved',evUnset:'No event set',
+ tabLead:'Leads',tabCo:'Companies',
+ ldSearchPh:'Search name, company, contact',ldAll:'All',ldCurEvent:'Current event',
+ ldAllGrade:'All grades',ldEmpty:'No leads yet',ldEmptyS:'Capture a card on the Booth tab and it lands here',
+ coEmpty:'No companies yet',coPeople:' people',coNoName:'(no company)',
+ dLead:'Lead',dCo:'Company',dPerson:'Contact',dCompanyS:'Company',
+ dStatus:'Status',dAssigned:'Owner',dInterest:'Interests',dRequest:'Requests',
+ dSummary:'Consultation',dTimeline:'Timeline',dCard2:'Business card',dPeople:'Contacts at this company',
+ dNoCompany:'No company on file',stSaved:'Status updated',
+ st_new:'New',st_qualified:'Qualified',st_contacted:'Contacted',st_sample_requested:'Sample requested',
+ st_quotation_requested:'Quotation requested',st_quotation_sent:'Quotation sent',st_negotiation:'Negotiation',
+ st_won:'Won',st_lost:'Lost',st_nurture:'Nurture',
+ it_booth_visit:'Booth visit',it_phone:'Call',it_email:'Email',it_meeting:'Meeting',
+ it_sample:'Sample',it_quotation:'Quotation',it_followup:'Follow-up',it_note:'Note'},
 zh:{evCurrent:'当前展会',evPickTitle:'选择展会',evNew:'+ 新建展会',
  evNameL:'展会名称',evStart:'开始日期',evEnd:'结束日期',evVenue:'场馆',evCountryL:'国家',
  evFormNew:'新建展会',evFormEdit:'编辑展会',evEdit:'编辑',evLeads:'条',
  evLock:'锁定展会 — 防止现场误改',
  evLocked:'展会已锁定，请先在下方解锁。',
  evNeedName:'请输入展会名称',evSwitched:'已切换展会',
- evCreated:'已创建展会',evSaved:'已保存展会',evUnset:'尚未设置展会'}
+ evCreated:'已创建展会',evSaved:'已保存展会',evUnset:'尚未设置展会',
+ tabLead:'客户',tabCo:'公司',
+ ldSearchPh:'搜索姓名、公司、联系方式',ldAll:'全部',ldCurEvent:'当前展会',
+ ldAllGrade:'全部等级',ldEmpty:'暂无客户',ldEmptyS:'在登记页拍摄名片后会显示在这里',
+ coEmpty:'暂无公司',coPeople:'人',coNoName:'（无公司名）',
+ dLead:'客户详情',dCo:'公司详情',dPerson:'客户信息',dCompanyS:'公司',
+ dStatus:'进展状态',dAssigned:'负责人',dInterest:'关注产品',dRequest:'需求事项',
+ dSummary:'洽谈摘要',dTimeline:'洽谈记录',dCard2:'名片',dPeople:'该公司的联系人',
+ dNoCompany:'无公司信息',stSaved:'已更新状态',
+ st_new:'新登记',st_qualified:'已确认',st_contacted:'已联系',st_sample_requested:'索取样品',
+ st_quotation_requested:'索取报价',st_quotation_sent:'已发报价',st_negotiation:'洽谈中',
+ st_won:'成交',st_lost:'未成交',st_nurture:'长期跟进',
+ it_booth_visit:'展位来访',it_phone:'电话',it_email:'邮件',it_meeting:'会面',
+ it_sample:'样品',it_quotation:'报价',it_followup:'跟进',it_note:'备注'}
 };
 Object.keys(I18N_V3).forEach(l=>Object.assign(I18N[l],I18N_V3[l]));
 
@@ -1618,6 +1709,173 @@ $('ev-save').addEventListener('click',async()=>{
   toast(t(prev?'evSaved':'evCreated'));
 });
 
+/* ═════ 리드 · 회사 (Ver 3.0) ═════
+   Reads through B2B.live(), so soft-deleted records never reach a screen. */
+const LEAD_STATUS=['new','qualified','contacted','sample_requested','quotation_requested',
+                   'quotation_sent','negotiation','won','lost','nurture'];
+const stLabel=k=>t('st_'+k)||k;
+const itLabel=k=>t('it_'+k)||k;
+let ldScope='cur', ldGrade='', ldQuery='', coQuery='';
+const objUrls=[];
+function dropUrls(){ while(objUrls.length)URL.revokeObjectURL(objUrls.pop()); }
+
+function gradeLabel(g){ return g?({A:t('gA'),B:t('gB'),C:t('gC')}[g]||g):''; }
+function shortDate(ms){
+  if(!ms)return '';
+  const d=new Date(ms), p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'.'+p(d.getMonth()+1)+'.'+p(d.getDate());
+}
+
+async function ldFilterPaint(){
+  const box=$('ldFilter'); if(!box)return;
+  const b=(k,on,label)=>'<button data-k="'+k+'" aria-pressed="'+on+'">'+esc(label)+'</button>';
+  box.innerHTML=
+    b('scope:cur',ldScope==='cur',t('ldCurEvent'))+
+    b('scope:all',ldScope==='all',t('ldAll'))+
+    b('grade:',   ldGrade==='',   t('ldAllGrade'))+
+    b('grade:A',  ldGrade==='A',  t('gA'))+
+    b('grade:B',  ldGrade==='B',  t('gB'))+
+    b('grade:C',  ldGrade==='C',  t('gC'));
+}
+
+async function renderLeads(){
+  await ldFilterPaint();
+  const [leads,cos]=await Promise.all([B2B.live('leads'),B2B.live('companies')]);
+  const coName=new Map(cos.map(c=>[c.id,c.companyName]));
+  const q=ldQuery.trim().toLowerCase();
+  const list=leads
+    .filter(l=>ldScope==='all'||l.eventId===cfg.eventId)
+    .filter(l=>!ldGrade||l.leadGrade===ldGrade)
+    .filter(l=>!q||[l.fullName,coName.get(l.companyId),l.phone,l.email,l.jobTitle]
+      .some(v=>String(v||'').toLowerCase().includes(q)))
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+
+  const box=$('ldList');
+  if(!list.length){ box.innerHTML='<div class="empty"><b>'+t('ldEmpty')+'</b>'+t('ldEmptyS')+'</div>'; return; }
+  box.innerHTML=list.map(l=>{
+    const tags=[...(l.interests||[]).map(x=>'<i>'+esc(x)+'</i>'),
+                ...(l.requests||[]).map(x=>'<i class="b">'+esc(x)+'</i>')].join('');
+    return '<article class="lcard" data-id="'+esc(l.id)+'">'+
+      '<div class="top"><h3>'+esc(coName.get(l.companyId)||t('coNoName'))+'</h3>'+
+        (l.leadGrade?'<span class="gbadge '+esc(l.leadGrade)+'">'+esc(l.leadGrade)+'</span>':'')+'</div>'+
+      '<p class="who">'+esc([l.fullName,l.jobTitle].filter(Boolean).join(' · ')||'—')+'</p>'+
+      '<div class="meta"><i class="st">'+esc(stLabel(l.status||'new'))+'</i>'+tags+
+        '<i>'+esc([l.assignedTo,shortDate(l.createdAt)].filter(Boolean).join(' · '))+'</i></div>'+
+      '</article>';
+  }).join('');
+}
+
+async function renderCompanies(){
+  const [cos,leads]=await Promise.all([B2B.live('companies'),B2B.live('leads')]);
+  const q=coQuery.trim().toLowerCase();
+  const list=cos.filter(c=>!q||String(c.companyName||'').toLowerCase().includes(q))
+    .sort((a,b)=>String(a.companyName||'').localeCompare(String(b.companyName||'')));
+  const box=$('coList');
+  if(!list.length){ box.innerHTML='<div class="empty"><b>'+t('coEmpty')+'</b></div>'; return; }
+  box.innerHTML=list.map(c=>{
+    const mine=leads.filter(l=>l.companyId===c.id);
+    const grades=['A','B','C'].filter(g=>mine.some(l=>l.leadGrade===g))
+      .map(g=>'<span class="gbadge '+g+'">'+g+' '+mine.filter(l=>l.leadGrade===g).length+'</span>').join(' ');
+    return '<article class="lcard" data-id="'+esc(c.id)+'">'+
+      '<div class="top"><h3>'+esc(c.companyName)+'</h3></div>'+
+      '<p class="who">'+mine.length+esc(t('coPeople'))+
+        (c.country?' · '+esc(c.country):'')+'</p>'+
+      (grades?'<div class="meta">'+grades+'</div>':'')+'</article>';
+  }).join('');
+}
+
+$('ldFilter').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  const [kind,val]=b.dataset.k.split(':');
+  if(kind==='scope')ldScope=val; else ldGrade=val;
+  renderLeads();
+});
+$('ldQ').addEventListener('input',e=>{ ldQuery=e.target.value; renderLeads(); });
+$('coQ').addEventListener('input',e=>{ coQuery=e.target.value; renderCompanies(); });
+$('ldList').addEventListener('click',e=>{ const c=e.target.closest('.lcard'); if(c)openLead(c.dataset.id); });
+$('coList').addEventListener('click',e=>{ const c=e.target.closest('.lcard'); if(c)openCompany(c.dataset.id); });
+$('b2bClose').addEventListener('click',()=>{ dropUrls(); $('b2bDetail').hidden=true; });
+
+/* AI-written and customer-written text alike goes in as text, never markup. */
+function dsec(label,body){ return '<div class="drow"><span>'+esc(label)+'</span><div>'+body+'</div></div>'; }
+function dtext(label,val,link){
+  const body=val?(link?'<a href="'+esc(link)+'">'+esc(val)+'</a>':esc(val)):t('dNoValue');
+  return dsec(label,body);
+}
+
+async function openLead(id){
+  const l=await B2B.get('leads',id); if(!l)return;
+  dropUrls();
+  const co=l.companyId?await B2B.get('companies',l.companyId):null;
+  const ints=(await B2B.byIndex('interactions','leadId',l.id))
+    .filter(x=>!x.deleted).sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  const atts=(await B2B.byIndex('attachments','leadId',l.id)).filter(x=>!x.deleted);
+
+  $('b2bTitle').textContent=t('dLead');
+  let h='';
+  h+=dtext(t('lName'),[l.fullName,l.jobTitle].filter(Boolean).join(' · '));
+  h+=dsec(t('dCompanyS'), co
+      ? '<span class="dlink" data-co="'+esc(co.id)+'">'+esc(co.companyName)+'</span>'
+      : esc(t('dNoCompany')));
+  h+=dtext(t('lPhone'),l.phone,l.phone?'tel:'+String(l.phone).replace(/[^0-9+]/g,''):'');
+  h+=dtext(t('lEmail'),l.email,l.email?'mailto:'+l.email:'');
+  h+=dtext(t('lAddr'),l.address);
+  h+=dsec(t('lGrade'), l.leadGrade
+      ? '<span class="gbadge '+esc(l.leadGrade)+'">'+esc(gradeLabel(l.leadGrade))+'</span>'
+      : t('dNoValue'));
+  h+=dsec(t('dStatus'),'<select class="dsel" id="ldStatus">'+
+      LEAD_STATUS.map(k=>'<option value="'+k+'"'+((l.status||'new')===k?' selected':'')+'>'+esc(stLabel(k))+'</option>').join('')+
+      '</select>');
+  h+=dtext(t('dAssigned'),l.assignedTo);
+  h+=dtext(t('dInterest'),(l.interests||[]).join(', '));
+  h+=dtext(t('dRequest'),(l.requests||[]).join(', '));
+  h+=dtext(t('dSummary'),l.notes);
+  if(atts.length){
+    const u=URL.createObjectURL(atts[0].blob); objUrls.push(u);
+    h+=dsec(t('dCard2'),'<img class="dcard" src="'+u+'" alt="">');
+  }
+  h+=dsec(t('dTimeline'),'<div class="tline">'+(ints.length?ints.map(i=>
+      '<div class="titem"><span class="tw">'+esc(shortDate(i.createdAt))+'</span>'+
+      '<b>'+esc(itLabel(i.type))+(i.createdBy?' · '+esc(i.createdBy):'')+'</b>'+
+      (i.notes?'<p>'+esc(i.notes)+'</p>':'')+'</div>').join(''):'<p>'+t('dNoValue')+'</p>')+'</div>');
+
+  $('b2bBody').innerHTML=h;
+  $('b2bDetail').hidden=false;
+  $('b2bBody').scrollTop=0;
+
+  $('ldStatus').addEventListener('change',async e=>{
+    const cur=await B2B.get('leads',l.id);
+    cur.status=e.target.value;
+    await B2B.save('leads',cur);
+    toast(t('stSaved')); renderLeads();
+  });
+}
+
+async function openCompany(id){
+  const c=await B2B.get('companies',id); if(!c)return;
+  dropUrls();
+  const mine=(await B2B.byIndex('leads','companyId',c.id)).filter(l=>!l.deleted)
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+  $('b2bTitle').textContent=t('dCo');
+  let h=dtext(t('lCompany'),c.companyName);
+  h+=dtext('Website',c.website,c.website||'');
+  h+=dtext(t('evCountryL'),c.country);
+  h+=dtext(t('lAddr'),c.address);
+  h+=dsec(t('dPeople'), mine.length?mine.map(l=>
+      '<div style="padding:9px 0"><span class="dlink" data-lead="'+esc(l.id)+'">'+
+      esc(l.fullName||'—')+'</span>'+(l.jobTitle?' · '+esc(l.jobTitle):'')+
+      (l.leadGrade?' <span class="gbadge '+esc(l.leadGrade)+'">'+esc(l.leadGrade)+'</span>':'')+
+      '</div>').join(''):t('dNoValue'));
+  $('b2bBody').innerHTML=h;
+  $('b2bDetail').hidden=false;
+  $('b2bBody').scrollTop=0;
+}
+
+$('b2bBody').addEventListener('click',e=>{
+  const co=e.target.closest('[data-co]'); if(co)return openCompany(co.dataset.co);
+  const ld=e.target.closest('[data-lead]'); if(ld)return openLead(ld.dataset.lead);
+});
+
 /* ═════ 실시간 공유 (구글 시트) ═════
    폰 저장이 먼저, 서버 전송은 나중. 끊겨도 기록은 남습니다. */
 let syncing=false;
@@ -2116,10 +2374,13 @@ function paintBar(k){
   document.body.style.paddingBottom = (k==='list')
     ? 'calc(84px + env(safe-area-inset-bottom))' : '24px';
 }
-['new','list','set'].forEach(k=>$('t-'+k).addEventListener('click',()=>{
-  ['new','list','set'].forEach(x=>{$('t-'+x).setAttribute('aria-selected',String(x===k));$('p-'+x).hidden=x!==k});
+const TABS=['new','list','lead','co','set'];
+TABS.forEach(k=>$('t-'+k).addEventListener('click',()=>{
+  TABS.forEach(x=>{$('t-'+x).setAttribute('aria-selected',String(x===k));$('p-'+x).hidden=x!==k});
   paintBar(k);
   if(k==='set')usage();
+  if(k==='lead')renderLeads();
+  if(k==='co')renderCompanies();
 }));
 
 /* ───── 설정 ───── */
