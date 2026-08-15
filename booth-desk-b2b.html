@@ -740,13 +740,278 @@ Object.defineProperty(window,'ITEMS',{get:()=>P().g1.opts||[]});
 Object.defineProperty(window,'BOOKS',{get:()=>P().g2.opts||[]});
 Object.defineProperty(window,'SPEC_BOOK',{get:()=>P().spec.trigger||''});
 function bookLabel(id){ return id; }
+
+/* ═════════════════════════════════════════════════════════════════════
+   B2B DATA LAYER — Ver 3.0
+   Everything below is additive. The Ver 2.0 code that follows keeps
+   working untouched; it just points at B2B-scoped storage names now.
+   ═════════════════════════════════════════════════════════════════════ */
+const B2B=(()=>{
+'use strict';
+
+/* ---- Storage namespaces ------------------------------------------------
+   IndexedDB and localStorage are scoped to the ORIGIN, not to the folder.
+   booth-desk and booth-scan are served from the same github.io origin, so
+   reusing a name here would silently overwrite the live exhibition data of
+   whichever app got there first. The guard below turns a future rename
+   mistake into an immediate, loud failure instead of lost leads. */
+const NS={
+  db:    'boothDeskB2B',        // the B2B database
+  v2ui:  'boothDeskB2B-v2ui',   // Ver 2.0 screens, sandboxed inside this build
+  cfg:   'bdb2b-cfg',
+  mirror:'boothDeskB2B-mirror'
+};
+const TAKEN=['boothdesk','kprint2026','bd-cfg','kp-cfg','boothdesk-mirror'];
+Object.keys(NS).forEach(k=>{
+  if(TAKEN.indexOf(NS[k])>=0)
+    throw new Error('B2B namespace collision: "'+NS[k]+'" belongs to a shipping app');
+});
+
+const LEGACY_DB='boothdesk', LEGACY_STORE='recs';
+
+/* ---- AI config (spec 83: one place, never inline a model name) ---- */
+const AI_CONFIG={
+  provider:'anthropic',
+  model:'claude-sonnet-5',
+  maxTokens:1200,
+  temperature:0,
+  apiVersion:'2023-06-01'
+};
+
+/* ---- Schema: store -> [[indexName, keyPath], ...] ---- */
+const SCHEMA={
+  events:       [['status','status'],['startDate','startDate']],
+  leads:        [['eventId','eventId'],['companyId','companyId'],['status','status'],
+                 ['leadGrade','leadGrade'],['assignedTo','assignedTo'],
+                 ['nextActionDate','nextActionDate'],['syncStatus','syncStatus'],
+                 ['updatedAt','updatedAt'],['sourceUid','sourceUid']],
+  companies:    [['normalizedName','normalizedName'],['website','website'],
+                 ['country','country'],['aiResearchStatus','aiResearchStatus']],
+  interactions: [['leadId','leadId'],['eventId','eventId'],['createdAt','createdAt']],
+  followups:    [['leadId','leadId'],['eventId','eventId'],['status','status'],
+                 ['scheduledAt','scheduledAt'],['statusScheduled',['status','scheduledAt']]],
+  aiResults:    [['leadId','leadId'],['companyId','companyId'],['type','type'],
+                 ['inputHash','inputHash']],
+  syncQueue:    [['status','status'],['entityType','entityType'],
+                 ['entity',['entityType','entityId']]],
+  attachments:  [['leadId','leadId'],['kind','kind']],
+  notifications:[['userId','userId'],['createdAt','createdAt']]
+};
+
+/* ---- Open ---- */
+let db=null, ready=null, lastError='';
+function open(){
+  if(ready)return ready;
+  ready=new Promise((res,rej)=>{
+    let r;
+    try{ r=indexedDB.open(NS.db,1); }
+    catch(e){ lastError=String(e.message||e); return rej(e); }
+    r.onupgradeneeded=e=>{
+      const d=e.target.result, t=e.target.transaction;
+      Object.keys(SCHEMA).forEach(name=>{
+        const s=d.objectStoreNames.contains(name)
+          ? t.objectStore(name)
+          : d.createObjectStore(name,{keyPath:'id'});
+        SCHEMA[name].forEach(ix=>{ if(!s.indexNames.contains(ix[0]))s.createIndex(ix[0],ix[1]); });
+      });
+    };
+    r.onsuccess=e=>{ db=e.target.result; res(db); };
+    r.onerror=()=>{ lastError='open: '+((r.error&&r.error.message)||'unknown'); rej(r.error||new Error(lastError)); };
+    r.onblocked=()=>{ lastError='open: blocked by another tab'; rej(new Error(lastError)); };
+  });
+  return ready;
+}
+
+const done=r=>new Promise((res,rej)=>{ r.onsuccess=()=>res(r.result); r.onerror=()=>rej(r.error); });
+const newId=()=>Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,9);
+
+async function store(name,mode){ await open(); return db.transaction(name,mode||'readonly').objectStore(name); }
+async function get(name,id){ return done((await store(name)).get(id)); }
+async function all(name){ return done((await store(name)).getAll())||[]; }
+async function byIndex(name,index,value){ return done((await store(name)).index(index).getAll(value))||[]; }
+/* Everything user-facing should read through live(): soft-deleted rows
+   stay in the database for sync, but must never show up on screen. */
+async function live(name){ return (await all(name)).filter(r=>!r.deleted); }
+
+/* Blobs (business card photos) must never ride along into the sync queue
+   or a JSON backup — they belong in `attachments` and on the device only. */
+function plain(o){
+  const out={};
+  Object.keys(o||{}).forEach(k=>{
+    const v=o[k];
+    if(v instanceof Blob||v instanceof ArrayBuffer)return;
+    out[k]=v;
+  });
+  return out;
+}
+
+async function enqueue(entityType,entityId,action,payload){
+  const s=await store('syncQueue','readwrite');
+  return done(s.put({id:newId(),entityType,entityId,action,payload:plain(payload),
+    retryCount:0,lastError:'',status:'pending',createdAt:Date.now(),updatedAt:Date.now()}));
+}
+
+/* save() is the only write path, so every mutation lands in the sync queue
+   exactly once. Ver 2.0 used a `dirty` flag on the record itself, which had
+   no retry count, no error record, and no way to sync a deletion at all. */
+async function save(name,obj,opt){
+  opt=opt||{};
+  const o={...obj};
+  if(!o.id)o.id=newId();
+  const prev=await get(name,o.id);
+  const now=Date.now();
+  o.createdAt=o.createdAt||(prev&&prev.createdAt)||now;
+  o.updatedAt=now;
+  if(o.deleted===undefined)o.deleted=false;
+  if(!o.syncStatus)o.syncStatus='pending';
+  const s=await store(name,'readwrite');
+  await done(s.put(o));
+  if(opt.queue!==false)await enqueue(name,o.id,opt.action||(prev?'UPDATE':'CREATE'),o);
+  return o;
+}
+
+/* Soft delete (spec 65). Nothing is ever really removed, so a delete on one
+   phone can still be replayed to the sheet and to the other phones. */
+async function remove(name,id,actor){
+  const cur=await get(name,id);
+  if(!cur)return null;
+  cur.deleted=true; cur.deletedAt=Date.now(); cur.deletedBy=actor||'';
+  return save(name,cur,{action:'DELETE'});
+}
+
+/* ---- Company identity (spec 18, name rule) ---- */
+function normalizeName(s){
+  return String(s||'')
+    .toLowerCase()
+    .replace(/주식회사|\(주\)|㈜|유한회사|co\.?,?\s*ltd\.?|inc\.?|corp(oration)?\.?|company|limited|llc|gmbh/g,'')
+    .replace(/[\s.,()·\-_/&'"]/g,'');
+}
+
+/* ---- Ver 2.0 reader -----------------------------------------------------
+   Opened with no version number and a readonly transaction, so this can
+   neither upgrade nor write to the shipping product's database. If the
+   database does not exist at all, opening it would create an empty one as a
+   side effect; that case is detected and cleaned up. */
+function readLegacyRows(){
+  return new Promise(res=>{
+    let created=false, r;
+    try{ r=indexedDB.open(LEGACY_DB); }catch(e){ return res([]); }
+    r.onupgradeneeded=()=>{ created=true; };
+    r.onerror=()=>res([]);
+    r.onblocked=()=>res([]);
+    r.onsuccess=e=>{
+      const d=e.target.result;
+      if(created||!d.objectStoreNames.contains(LEGACY_STORE)){
+        d.close();
+        if(created){ try{ indexedDB.deleteDatabase(LEGACY_DB); }catch(_){} }
+        return res([]);
+      }
+      try{
+        const q=d.transaction(LEGACY_STORE,'readonly').objectStore(LEGACY_STORE).getAll();
+        q.onsuccess=()=>{ const out=q.result||[]; d.close(); res(out); };
+        q.onerror=()=>{ d.close(); res([]); };
+      }catch(err){ d.close(); res([]); }
+    };
+  });
+}
+
+function backupBlob(rows){
+  return new Blob([JSON.stringify({
+    kind:'booth-desk-v2-backup', takenAt:new Date().toISOString(),
+    note:'Text fields only. Photos stay in the boothdesk database, which this migration never writes to.',
+    count:rows.length, rows:rows.map(plain)
+  },null,2)],{type:'application/json'});
+}
+
+/* ---- Migration (spec 86) ------------------------------------------------
+   One Ver 2.0 row becomes Company + Lead + Interaction (+ Attachment).
+   Re-running is safe: leads carry the source row's uid and are skipped on a
+   second pass, so nothing is duplicated. */
+async function migrate(opt){
+  opt=opt||{};
+  const rows=await readLegacyRows();
+  if(!rows.length)return {status:'nothing',leads:0,companies:0,interactions:0,skipped:0};
+
+  const backup=backupBlob(rows);
+  if(opt.backup!==false&&typeof dl==='function')
+    dl(backup,'booth-desk-v2-backup-'+new Date().toISOString().slice(0,10)+'.json');
+
+  const profile=(typeof P==='function')?P():{};
+  const eventName=(profile.event||'').trim()||'이전 기록';
+  let ev=(await live('events')).find(x=>x.eventName===eventName);
+  if(!ev)ev=await save('events',{eventName,startDate:'',endDate:'',venue:'',country:'',
+    status:'completed',description:'Ver 2.0 기록에서 자동 생성'});
+
+  const leads=await all('leads');
+  const seen=new Set(leads.map(l=>l.sourceUid).filter(Boolean));
+  const byName=new Map((await all('companies')).map(c=>[c.normalizedName,c.id]));
+
+  let nLead=0,nCo=0,nInt=0,skipped=0;
+
+  for(const r of rows){
+    const src=r.uid||('legacy-'+r.id);
+    if(seen.has(src)){ skipped++; continue; }
+    seen.add(src);
+
+    let companyId='';
+    if((r.company||'').trim()){
+      const key=normalizeName(r.company);
+      if(key&&byName.has(key))companyId=byName.get(key);
+      else{
+        const co=await save('companies',{companyName:r.company.trim(),normalizedName:key,
+          website:'',country:'',city:'',address:r.addr||'',industry:'',businessType:'',
+          products:[],markets:[],employeeSize:'',description:'',aiSummary:'',aiFitScore:null,
+          aiResearchStatus:'none',researchSource:'',researchedAt:null});
+        if(key)byName.set(key,co.id);
+        companyId=co.id; nCo++;
+      }
+    }
+
+    const lead=await save('leads',{
+      eventId:ev.id, companyId, sourceUid:src,
+      firstName:'', lastName:'', fullName:(r.name||'').trim(),
+      jobTitle:r.title||'', phone:r.phone||'', mobile:'', email:r.email||'',
+      address:r.addr||'', country:'', city:'', website:'',
+      source:'business_card', leadGrade:r.grade||'', leadScore:null,
+      interests:r.items||[], requests:r.books||[], notes:r.memo||'',
+      assignedTo:r.staff||'', status:'new', nextAction:'', nextActionDate:null,
+      createdAt:Date.parse(String(r.at||'').replace(' ','T'))||r.id||Date.now(),
+      syncedAt:null, syncStatus:'pending'
+    });
+    nLead++;
+
+    await save('interactions',{leadId:lead.id, eventId:ev.id, type:'booth_visit',
+      summary:(r.memo||'').slice(0,200), notes:r.memo||'',
+      interests:r.items||[], requests:r.books||[], attachments:[],
+      createdBy:r.staff||'', createdAt:lead.createdAt}, {queue:false});
+    nInt++;
+
+    if(r.photo)await save('attachments',{leadId:lead.id, kind:'business_card',
+      blob:r.photo, name:(r.company||'card')+'.jpg'}, {queue:false});
+  }
+
+  return {status:'done',leads:nLead,companies:nCo,interactions:nInt,skipped,
+          eventId:ev.id,eventName,backup};
+}
+
+async function counts(){
+  const out={};
+  for(const k of Object.keys(SCHEMA))out[k]=(await all(k)).length;
+  return out;
+}
+
+return {NS,AI_CONFIG,SCHEMA,LEGACY_DB,open,get,all,byIndex,live,save,remove,
+        enqueue,normalizeName,readLegacyRows,migrate,counts,newId,plain,
+        error:()=>lastError};
+})();
+
 const $=i=>document.getElementById(i);
-let rows=[], draft=null, cfg={staff:'',key:'',model:'claude-sonnet-5',profile:null};
+let rows=[], draft=null, cfg={staff:'',key:'',model:B2B.AI_CONFIG.model,profile:null};
 
 /* ───── 설정 저장 (작은 값) ───── */
-function cfgLoad(){try{const v=localStorage.getItem('bd-cfg');if(v)cfg={...cfg,...JSON.parse(v)}}catch(e){}
+function cfgLoad(){try{const v=localStorage.getItem(B2B.NS.cfg);if(v)cfg={...cfg,...JSON.parse(v)}}catch(e){}
   if(!cfg.profile)cfg.profile=JSON.parse(JSON.stringify(DEFAULT_PROFILE));}
-function cfgSave(){try{localStorage.setItem('bd-cfg',JSON.stringify(cfg))}catch(e){}}
+function cfgSave(){try{localStorage.setItem(B2B.NS.cfg,JSON.stringify(cfg))}catch(e){}}
 
 /* ───── 기록 저장 (IndexedDB · 사진 포함) ───── */
 let db=null, memOnly=false, dbReady=null;
@@ -754,7 +1019,7 @@ function openDB(){
   if(dbReady)return dbReady;
   dbReady = new Promise(res=>{
     try{
-      const r=indexedDB.open('boothdesk',1);
+      const r=indexedDB.open(B2B.NS.v2ui,1);
       r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains('recs'))d.createObjectStore('recs',{keyPath:'id'})};
       r.onsuccess=e=>{db=e.target.result;res(true)};
       r.onerror=()=>{memOnly=true;lastDbError='open: '+((r.error&&r.error.message)||'unknown');res(false)};
@@ -788,7 +1053,7 @@ async function dbClear(){
 
 /* ═════ 예비 저장소 (IndexedDB 실패 대비) ═════
    사진을 뺀 글자 정보만 별도로 한 벌 더 보관합니다. */
-const MIRROR='boothdesk-mirror';
+const MIRROR=B2B.NS.mirror;
 let lastDbError='';
 function mirrorSave(){
   try{
@@ -934,7 +1199,7 @@ async function readBadge(blob){
       method:'POST',
       headers:{'content-type':'application/json','x-api-key':cfg.key,
         'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:cfg.model||'claude-sonnet-5',max_tokens:600,
+      body:JSON.stringify({model:cfg.model||B2B.AI_CONFIG.model,max_tokens:600,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
           {type:'text',text:'전시회 방문증 또는 명함 사진입니다. 인쇄된 글자를 읽어 아래 항목을 뽑아 주세요.\n- company: 회사명 (한글이 있으면 한글 우선, 없으면 영문)\n- name: 사람 이름만 (한글·영문·한자 중 인쇄된 그대로. 한글과 영문이 함께 있으면 한글)\n- title: 직함 (부장, 대표, Manager 등). 없으면 빈 문자열\n- phone: 휴대폰 번호 우선, 없으면 대표번호. 숫자와 하이픈만\n- email: 이메일 주소\n- address: 회사 주소\n읽을 수 없는 항목은 빈 문자열로 두세요. 추측하지 말고 보이는 대로만 적으세요.\n오직 JSON만 출력하고 다른 말은 절대 쓰지 마세요.\n{"company":"","name":"","title":"","phone":"","email":"","address":""}'}
@@ -1040,7 +1305,7 @@ async function readBadgeQuiet(blob){
       method:'POST',
       headers:{'content-type':'application/json','x-api-key':cfg.key,
         'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:cfg.model||'claude-sonnet-5',max_tokens:600,
+      body:JSON.stringify({model:cfg.model||B2B.AI_CONFIG.model,max_tokens:600,
         messages:[{role:'user',content:[
           {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
           {type:'text',text:'전시회 방문증 또는 명함 사진입니다. 인쇄된 글자를 읽어 아래 항목을 뽑아 주세요.\n- company: 회사명 (한글이 있으면 한글 우선, 없으면 영문)\n- name: 사람 이름만 (한글·영문·한자 중 인쇄된 그대로. 한글과 영문이 함께 있으면 한글)\n- title: 직함 (부장, 대표, Manager 등). 없으면 빈 문자열\n- phone: 휴대폰 번호 우선, 없으면 대표번호. 숫자와 하이픈만\n- email: 이메일 주소\n- address: 회사 주소\n읽을 수 없는 항목은 빈 문자열로 두세요. 추측하지 말고 보이는 대로만 적으세요.\n오직 JSON만 출력하고 다른 말은 절대 쓰지 마세요.\n{"company":"","name":"","title":"","phone":"","email":"","address":""}'}
@@ -1697,7 +1962,7 @@ $('s-eye').addEventListener('click',()=>{
   $('s-eye').textContent=t(on?'bHide':'bShow');
 });
 $('s-keySave').addEventListener('click',()=>{cfg.key=$('s-key').value.trim();cfg.model=$('s-model').value.trim();cfgSave();toast(t('tSaved'))});
-const MODEL_CANDIDATES=['claude-sonnet-5','claude-haiku-4-5-20251001','claude-opus-5','claude-sonnet-4-5-20250929'];
+const MODEL_CANDIDATES=[B2B.AI_CONFIG.model,'claude-haiku-4-5-20251001','claude-opus-5','claude-sonnet-4-5-20250929'];
 async function pingModel(key,model){
   const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
     headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
