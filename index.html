@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#EFEAE0">
+<meta http-equiv="Cache-Control" content="no-store">
+<title>부스 접수대</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<style>
+:root{
+  --bg:#FAF7F3;        /* 화면 바탕 */
+  --card:#FFFFFF;      /* 카드 */
+  --soft:#FDF1E7;      /* 강조 배경 */
+  --line:#EDE6DD;      /* 경계선 */
+  --ink:#1C1A18;       /* 본문 */
+  --sub:#6F675E;       /* 보조 */
+  --mut:#A79C90;       /* 흐린 글자 */
+  --brand:#F26A21;     /* 로고 주황 */
+  --brand-d:#D9541200; /* 예약 */
+  --dark:#171514;      /* 강조 버튼 */
+  --ok:#2E7D5B;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+  --r:16px;            /* 카드 모서리 */
+  --sh:0 1px 2px rgba(28,26,24,.04), 0 6px 18px rgba(28,26,24,.05);
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{font-size:18px}
+html,body{margin:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:Pretendard,-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo",sans-serif;
+  font-size:1rem;line-height:1.5;letter-spacing:-.01em;
+  padding-bottom:24px;
+}
+button,input,textarea,select{font-family:inherit;font-size:1rem;color:inherit}
+button{cursor:pointer;border:0;background:none}
+a{color:var(--brand)}
+
+/* ═══ 헤더 ═══ */
+header{padding:22px 22px 0;display:flex;justify-content:space-between;align-items:flex-start;gap:14px}
+.brandwrap{min-width:0}
+.logo{max-height:30px;max-width:180px;display:block;object-fit:contain}
+.wordmark{font-size:1.34rem;font-weight:800;letter-spacing:.01em;line-height:1;color:var(--brand);display:flex;gap:5px;align-items:baseline}
+.wordmark em{font-style:normal;font-weight:500;color:var(--ink);font-size:1.05rem}
+.sub{font-size:.68rem;font-weight:600;letter-spacing:.16em;color:var(--sub);margin-top:9px;text-transform:uppercase}
+.who{font-size:.66rem;font-weight:600;letter-spacing:.13em;color:var(--mut);margin-top:5px;text-transform:uppercase}
+.who b{color:var(--ink);font-weight:700}
+.cnt{text-align:right;line-height:1;flex:0 0 auto}
+.cnt b{font-size:2rem;font-weight:800;letter-spacing:-.03em;display:block}
+.cnt span{display:block;font-size:.56rem;letter-spacing:.2em;color:var(--mut);font-weight:700;margin-top:5px;text-transform:uppercase}
+.syncpill{display:inline-block!important;margin-top:8px;padding:4px 9px;border-radius:999px;font-size:.56rem;letter-spacing:.08em;font-weight:700;background:var(--line);color:var(--sub)}
+.syncpill.on{background:#E4F1EA;color:var(--ok)}
+.syncpill.wait{background:#FCEEDD;color:#B4650F}
+.syncpill.off{background:#FBE4E0;color:#C0402A}
+
+/* ═══ 탭 ═══ */
+nav{display:flex;gap:26px;padding:18px 22px 0;border-bottom:1px solid var(--line);margin-top:16px}
+nav button{padding:0 0 13px;font-size:.83rem;font-weight:700;color:var(--mut);position:relative;letter-spacing:-.01em}
+nav button::before{content:attr(data-no);font-family:var(--mono);font-size:.72rem;font-weight:600;margin-right:6px;opacity:.75}
+nav button[aria-selected=true]{color:var(--brand)}
+nav button[aria-selected=true]::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2.5px;background:var(--brand);border-radius:2px}
+
+main{padding:22px}
+section[hidden]{display:none}
+
+/* ═══ 접수: 촬영 카드 ═══ */
+.hero{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:34px 24px 28px;text-align:center;position:relative;overflow:hidden}
+.hero::before,.hero::after{content:"";position:absolute;width:24px;height:24px;border:2px solid #F3D7BE;border-radius:5px}
+.hero::before{top:16px;left:16px;border-right:0;border-bottom:0}
+.hero::after{bottom:16px;right:16px;border-left:0;border-top:0}
+.heroicon{width:74px;height:74px;margin:0 auto 20px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center}
+.heroicon svg{width:32px;height:32px;stroke:var(--brand);fill:none;stroke-width:1.8}
+.herokicker{font-size:.62rem;font-weight:800;letter-spacing:.2em;color:var(--brand);text-transform:uppercase}
+.hero h2{margin:9px 0 0;font-size:1.18rem;font-weight:800;letter-spacing:-.03em}
+.hero p{margin:7px 0 0;font-size:.78rem;color:var(--mut)}
+.shoot{display:block;width:100%;margin-top:24px;padding:17px;border-radius:12px;background:var(--brand);color:#fff;font-size:.9rem;font-weight:800;letter-spacing:-.01em;box-shadow:0 6px 16px rgba(242,106,33,.26)}
+.shoot:disabled{opacity:.5;box-shadow:none}
+.shoot.alt{margin-top:14px;background:none;color:var(--mut);font-size:.78rem;font-weight:600;box-shadow:none;padding:4px}
+.shoot.alt:active{color:var(--brand)}
+.tip{display:flex;gap:13px;align-items:flex-start;background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:17px 18px;margin-top:14px}
+.tip .ic{flex:0 0 32px;height:32px;border-radius:9px;background:var(--soft);display:flex;align-items:center;justify-content:center;font-size:.8rem}
+.tip b{display:block;font-size:.6rem;font-weight:800;letter-spacing:.18em;color:var(--mut);text-transform:uppercase}
+.tip span{display:block;font-size:.76rem;color:var(--sub);margin-top:4px;line-height:1.55}
+
+/* ═══ 카드 공통 ═══ */
+.card,.setrow,.bulk{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:20px}
+.card{margin-top:16px}
+.bulk{margin-top:16px}
+.bulk h4{margin:0 0 10px;font-size:.82rem;font-weight:800}
+.bulkbar{height:6px;background:var(--line);border-radius:999px;overflow:hidden}
+.bulkbar i{display:block;height:100%;background:var(--brand);width:0;transition:width .25s}
+.bulk p{margin:9px 0 0;font-size:.72rem;color:var(--mut)}
+
+.shot{width:100%;border-radius:12px;display:block;background:var(--line)}
+.photoacts{display:flex;gap:7px;margin-top:11px}
+.photoacts button{flex:1;padding:10px 0;border-radius:9px;background:var(--bg);font-size:.66rem;font-weight:700;color:var(--sub)}
+.photoacts button.danger{color:#C0402A}
+.nophoto{border:1.5px dashed var(--line);border-radius:12px;padding:30px 12px;text-align:center;font-size:.75rem;color:var(--mut)}
+
+.fld{margin-top:17px}
+.fld.two{display:flex;gap:12px}
+.fld.two>div{flex:1;min-width:0}
+.fld label{display:block;font-size:.6rem;font-weight:800;letter-spacing:.15em;color:var(--mut);margin-bottom:7px;text-transform:uppercase}
+.fld input,.fld textarea{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:11px;padding:13px 14px;font-size:.86rem}
+.fld textarea{resize:vertical;min-height:80px;line-height:1.5}
+.fld input:focus,.fld textarea:focus{outline:0;border-color:var(--brand);background:var(--card)}
+.fld input::placeholder,.fld textarea::placeholder{color:#C9BFB3}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chips button{padding:9px 13px;border-radius:999px;background:var(--bg);font-size:.72rem;font-weight:600;color:var(--sub)}
+.chips button[aria-pressed=true]{background:var(--brand);color:#fff}
+.chips.books button[aria-pressed=true]{background:var(--dark);color:#fff}
+.grade{display:flex;gap:8px}
+.grade button{flex:1;padding:13px 0;border-radius:11px;background:var(--bg);font-size:.72rem;font-weight:700;color:var(--sub)}
+.grade button[aria-pressed=true]{background:var(--soft);color:var(--brand);box-shadow:inset 0 0 0 1.5px var(--brand)}
+
+.save{display:block;width:100%;margin-top:22px;padding:17px;border-radius:12px;background:var(--brand);color:#fff;font-size:.9rem;font-weight:800;box-shadow:0 6px 16px rgba(242,106,33,.26)}
+.ghost{display:block;width:100%;margin-top:10px;padding:13px;border-radius:11px;color:var(--mut);font-size:.75rem;font-weight:600}
+.ai{font-size:.72rem;color:var(--mut);margin-top:12px;display:flex;align-items:center;gap:7px;min-height:18px;line-height:1.5}
+.ai.on{color:var(--ok);font-weight:600}
+.ai.err{color:#C0402A}
+.spin{width:12px;height:12px;border:2px solid var(--line);border-top-color:var(--brand);border-radius:50%;animation:sp .7s linear infinite;flex:0 0 auto}
+@keyframes sp{to{transform:rotate(360deg)}}
+.note{font-size:.7rem;color:var(--mut);line-height:1.7;margin:16px 4px 0}
+.warn{background:#FBE4E0;color:#8E2E1D;padding:14px 16px;border-radius:12px;font-size:.74rem;line-height:1.6;margin-bottom:16px}
+
+/* ═══ 명부 ═══ */
+.today{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px}
+.today b{font-size:.68rem;font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+.today span{font-size:.7rem;color:var(--mut);font-weight:600}
+.stats{display:flex;gap:9px;margin-bottom:16px}
+.stats div{flex:1;background:var(--card);border-radius:13px;box-shadow:var(--sh);padding:14px 6px;text-align:center}
+.stats div:first-child{background:var(--soft);box-shadow:none}
+.stats b{display:block;font-size:1.1rem;font-weight:800;letter-spacing:-.03em}
+.stats div:first-child b{color:var(--brand)}
+.stats span{display:block;font-size:.54rem;font-weight:700;letter-spacing:.12em;color:var(--mut);margin-top:4px;text-transform:uppercase}
+.searchrow{display:flex;gap:9px;margin-bottom:16px}
+.searchrow .sbox{flex:1;display:flex;align-items:center;gap:9px;background:var(--card);border-radius:12px;box-shadow:var(--sh);padding:0 14px}
+.searchrow .sbox span{color:var(--mut);font-size:.85rem}
+.searchrow input{flex:1;border:0;background:none;padding:13px 0;font-size:.8rem}
+.searchrow input:focus{outline:0}
+.searchrow .fbtn{flex:0 0 46px;background:var(--card);border-radius:12px;box-shadow:var(--sh);font-size:.85rem;color:var(--sub)}
+.searchrow .fbtn[aria-pressed=true]{background:var(--dark);color:#fff}
+.filters{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.filters button{padding:8px 13px;border-radius:999px;background:var(--card);box-shadow:var(--sh);font-size:.7rem;font-weight:700;color:var(--sub)}
+.filters button[aria-pressed=true]{background:var(--dark);color:#fff;box-shadow:none}
+.filters button em{font-style:normal;font-size:.62rem;opacity:.65;margin-left:5px}
+.selbar{display:flex;align-items:center;gap:11px;padding:12px 15px;background:var(--card);border-radius:12px;box-shadow:var(--sh);margin-bottom:14px}
+.selbar .chk{display:flex;align-items:center;gap:9px;font-size:.75rem;font-weight:700}
+.selbar input{width:19px;height:19px;accent-color:#F26A21}
+.selcnt{flex:1;font-size:.7rem;color:var(--brand);font-weight:700}
+.selbar #selDel{font-size:.7rem;font-weight:800;color:#C8342A;margin-right:10px}
+.selbar #selClear{font-size:.7rem;font-weight:700;color:var(--mut)}
+
+.slip{display:flex;gap:14px;background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px;margin-bottom:12px;position:relative}
+.slip.on{box-shadow:0 0 0 2px var(--brand),var(--sh)}
+.slip.imp{background:#FCFAF7}
+.slip .pick{position:absolute;top:14px;left:14px;z-index:2}
+.slip .pick input{width:19px;height:19px;accent-color:#F26A21}
+.slip .tapzone{flex:0 0 78px}
+.slip img{width:78px;height:100px;object-fit:cover;border-radius:10px;display:block;background:var(--line)}
+.slip .nopic{width:78px;height:100px;border-radius:10px;background:var(--bg);display:flex;align-items:center;justify-content:center;font-size:.62rem;color:var(--mut);text-align:center;line-height:1.4}
+.slip .body{flex:1;min-width:0}
+.slip .no{display:flex;justify-content:space-between;gap:8px;font-family:var(--mono);font-size:.6rem;font-weight:600;color:var(--mut)}
+.slip h3{margin:6px 0 2px;font-size:.92rem;font-weight:800;letter-spacing:-.02em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slip .sub{font-size:.74rem;color:var(--mut);margin:0;letter-spacing:0;text-transform:none;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slip .contact{margin-top:7px;display:flex;flex-direction:column;gap:2px}
+.slip .contact a{font-size:.74rem;font-weight:600;color:var(--brand);text-decoration:none;word-break:break-all}
+.slip .contact a:last-child{color:#3E7AA6}
+.slip .tags{margin-top:9px;display:flex;flex-wrap:wrap;gap:5px}
+.slip .tags i{font-style:normal;font-size:.62rem;font-weight:700;padding:5px 9px;border-radius:7px;background:var(--bg);color:var(--sub)}
+.slip .tags i.g{background:var(--soft);color:var(--brand)}
+.slip .tags i.b{background:#EFEBE6;color:var(--ink)}
+.slip .tags i.im{background:none;color:var(--mut);box-shadow:inset 0 0 0 1px var(--line)}
+.slip .m{margin-top:9px;font-size:.72rem;color:var(--sub);line-height:1.55;word-break:break-word;display:flex;gap:6px}
+.slip .m::before{content:"▤";color:var(--mut);font-size:.66rem;flex:0 0 auto}
+.slip .m b{font-weight:700;color:var(--ink)}
+.slip .acts{display:flex;gap:8px;margin-top:12px}
+.slip .acts button{flex:1;padding:9px 0;border-radius:9px;background:var(--bg);font-size:.66rem;font-weight:700;color:var(--sub)}
+.slip .acts .del{color:#C0402A;flex:0 0 62px}
+.slip .acts .edit{background:var(--soft);color:var(--brand)}
+.slip .pick .pk{margin:0}
+.ghost.cancel{}
+.empty{text-align:center;color:var(--mut);padding:56px 20px;font-size:.76rem;line-height:1.8}
+.empty b{display:block;font-size:.9rem;color:var(--ink);margin-bottom:7px}
+
+/* ═══ 설정 ═══ */
+.setrow{margin-bottom:14px;padding:20px}
+.setrow h4{margin:0 0 4px;font-size:.62rem;font-weight:800;letter-spacing:.17em;color:var(--mut);text-transform:uppercase}
+.setrow p{margin:8px 0 13px;font-size:.72rem;color:var(--mut);line-height:1.7}
+.setrow input{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:11px;padding:13px 14px;font-size:.84rem}
+.setrow input:focus{outline:0;border-color:var(--brand);background:var(--card)}
+.setrow button{margin-top:10px;padding:13px 20px;border-radius:11px;background:var(--dark);color:#fff;font-size:.76rem;font-weight:700}
+.setrow button.sec{background:var(--bg);color:var(--ink)}
+.langbtns{display:flex;flex-direction:column;margin-top:10px}
+.langbtns button{margin:0!important;padding:15px 14px;border-radius:10px;background:none;color:var(--ink);font-size:.82rem;font-weight:600;text-align:left;border-bottom:1px solid var(--line)}
+.langbtns button:last-child{border-bottom:0}
+.langbtns button[aria-pressed=true]{background:var(--soft);color:var(--brand);font-weight:800}
+.langbtns button[aria-pressed=true]::after{content:"✓";float:right;font-weight:800}
+#fontBtns{flex-direction:row;gap:8px}
+#fontBtns button{flex:1;text-align:center;border-bottom:0;background:var(--bg);border-radius:11px;font-size:.76rem;font-weight:700}
+#fontBtns button[aria-pressed=true]{background:var(--soft);color:var(--brand)}
+#fontBtns button[aria-pressed=true]::after{content:""}
+.keyrow{display:flex;gap:8px}
+.keyrow button{flex:1;margin-top:10px}
+.ver{text-align:center;font-size:.6rem;color:#CDC3B7;font-weight:600;letter-spacing:.1em;padding:6px 0 20px}
+
+/* ═══ 하단 바 ═══ */
+.bar[hidden]{display:none!important}
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;gap:10px;padding:13px 22px calc(13px + env(safe-area-inset-bottom));background:linear-gradient(180deg,rgba(250,247,243,0) 0%,var(--bg) 26%)}
+.bar button{flex:1;padding:16px 0;border-radius:12px;font-size:.8rem;font-weight:800;background:var(--card);box-shadow:var(--sh);color:var(--ink)}
+.bar button.primary{background:var(--dark);color:#fff}
+
+/* ═══ 시트 · 모달 ═══ */
+.sheet{position:fixed;inset:0;z-index:120;background:rgba(28,26,24,.42);display:flex;align-items:flex-end}
+.sheetbox{background:var(--card);width:100%;border-radius:22px 22px 0 0;padding:12px 14px calc(14px + env(safe-area-inset-bottom))}
+.sheetbox button{display:block;width:100%;padding:17px;border-radius:12px;font-size:.84rem;font-weight:700;text-align:left;color:var(--ink)}
+.sheetbox button+button{margin-top:4px}
+.sheetbox button:last-child{margin-top:8px;background:var(--bg);text-align:center;color:var(--mut);font-weight:600}
+.detail{position:fixed;inset:0;z-index:130;background:var(--bg);display:flex;flex-direction:column}
+.dhead{display:flex;align-items:center;justify-content:space-between;padding:20px 22px 14px;border-bottom:1px solid var(--line)}
+.dhead b{font-size:.68rem;font-weight:800;letter-spacing:.18em;text-transform:uppercase}
+.dhead button{font-size:.76rem;font-weight:700;color:var(--mut)}
+.dbody{flex:1;overflow:auto;padding:20px 22px}
+.dbody img{width:100%;border-radius:14px;margin-bottom:20px;box-shadow:var(--sh)}
+.drow{padding:14px 0;border-bottom:1px solid var(--line)}
+.drow label{display:block;font-size:.58rem;font-weight:800;letter-spacing:.15em;color:var(--mut);margin-bottom:5px;text-transform:uppercase}
+.drow .val{font-size:.86rem;word-break:break-word;line-height:1.5}
+.drow .val.empty{color:#CDC3B7}
+.drow a{color:var(--brand);text-decoration:none;font-weight:600}
+.dfoot{display:flex;gap:9px;padding:14px 22px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);background:var(--card)}
+.dfoot button{flex:1;padding:16px 0;border-radius:12px;background:var(--bg);font-size:.78rem;font-weight:700;color:var(--ink)}
+.dfoot button.pri{background:var(--brand);color:#fff}
+
+/* ═══ 기타 ═══ */
+.toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);z-index:200;background:var(--dark);color:#fff;padding:13px 20px;border-radius:11px;font-size:.74rem;font-weight:600;opacity:0;transition:opacity .2s;pointer-events:none;max-width:88vw;text-align:center}
+.toast.on{opacity:1}
+.flash{position:fixed;inset:0;z-index:150;display:flex;align-items:center;justify-content:center;background:rgba(250,247,243,.93);animation:fo .9s ease-out forwards;pointer-events:none}
+.flash div{background:var(--brand);color:#fff;border-radius:18px;padding:22px 34px;font-size:1.4rem;font-weight:800;letter-spacing:.06em;transform:scale(1.5);opacity:0;animation:pr .32s cubic-bezier(.2,.9,.25,1.1) forwards;text-align:center;box-shadow:0 12px 34px rgba(242,106,33,.35)}
+.flash div small{display:block;font-size:.6rem;letter-spacing:.16em;font-weight:600;margin-top:6px;opacity:.9}
+@keyframes pr{to{transform:scale(1);opacity:1}}
+@keyframes fo{0%,62%{opacity:1}100%{opacity:0}}
+#inapp{position:fixed;inset:0;z-index:220;background:var(--bg);padding:34px 26px;display:flex;flex-direction:column;justify-content:center;gap:17px}
+#inapp h2{margin:0;font-size:1.18rem;font-weight:800;line-height:1.4}
+#inapp p{margin:0;font-size:.78rem;color:var(--mut);line-height:1.75}
+#inapp p b{color:var(--brand)}
+#inapp .url{font-family:var(--mono);font-size:.7rem;background:var(--card);border-radius:11px;padding:13px;word-break:break-all;box-shadow:var(--sh)}
+#inapp button{width:100%;padding:17px;border-radius:12px;font-size:.86rem;font-weight:800}
+#inapp .go{background:var(--brand);color:#fff}
+#inapp .cp{background:var(--card);color:var(--ink);box-shadow:var(--sh)}
+#inapp .skip{background:none;color:var(--mut);font-size:.72rem;font-weight:600;text-decoration:underline;padding:8px}
+.pflab{display:block;margin:16px 0 6px;font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--sub)}
+#rowProfile textarea{width:100%;min-height:96px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;font-size:.86rem;line-height:1.6;background:#fff;color:inherit;resize:vertical}
+#rowProfile select{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff}
+#rowProfile.lock input,#rowProfile.lock textarea,#rowProfile.lock select,#rowProfile.lock #pf-save,#rowProfile.lock #pf-load,#rowProfile.lock #pf-apply{opacity:.45;pointer-events:none}
+#rowProfile.lock #pf-lock,#rowProfile.lock #pf-copy{opacity:1;pointer-events:auto}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brandwrap">
+    <img id="logo" class="logo" src="logo.png" alt="BOOTH DESK" hidden>
+    <div id="wordmark" class="wordmark">BOOTH<em>DESK</em></div>
+    <div class="sub" data-i18n="sub">부스 접수대</div>
+    <div class="who"><span data-i18n="staffLbl">담당자</span> <b id="staffName">미설정</b></div>
+  </div>
+  <div class="cnt"><b id="count">0</b><span data-i18n="scans">접수</span><span class="syncpill" id="syncPill" hidden></span></div>
+</header>
+
+<nav role="tablist">
+  <button role="tab" id="t-new" aria-selected="true" data-no="01" data-i18n="tabNew">접수</button>
+  <button role="tab" id="t-list" aria-selected="false" data-no="02" data-i18n="tabList">명부</button>
+  <button role="tab" id="t-set" aria-selected="false" data-no="03" data-i18n="tabSet">설정</button>
+</nav>
+
+<main>
+<section id="p-new">
+  <div class="warn" id="storeWarn" hidden data-i18n="storeWarn">저장 기능이 작동하지 않는 환경입니다.</div>
+  <input type="file" id="cam" accept="image/*" capture="environment" hidden>
+  <input type="file" id="gal" accept="image/*" multiple hidden>
+  <input type="file" id="recam" accept="image/*" capture="environment" hidden>
+  <input type="file" id="regal" accept="image/*" hidden>
+  <div class="hero">
+    <div class="heroicon"><svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5A2.5 2.5 0 0 1 5.5 6h1.7l1.1-1.8A1 1 0 0 1 9.2 3.7h5.6a1 1 0 0 1 .9.5L16.8 6h1.7A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"/><circle cx="12" cy="12.7" r="3.6"/></svg></div>
+    <div class="herokicker" data-i18n="heroKick">NEW VISITOR</div>
+    <h2 data-i18n="heroTitle">명함을 촬영해주세요</h2>
+    <p data-i18n="heroSub">명함이나 방문증을 프레임 안에 맞춰주세요.</p>
+    <button class="shoot" id="shootBtn" data-i18n="shootB">명함 · 방문증 촬영</button>
+    <button class="shoot alt" id="pickBtn" data-i18n="pickB">또는 사진첩에서 선택</button>
+  </div>
+  <div class="tip">
+    <div class="ic">💡</div>
+    <div><b data-i18n="tipT">TIP</b><span data-i18n="tipS">촬영하면 회사명과 이름이 자동으로 인식되어 명부에 저장됩니다.</span></div>
+  </div>
+
+  <div class="bulk" id="bulk" hidden>
+    <h4 id="bulkTitle" data-i18n="bulkTitle">사진을 불러오는 중…</h4>
+    <div class="bulkbar"><i id="bulkFill"></i></div>
+    <p id="bulkMsg"></p>
+  </div>
+
+  <div class="card" id="draft" hidden>
+    <img class="shot" id="preview" alt="촬영한 방문증 또는 명함">
+    <div class="photoacts" id="photoActs">
+      <button id="rePhoto" data-i18n="rePhoto">사진 다시 찍기</button>
+      <button id="rePick" data-i18n="rePick">사진첩에서 고르기</button>
+      <button id="toggleScan">원본 보기</button>
+      <button id="delPhoto" class="danger" data-i18n="delPhoto">사진 삭제</button>
+    </div>
+    <div class="nophoto" id="noPhoto" hidden data-i18n="noPhoto">사진 없음 — 메모만 저장됩니다</div>
+    <div class="ai" id="aiStatus"></div>
+    <div class="fld"><label data-i18n="lCompany">회사명</label><input id="f-company" type="text" lang="ko" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" data-i18n-ph="phCompany" placeholder="예: 대한상사"></div>
+    <div class="fld"><label data-i18n="lName">성함</label><input id="f-name" type="text" lang="ko" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" data-i18n-ph="phName" placeholder="예: 최환준 / Hwanjun Choi"></div>
+    <div class="fld"><label data-i18n="lTitle">직함</label><input id="f-title" type="text" lang="ko" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" data-i18n-ph="phTitle" placeholder="예: 부장"></div>
+    <div class="fld two"><div><label data-i18n="lPhone">전화번호</label><input id="f-phone" type="tel" inputmode="tel" autocomplete="off" placeholder="010-0000-0000"></div><div><label data-i18n="lEmail">이메일</label><input id="f-email" type="email" inputmode="email" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="name@company.com"></div></div>
+    <div class="fld"><label data-i18n="lAddr">회사 주소</label><input id="f-addr" type="text" lang="ko" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" enterkeyhint="next" data-i18n-ph="phAddr" placeholder="예: 경기도 고양시 …"></div>
+    <div class="fld" id="wrapG1"><label id="lblG1">관심 품목</label>
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="fld" id="wrapG2"><label id="lblG2">요청 자료</label>
+      <div class="chips books" id="books"></div>
+    </div>
+    <div class="fld" id="specWrap" hidden><label id="lblSpec">추가 입력</label><input id="f-spec" type="text" lang="ko" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" id="f-spec-ph" placeholder=""></div>
+    <div class="fld"><label data-i18n="lMemo">상담 메모</label><textarea id="f-memo" lang="ko" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-i18n-ph="phMemo" placeholder="샘플 요청, 단가 문의, 재방문 약속 등"></textarea></div>
+    <div class="fld"><label data-i18n="lGrade">등급</label>
+      <div class="grade" id="grade"></div>
+    </div>
+    <button class="save" id="saveBtn" data-i18n="save">명부에 접수</button>
+    <button class="ghost" id="cancelBtn" data-i18n="cancel">취소하고 버리기</button>
+  </div>
+
+  <p class="note" data-i18n="note">사진과 메모는 이 휴대폰 안에만 저장됩니다.</p>
+</section>
+
+<section id="p-list" hidden>
+  <div class="today"><b data-i18n="today">TODAY</b><span id="todayDate"></span></div>
+  <div class="stats" id="stats"></div>
+  <div class="searchrow">
+    <div class="sbox"><span>⌕</span><input id="q" type="search" lang="ko" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="phSearch" placeholder="이름, 회사명, 연락처 검색"></div>
+    <button class="fbtn" id="fToggle" aria-pressed="false" title="filter">⧩</button>
+  </div>
+  <div class="filters" id="filters" hidden></div>
+  <div class="selbar" id="selBar" hidden>
+    <label class="chk"><input type="checkbox" id="selAll"><span data-i18n="selAll">전체 선택</span></label>
+    <span class="selcnt" id="selCnt"></span>
+    <button id="selDel" data-i18n="selDel">선택 삭제</button>
+    <button id="selClear" data-i18n="selNone">선택 해제</button>
+  </div>
+  <div id="slips"></div>
+</section>
+
+<section id="p-set" hidden>
+  <div class="setrow">
+    <h4 data-i18n="sLangH">언어</h4>
+    <div class="langbtns" id="langBtns">
+      <button data-l="ko" aria-pressed="true">한국어</button>
+      <button data-l="en" aria-pressed="false">English</button>
+      <button data-l="zh" aria-pressed="false">简体中文</button>
+    </div>
+  </div>
+  <div class="setrow">
+    <h4 data-i18n="sFontH">글자 크기</h4>
+    <div class="langbtns" id="fontBtns">
+      <button data-f="16" data-i18n="fSmall">보통</button>
+      <button data-f="18" data-i18n="fMid">크게</button>
+      <button data-f="20" data-i18n="fBig">아주 크게</button>
+    </div>
+  </div>
+  <div class="setrow">
+    <h4 data-i18n="sStaffH">담당자 이름</h4>
+    <p data-i18n="sStaffP">여러 명이 나눠 쓸 때 누가 받은 리드인지 구분합니다.</p>
+    <input id="s-staff" type="text" lang="ko" inputmode="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" data-i18n-ph="phStaff" placeholder="예: 최환준">
+    <button id="s-staffSave" data-i18n="bSave">저장</button>
+  </div>
+  <div class="setrow" id="rowProfile">
+    <h4>항목 설정 (이 부스 전용)</h4>
+    <p>현장에서 누르는 버튼을 회사에 맞게 바꿉니다. 업종을 고르면 기본 버튼이 자동으로 채워지고, 이름만 고쳐 쓰면 됩니다.<br><br>
+    <b>한 줄에 하나씩</b> 적어 주세요. 줄 순서가 곧 화면 순서이고, 줄을 지우면 버튼도 사라집니다.</p>
+    <select id="pf-tpl"></select>
+    <button class="sec" id="pf-load" style="margin-top:8px">이 업종 기본값으로 채우기</button>
+
+    <label class="pflab">부스 상단 표시</label>
+    <div class="keyrow"><input id="pf-b1" placeholder="회사명"><input id="pf-b2" placeholder="뒷글자 (선택)"></div>
+    <input id="pf-sub" placeholder="부스 접수대" style="margin-top:8px">
+    <input id="pf-event" placeholder="전시회명 · 정보카드에 표시 (선택)" style="margin-top:8px">
+
+    <label class="pflab">첫 번째 버튼 묶음</label>
+    <input id="pf-g1l" placeholder="묶음 제목 (예: 관심 품목)">
+    <textarea id="pf-g1o" rows="7" placeholder="한 줄에 하나씩" style="margin-top:8px"></textarea>
+
+    <label class="pflab">두 번째 버튼 묶음</label>
+    <input id="pf-g2l" placeholder="묶음 제목 (예: 요청 자료)">
+    <textarea id="pf-g2o" rows="6" placeholder="한 줄에 하나씩" style="margin-top:8px"></textarea>
+
+    <label class="pflab">조건부 추가 입력칸</label>
+    <p style="margin-top:0">특정 버튼을 눌렀을 때만 나타나는 입력칸입니다. 필요 없으면 첫 칸을 비워 두세요.</p>
+    <input id="pf-sptr" placeholder="어떤 버튼을 눌렀을 때? (위 두 묶음 중 하나)">
+    <input id="pf-spl" placeholder="입력칸 제목" style="margin-top:8px">
+    <input id="pf-spp" placeholder="입력 예시 안내문" style="margin-top:8px">
+
+    <label class="pflab">등급 버튼</label>
+    <input id="pf-gr1" placeholder="A 즉시상담">
+    <input id="pf-gr2" placeholder="B 관심" style="margin-top:8px">
+    <input id="pf-gr3" placeholder="C 단순방문" style="margin-top:8px">
+
+    <button id="pf-save" style="margin-top:14px">항목 설정 저장</button>
+    <div class="ai" id="pfStatus"></div>
+
+    <label class="pflab">직원 폰에 똑같이 복제</label>
+    <p style="margin-top:0">저장한 설정을 코드 한 줄로 복사해 직원에게 보내세요. 직원은 아래 칸에 붙여넣고 적용만 누르면 됩니다. (API 키는 들어 있지 않습니다)</p>
+    <button class="sec" id="pf-copy">설정 코드 복사</button>
+    <input id="pf-paste" placeholder="받은 설정 코드를 여기 붙여넣기" style="margin-top:8px">
+    <button class="sec" id="pf-apply" style="margin-top:8px">붙여넣은 코드 적용</button>
+
+    <label class="pflab" style="text-transform:none;letter-spacing:0;font-size:.8rem;font-weight:600;color:inherit">
+      <input type="checkbox" id="pf-lock" style="width:auto;margin-right:8px;vertical-align:-2px">설정 잠그기 — 현장에서 실수로 바뀌는 것을 막습니다</label>
+  </div>
+  <div class="setrow">
+    <h4 data-i18n="sAiH">자동 인식 (선택)</h4>
+    <p>켜면 촬영 즉시 회사명과 이름이 자동으로 채워집니다. 키는 이 휴대폰에만 저장되며 어디로도 전송되지 않습니다.<br><br>
+    <b>켜는 방법</b> — 컴퓨터에서 console.anthropic.com 접속 → 왼쪽 API keys → Create Key → 생성된 sk-ant- 로 시작하는 문자열을 복사해 아래에 붙여넣고 <b>키 연결 확인</b>을 누르세요. 모델명은 비워 두면 알아서 맞는 것을 찾습니다.</p>
+    <input id="s-key" type="password" placeholder="sk-ant-... (선택 사항)" autocomplete="off">
+    <div class="keyrow">
+      <button class="sec" id="s-paste" data-i18n="bPaste">붙여넣기</button>
+      <button class="sec" id="s-eye" data-i18n="bShow">보기</button>
+    </div>
+    <input id="s-model" data-i18n-ph="phModel" placeholder="비워 두면 자동으로 찾습니다" style="margin-top:8px">
+    <button id="s-test" data-i18n="bKeyTest">키 연결 확인</button>
+    <button class="sec" id="s-keySave" data-i18n="bSave">저장</button>
+    <div class="ai" id="testStatus"></div>
+  </div>
+  <div class="setrow">
+    <h4 data-i18n="sLinkH">직원용 설치 링크</h4>
+    <p>키 연결이 끝난 뒤 이 버튼을 누르면 키가 담긴 링크가 만들어집니다. 직원이 그 링크를 한 번만 열면 자동 인식이 켜진 상태로 바로 사용할 수 있습니다.<br><br>
+    <b>이 링크를 아는 사람은 누구나 키를 쓸 수 있습니다.</b> 함께 일하는 사람에게만 보내고, 전시가 끝나면 키를 삭제하세요.</p>
+    <button id="s-link" data-i18n="bMakeLink">설치 링크 만들어 복사</button>
+    <div class="ai" id="linkStatus"></div>
+  </div>
+  <div class="setrow">
+    <h4 data-i18n="sScanH">스캔 보정</h4>
+    <p>사진을 찍거나 불러오면 그림자와 조명 얼룩을 걷어내고 배경을 하얗게 펴서 스캔한 문서처럼 만듭니다. 글자가 또렷해지고 용량도 줄어듭니다. 촬영 화면에서 언제든 원본과 번갈아 볼 수 있습니다.</p>
+    <button id="s-scan">불러오는 중</button>
+  </div>
+  <div class="setrow">
+    <h4 data-i18n="sSyncH">실시간 공유 (구글 시트)</h4>
+    <p>연결하면 접수 기록이 자동으로 구글 시트에 올라가고, 다른 직원의 기록도 자동으로 내려받아 명부에 함께 표시됩니다. 인터넷이 끊겨도 폰에는 정상 저장되며, 연결되는 순간 밀린 기록이 알아서 올라갑니다.<br><br>
+    <b>사진은 올라가지 않습니다.</b> 용량이 커서 폰에만 보관됩니다.</p>
+    <input id="s-sync" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="https://script.google.com/.../exec">
+    <div class="keyrow">
+      <button class="sec" id="s-syncPaste" data-i18n="bPaste">붙여넣기</button>
+      <button id="s-syncTest" data-i18n="bConnTest">연결 확인</button>
+    </div>
+    <div class="ai" id="syncStatus"></div>
+    <button class="sec" id="s-syncNow" style="width:100%" data-i18n="bSyncNow">지금 바로 동기화</button>
+  </div>
+  <div class="setrow">
+    <h4 data-i18n="sImpH">다른 담당자 기록 합치기</h4>
+    <p>직원이 내보낸 CSV 파일을 불러오면 이 폰의 명부에 함께 표시되고, 담당자별로 나눠 볼 수 있습니다. 사진은 따로 관리되므로 글자 정보만 합쳐집니다. 같은 기록을 두 번 불러와도 중복되지 않습니다.</p>
+    <input type="file" id="impFile" accept=".csv,text/csv" hidden>
+    <button id="s-import" data-i18n="bImport">CSV 불러와 합치기</button>
+    <div class="ai" id="impStatus"></div>
+  </div>
+  <div class="setrow">
+    <h4 data-i18n="sUsageH">저장 상태</h4>
+    <p id="usage">계산 중…</p>
+    <button class="sec" id="s-diag" style="width:100%;margin-bottom:9px">저장소 진단</button>
+    <div class="ai" id="diagOut"></div>
+    <button class="sec" id="s-wipe" style="border-color:#C8342A;color:#C8342A">전체 기록 삭제</button>
+  </div>
+  <div class="ver">BOOTH DESK · Ver 2.0.0</div>
+</section>
+</main>
+
+<div class="bar" hidden>
+  <button class="primary" id="exMenu" data-i18n="bExport">내보내기</button>
+  <button id="exZip" data-i18n="bExZip">사진 전체 저장</button>
+</div>
+<div class="sheet" id="exSheet" hidden>
+  <div class="sheetbox">
+    <button id="exCsv" data-i18n="exCsv">CSV 내보내기</button>
+    <button id="exCard" data-i18n="exCard">정보카드 내보내기</button>
+    <button id="exVcf" data-i18n="exVcf">연락처로 저장</button>
+    <button class="cancel" id="exClose" data-i18n="dClose">닫기</button>
+  </div>
+</div>
+
+<div class="detail" id="detail" hidden>
+  <div class="dhead">
+    <b data-i18n="dTitle">접수 상세</b>
+    <button id="dClose" data-i18n="dClose">닫기</button>
+  </div>
+  <div class="dbody" id="dBody"></div>
+  <div class="dfoot">
+    <button id="dVcf" data-i18n="dVcf">연락처 저장</button>
+    <button id="dCard" data-i18n="dCard">정보카드 저장</button>
+    <button id="dEdit" class="pri" data-i18n="dEdit">수정</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+
+/* ═════ 언어 ═════ */
+const I18N={
+ko:{sub:'부스 접수대',staffLbl:'담당자',unset:'미설정',scans:'접수',
+ tabNew:'접수',tabList:'명부',tabSet:'설정',
+ storeWarn:'저장 기능이 작동하지 않는 환경입니다. 지금 기록하면 화면을 닫는 순간 사라집니다. 반드시 배포한 주소(https://)에서 사용하세요.',
+ shootB:'명함 · 방문증 촬영',shootS:'휴대폰 카메라가 열립니다',
+ pickB:'또는 사진첩에서 선택',pickS:'여러 장을 한 번에 불러올 수 있습니다',
+ bulkTitle:'사진을 불러오는 중…',rePhoto:'사진 다시 찍기',rePick:'사진첩에서 고르기',
+ scanOrig:'원본 보기',scanFix:'스캔 보정',delPhoto:'사진 삭제',noPhoto:'사진 없음 — 메모만 저장됩니다',
+ lCompany:'회사명',lName:'성함',lTitle:'직함',lPhone:'전화번호',lEmail:'이메일',lAddr:'회사 주소',
+ lItems:'관심 품목',lBooks:'샘플북 요청',lMemo:'상담 메모',lGrade:'등급',
+ selAll:'전체 선택',selNone:'선택 해제',selDel:'선택 삭제',cDelSel:'선택한 %n건을 삭제합니다. 사진도 함께 지워지며 되돌릴 수 없습니다.',tDelSel:'%n건을 삭제했습니다',selCnt:'개 선택됨',
+ bExport:'내보내기',exCsv:'CSV 내보내기',exCard:'정보카드 내보내기',exVcf:'연락처로 저장',dVcf:'연락처 저장',vcfDone:'연락처 파일을 만들었습니다',vcfHint:'파일을 열면 연락처에 추가할 수 있습니다',
+ cardMaking:'정보카드를 만드는 중…',cardDone:'정보카드를 저장했습니다',
+ dTitle:'접수 상세',dClose:'닫기',dCard:'정보카드 저장',dEdit:'수정',dDel:'삭제',
+ dNoValue:'—',dAt:'접수시각',dStaff:'담당자',
+ gA:'A 즉시상담',gB:'B 관심',gC:'C 단순방문',save:'명부에 접수',saveEdit:'수정 내용 저장',cancel:'취소하고 버리기',
+ note:'사진과 메모는 이 휴대폰 안에만 저장됩니다. 매일 마감 후 CSV 내보내기로 백업하세요.',
+ phCompany:'예: 대한상사',phName:'예: 홍길동 / Gildong Hong',phTitle:'예: 부장',
+ phAddr:'예: 경기도 고양시 …',phMemo:'샘플 요청, 단가 문의, 재방문 약속 등',phStaff:'예: 최환준',
+ phModel:'비워 두면 자동으로 찾습니다',
+ heroKick:'NEW VISITOR',heroTitle:'명함을 촬영해주세요',heroSub:'명함이나 방문증을 프레임 안에 맞춰주세요.',tipT:'TIP',tipS:'촬영하면 회사명과 이름이 자동으로 인식되어 명부에 저장됩니다.',today:'TODAY',phSearch:'이름, 회사명, 연락처 검색',stTotal:'TOTAL',stNew:'NEW',stFollow:'FOLLOW-UP',stSample:'SAMPLE',sLangH:'언어',sFontH:'글자 크기',fSmall:'보통',fMid:'크게',fBig:'아주 크게',sStaffH:'담당자 이름',sStaffP:'여러 명이 나눠 쓸 때 누가 받은 리드인지 구분합니다. CSV에 함께 기록됩니다.',
+ sAiH:'자동 인식 (선택)',sLinkH:'직원용 설치 링크',sScanH:'스캔 보정',sSyncH:'실시간 공유 (구글 시트)',
+ sImpH:'다른 담당자 기록 합치기',sUsageH:'저장 상태',
+ bSave:'저장',bPaste:'붙여넣기',bShow:'보기',bHide:'가리기',bKeyTest:'키 연결 확인',bConnTest:'연결 확인',
+ bMakeLink:'설치 링크 만들어 복사',bSyncNow:'지금 바로 동기화',bImport:'CSV 불러와 합치기',
+ bExCsv:'CSV 내보내기',bExZip:'사진 전체 저장',bWipe:'전체 기록 삭제',
+ all:'전체',emptyT:'아직 접수된 방문객이 없습니다.',emptyS:'접수 탭에서 촬영하면 여기에 쌓입니다.',
+ edit:'수정',del:'삭제',imported:'가져옴',noPic:'사진<br>없음',noName:'(회사명 없음)',
+ aiOff:'자동 인식 꺼짐 — 설정 탭에서 API 키를 넣으면 켜집니다',aiRead:'방문증 글자를 읽는 중…',
+ aiOn:'자동 인식 켜짐 — 키가 이 폰에 저장되어 있습니다',aiEdit:'기존 기록을 수정하는 중입니다',
+ tSaved:'저장했습니다',tNoStore:'저장소에 기록하지 못했습니다 — 지금 CSV로 내보내세요',tEdited:'수정했습니다',tDeleted:'사진을 지웠습니다',tReplaced:'사진을 교체했습니다',
+ tCsv:'CSV를 저장했습니다',tZip:'사진을 저장했습니다',tNoRec:'내보낼 기록이 없습니다',
+ tSyncOk:'동기화 완료',tCopied:'복사했습니다',tSetStaff:'먼저 담당자 이름을 설정하세요',
+ cDelPhoto:'이 사진을 지웁니다. 입력한 회사명과 메모는 그대로 남습니다.',
+ cDelRec:'이 기록을 삭제합니다. 사진도 함께 지워집니다.',
+ scanOnBtn:'자동 보정 켜짐 — 누르면 끕니다',scanOffBtn:'자동 보정 꺼짐 — 누르면 켭니다',
+ syncOn:'공유됨',syncWait:'대기',syncOff:'오프라인',syncing:'전송 중'},
+
+en:{sub:'Booth Desk',staffLbl:'Staff',unset:'Not set',scans:'ENTRIES',
+ tabNew:'New',tabList:'List',tabSet:'Settings',
+ storeWarn:'Storage is not working here. Anything you record now disappears when you close this screen. Please use the published https:// address.',
+ shootB:'Take a photo',shootS:'Opens your phone camera',
+ pickB:'Or choose from photos',pickS:'You can import several at once',
+ bulkTitle:'Importing photos…',rePhoto:'Retake photo',rePick:'Pick from photos',
+ scanOrig:'View original',scanFix:'Scan cleanup',delPhoto:'Delete photo',noPhoto:'No photo — notes only',
+ lCompany:'Company',lName:'Name',lTitle:'Job title',lPhone:'Phone',lEmail:'Email',lAddr:'Company address',
+ lItems:'Products of interest',lBooks:'Sample book request',lMemo:'Notes',lGrade:'Priority',
+ selAll:'Select all',selNone:'Clear',selDel:'Delete selected',cDelSel:'Delete %n selected records? Photos will be removed too and this cannot be undone.',tDelSel:'%n records deleted',selCnt:' selected',
+ bExport:'Export',exCsv:'Export CSV',exCard:'Export info cards',exVcf:'Save as contacts',dVcf:'Save contact',vcfDone:'Contact file created',vcfHint:'Open the file to add it to your contacts',
+ cardMaking:'Creating info cards…',cardDone:'Info cards saved',
+ dTitle:'Record',dClose:'Close',dCard:'Save info card',dEdit:'Edit',dDel:'Delete',
+ dNoValue:'—',dAt:'Recorded',dStaff:'Staff',
+ gA:'A Hot lead',gB:'B Interested',gC:'C Visitor',save:'Add to list',saveEdit:'Save changes',cancel:'Discard',
+ note:'Photos and notes stay on this phone only. Export a CSV at the end of each day.',
+ phCompany:'e.g. Daehan Corp.',phName:'e.g. Gildong Hong',phTitle:'e.g. Manager',
+ phAddr:'e.g. Goyang-si, Gyeonggi-do',phMemo:'Sample request, pricing question, follow-up',phStaff:'e.g. Hwanjun',
+ phModel:'Leave blank to detect automatically',
+ heroKick:'NEW VISITOR',heroTitle:'Photograph a card',heroSub:'Fit the card or badge inside the frame.',tipT:'TIP',tipS:'The company and name are recognised automatically and saved to your list.',today:'TODAY',phSearch:'Search name, company, contact',stTotal:'TOTAL',stNew:'NEW',stFollow:'FOLLOW-UP',stSample:'SAMPLE',sLangH:'Language',sFontH:'Text size',fSmall:'Normal',fMid:'Large',fBig:'Extra large',sStaffH:'Staff name',sStaffP:'Identifies who captured each lead when several people share the app. Included in the CSV.',
+ sAiH:'Auto-recognition (optional)',sLinkH:'Setup link for staff',sScanH:'Scan cleanup',sSyncH:'Live sharing (Google Sheets)',
+ sImpH:'Merge another staff CSV',sUsageH:'Storage',
+ bSave:'Save',bPaste:'Paste',bShow:'Show',bHide:'Hide',bKeyTest:'Check key',bConnTest:'Check connection',
+ bMakeLink:'Create and copy setup link',bSyncNow:'Sync now',bImport:'Import and merge CSV',
+ bExCsv:'Export CSV',bExZip:'Save all photos',bWipe:'Delete all records',
+ all:'All',emptyT:'No visitors recorded yet.',emptyS:'Photograph a badge on the New tab and it will appear here.',
+ edit:'Edit',del:'Delete',imported:'Imported',noPic:'No<br>photo',noName:'(no company)',
+ aiOff:'Auto-recognition off — add an API key in Settings',aiRead:'Reading the text…',
+ aiOn:'Auto-recognition on — key saved on this phone',aiEdit:'Editing an existing record',
+ tSaved:'Saved',tNoStore:'Could not write to storage — export a CSV now',tEdited:'Updated',tDeleted:'Photo deleted',tReplaced:'Photo replaced',
+ tCsv:'CSV saved',tZip:'Photos saved',tNoRec:'Nothing to export',
+ tSyncOk:'Sync complete',tCopied:'Copied',tSetStaff:'Please set your staff name first',
+ cDelPhoto:'Delete this photo? The company name and notes you typed will stay.',
+ cDelRec:'Delete this record? The photo will be removed too.',
+ scanOnBtn:'Auto cleanup ON — tap to turn off',scanOffBtn:'Auto cleanup OFF — tap to turn on',
+ syncOn:'Synced',syncWait:'Queued',syncOff:'Offline',syncing:'Sending'},
+
+zh:{sub:'展位登记台',staffLbl:'负责人',unset:'未设置',scans:'登记',
+ tabNew:'登记',tabList:'名录',tabSet:'设置',
+ storeWarn:'当前环境无法保存数据。现在记录的内容在关闭页面后会消失。请使用已发布的 https:// 网址。',
+ shootB:'拍摄名片 · 参观证',shootS:'将打开手机相机',
+ pickB:'或从相册选择',pickS:'可一次导入多张',
+ bulkTitle:'正在导入照片…',rePhoto:'重新拍摄',rePick:'从相册选择',
+ scanOrig:'查看原图',scanFix:'扫描优化',delPhoto:'删除照片',noPhoto:'无照片 — 仅保存备注',
+ lCompany:'公司名称',lName:'姓名',lTitle:'职务',lPhone:'电话',lEmail:'邮箱',lAddr:'公司地址',
+ lItems:'感兴趣产品',lBooks:'索取样本册',lMemo:'洽谈备注',lGrade:'等级',
+ selAll:'全选',selNone:'取消选择',selDel:'删除所选',cDelSel:'将删除所选 %n 条记录，照片也会一并删除且无法恢复。',tDelSel:'已删除 %n 条记录',selCnt:' 项已选',
+ bExport:'导出',exCsv:'导出 CSV',exCard:'导出信息卡',exVcf:'保存为联系人',dVcf:'保存联系人',vcfDone:'已生成联系人文件',vcfHint:'打开文件即可添加到通讯录',
+ cardMaking:'正在生成信息卡…',cardDone:'已保存信息卡',
+ dTitle:'登记详情',dClose:'关闭',dCard:'保存信息卡',dEdit:'修改',dDel:'删除',
+ dNoValue:'—',dAt:'登记时间',dStaff:'负责人',
+ gA:'A 立即洽谈',gB:'B 有意向',gC:'C 普通参观',save:'登记到名录',saveEdit:'保存修改',cancel:'取消并丢弃',
+ note:'照片和备注仅保存在本手机中。请每天闭馆后导出 CSV 备份。',
+ phCompany:'例：大韩商事',phName:'例：洪吉童',phTitle:'例：部长',
+ phAddr:'例：京畿道高阳市',phMemo:'索取样品、询价、再次拜访约定等',phStaff:'例：崔焕俊',
+ phModel:'留空将自动选择',
+ heroKick:'NEW VISITOR',heroTitle:'请拍摄名片',heroSub:'请将名片或参观证放入取景框内。',tipT:'提示',tipS:'拍摄后会自动识别公司名和姓名并存入名录。',today:'TODAY',phSearch:'搜索姓名、公司、联系方式',stTotal:'总计',stNew:'今日',stFollow:'跟进',stSample:'样本',sLangH:'语言',sFontH:'字体大小',fSmall:'标准',fMid:'大',fBig:'特大',sStaffH:'负责人姓名',sStaffP:'多人共用时用于区分由谁接待。会一并记入 CSV。',
+ sAiH:'自动识别（可选）',sLinkH:'员工安装链接',sScanH:'扫描优化',sSyncH:'实时共享（Google 表格）',
+ sImpH:'合并其他负责人的 CSV',sUsageH:'存储状态',
+ bSave:'保存',bPaste:'粘贴',bShow:'显示',bHide:'隐藏',bKeyTest:'检查密钥',bConnTest:'检查连接',
+ bMakeLink:'生成并复制安装链接',bSyncNow:'立即同步',bImport:'导入并合并 CSV',
+ bExCsv:'导出 CSV',bExZip:'保存全部照片',bWipe:'删除全部记录',
+ all:'全部',emptyT:'尚未登记任何访客。',emptyS:'在登记页拍摄后会显示在这里。',
+ edit:'修改',del:'删除',imported:'已导入',noPic:'无<br>照片',noName:'（无公司名）',
+ aiOff:'自动识别已关闭 — 在设置中填入 API 密钥即可开启',aiRead:'正在识别文字…',
+ aiOn:'自动识别已开启 — 密钥已保存在本手机',aiEdit:'正在修改已有记录',
+ tSaved:'已保存',tNoStore:'无法写入存储 — 请立即导出 CSV',tEdited:'已修改',tDeleted:'已删除照片',tReplaced:'已更换照片',
+ tCsv:'已保存 CSV',tZip:'已保存照片',tNoRec:'没有可导出的记录',
+ tSyncOk:'同步完成',tCopied:'已复制',tSetStaff:'请先设置负责人姓名',
+ cDelPhoto:'删除这张照片？已输入的公司名和备注会保留。',
+ cDelRec:'删除这条记录？照片也会一并删除。',
+ scanOnBtn:'自动优化已开启 — 点击关闭',scanOffBtn:'自动优化已关闭 — 点击开启',
+ syncOn:'已共享',syncWait:'待发送',syncOff:'离线',syncing:'发送中'}
+};
+function t(k){ const L=I18N[cfg.lang]||I18N.ko; return (L[k]!==undefined?L[k]:I18N.ko[k])||''; }
+function itemLabel(id){ return id; }
+function applyLang(){
+  document.documentElement.lang = cfg.lang==='zh'?'zh-CN':(cfg.lang||'ko');
+  document.querySelectorAll('[data-i18n]').forEach(el=>{ el.textContent=t(el.dataset.i18n) });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{ el.placeholder=t(el.dataset.i18nPh) });
+  const sn=$('staffName'); if(sn&&!cfg.staff)sn.textContent=t('unset');
+  [...document.querySelectorAll('#langBtns button')].forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.l===cfg.lang)));
+  if(typeof applyFont==='function')applyFont();
+  if(typeof paintScanBtn==='function')paintScanBtn();
+  if(typeof paintKeyState==='function')paintKeyState();
+  if(typeof renderChips==='function'){renderChips();renderBooks();}
+  if(typeof render==='function')render();
+  if(typeof pill==='function')pill();
+  const sb=$('saveBtn'); if(sb)sb.textContent=t(draft&&draft.editId?'saveEdit':'save');
+  const tb=$('toggleScan'); if(tb)tb.textContent=t(draft&&draft.scanOn?'scanOrig':'scanFix');
+  const ey=$('s-eye'); if(ey)ey.textContent=t($('s-key').type==='password'?'bShow':'bHide');
+  const wp=$('s-wipe'); if(wp)wp.textContent=t('bWipe');
+  try{applyProfile()}catch(e){}
+}
+
+/* 프로필의 글자를 화면 곳곳에 갈아 끼웁니다 */
+function applyProfile(){
+  const P0=P();
+  const wm=$('wordmark');
+  if(wm)wm.innerHTML=esc(P0.brand||'BOOTH')+(P0.brand2?'<em>'+esc(P0.brand2)+'</em>':'');
+  const sb=document.querySelector('header .sub');
+  if(sb)sb.textContent=P0.sub||t('sub');
+  document.title=((P0.brand||'')+' '+(P0.brand2||'')).trim()+' · '+(P0.sub||'부스 접수대');
+
+  const w1=$('wrapG1'), w2=$('wrapG2');
+  if(w1){w1.hidden=!P0.g1.on; $('lblG1').textContent=P0.g1.label||'관심 품목';}
+  if(w2){w2.hidden=!P0.g2.on; $('lblG2').textContent=P0.g2.label||'요청 자료';}
+
+  const ls=$('lblSpec'); if(ls)ls.textContent=P0.spec.label||'추가 입력';
+  const fs=$('f-spec'); if(fs)fs.placeholder=P0.spec.ph||'';
+
+  const g=$('grade');
+  if(g)g.innerHTML=(P0.grades||[]).map(x=>
+    `<button data-g="${esc(x.k)}" aria-pressed="false">${esc(x.label)}</button>`).join('');
+
+  if(typeof renderChips==='function'){renderChips();renderBooks();renderGrade();}
+}
+
+
+/* ═════════════════════════════════════════════════
+   항목 설정 (프로필)
+   회사마다 다른 것은 여기 담긴 값뿐입니다.
+   앱 코드는 손대지 않고 설정 화면에서 전부 바꿉니다.
+   ═════════════════════════════════════════════════ */
+const DEFAULT_PROFILE={
+  brand:'BOOTH', brand2:'DESK', sub:'부스 접수대', event:'',
+  g1:{on:true,  label:'관심 품목', opts:['제품 A','제품 B','제품 C']},
+  g2:{on:true,  label:'요청 자료', opts:['카탈로그','견적서','샘플 실물','재방문 약속']},
+  spec:{on:false, trigger:'', label:'추가 입력', ph:''},
+  grades:[{k:'A',label:'A 즉시상담'},{k:'B',label:'B 관심'},{k:'C',label:'C 단순방문'}],
+  locked:false
+};
+const TEMPLATES={
+'blank':{name:'── 직접 입력 (빈 상태) ──', p:DEFAULT_PROFILE},
+
+'machine':{name:'인쇄기계 · 설비', p:{
+  brand:'', brand2:'', sub:'부스 접수대', event:'',
+  g1:{on:true,label:'관심 장비',opts:['오프셋 인쇄기','디지털 인쇄기','잉크젯 프린터','후가공기','제본기','소모품 · 부품','A/S · 기술지원']},
+  g2:{on:true,label:'요청 사항',opts:['카탈로그','견적서','데모 시연','현장 실사','금융 · 리스 상담']},
+  spec:{on:true,trigger:'견적서',label:'희망 사양 · 수량',ph:'예: 4도 A1, 월 30만매'},
+  grades:[{k:'A',label:'A 도입 확정'},{k:'B',label:'B 검토중'},{k:'C',label:'C 참고'}],locked:false}},
+
+'material':{name:'소재 · 용지 · 자재', p:{
+  brand:'', brand2:'', sub:'부스 접수대', event:'',
+  g1:{on:true,label:'관심 품목',opts:['일반 용지','특수지','친환경 소재','잉크 · 토너','필름 · 라미네이트','접착 · 코팅제']},
+  g2:{on:true,label:'요청 자료',opts:['샘플북','실물 샘플','단가표','물성표','견적서','소량 테스트']},
+  spec:{on:true,trigger:'실물 샘플',label:'요청 품번 · 품명',ph:'품번 또는 품명을 적어 주세요'},
+  grades:[{k:'A',label:'A 즉시상담'},{k:'B',label:'B 관심'},{k:'C',label:'C 단순방문'}],locked:false}},
+
+'label':{name:'라벨 · 패키징', p:{
+  brand:'', brand2:'', sub:'부스 접수대', event:'',
+  g1:{on:true,label:'상담 분야',opts:['라벨 · 스티커','연포장','박스 · 골판지','친환경 패키지','라벨 인쇄기','후가공']},
+  g2:{on:true,label:'요청 사항',opts:['실물 샘플','카탈로그','견적서','디자인 상담','공장 견학']},
+  spec:{on:true,trigger:'견적서',label:'품목 · 수량 · 납기',ph:'예: 라벨 5만장 / 3주'},
+  grades:[{k:'A',label:'A 즉시견적'},{k:'B',label:'B 검토중'},{k:'C',label:'C 참고'}],locked:false}},
+
+'sign':{name:'사인 · 광고', p:{
+  brand:'', brand2:'', sub:'부스 접수대', event:'',
+  g1:{on:true,label:'관심 분야',opts:['실사 출력','사인물 제작','LED · 전광판','시트지 · 필름','출력 장비']},
+  g2:{on:true,label:'요청 사항',opts:['견적서','카탈로그','시공 상담','현장 실측']},
+  spec:{on:true,trigger:'현장 실측',label:'현장 위치 · 규모',ph:'예: 서울 강남 / 가로 6m'},
+  grades:[{k:'A',label:'A 즉시상담'},{k:'B',label:'B 관심'},{k:'C',label:'C 단순방문'}],locked:false}},
+
+/* ── 아래 세 가지는 실제 회사 홈페이지를 분석해 만든 예시입니다 ── */
+'yukdaejang':{name:'[예시] 육대장 · 프랜차이즈 창업', p:{
+  brand:'육대장', brand2:'', sub:'창업 상담 접수대', event:'프랜차이즈 창업박람회',
+  g1:{on:true,label:'상담 관심사',opts:['창업 문의','브랜드 소개','가맹비 · 창업비용','예상 매출 · 수익률','상권 · 입지 상담','업종 변경','다점포 운영','단순 관심']},
+  g2:{on:true,label:'요청 사항',opts:['창업안내 책자','수익성 자료','가맹계약 안내','매장 방문 희망','창업설명회 참석','시식 후 문의']},
+  spec:{on:true,trigger:'창업 문의',label:'희망 지역 · 창업 자금',ph:'예: 인천 서구 / 1억 5천'},
+  grades:[{k:'A',label:'A 3개월 내'},{k:'B',label:'B 6개월 내'},{k:'C',label:'C 정보수집'}],locked:false}},
+
+'yewoo':{name:'[예시] 예우시스템 · 매장집기 · 랙', p:{
+  brand:'예우시스템', brand2:'', sub:'부스 접수대', event:'',
+  g1:{on:true,label:'관심 품목',opts:['곤도라 (진열대)','냉동 · 냉장 쇼케이스','슬림베젤도어','계산대','농산 · 행사 평대','잡화집기','파렛트랙','경량 · 중량랙','쇼핑카트 · 대차','기타 소품']},
+  g2:{on:true,label:'요청 사항',opts:['견적 요청','카탈로그','매장 실측 요청','시공 상담','납기 문의','단가표']},
+  spec:{on:true,trigger:'매장 실측 요청',label:'매장 위치 · 평수',ph:'예: 파주시 / 45평 편의점'},
+  grades:[{k:'A',label:'A 즉시견적'},{k:'B',label:'B 검토중'},{k:'C',label:'C 참고'}],locked:false}},
+
+'pacom':{name:'[예시] 팩컴코리아 · 인쇄 제작', p:{
+  brand:'PACOM', brand2:'KOREA', sub:'부스 접수대', event:'',
+  g1:{on:true,label:'상담 분야',opts:['상업 인쇄물','패키지 · 박스','단행본 · 출판','캘린더 · 다이어리','Cold Foil 특수인쇄','후가공 · 제본','디자인 · 기획','해외 수출 인쇄']},
+  g2:{on:true,label:'요청 사항',opts:['회사소개서','포트폴리오','견적 요청','실물 샘플','공장 견학','담당 PM 연결']},
+  spec:{on:true,trigger:'견적 요청',label:'품목 · 수량 · 납기',ph:'예: 화보집 3천부 / 6주'},
+  grades:[{k:'A',label:'A 즉시견적'},{k:'B',label:'B 프로젝트 예정'},{k:'C',label:'C 참고'}],locked:false}}
+};
+
+function P(){ return (cfg&&cfg.profile)||DEFAULT_PROFILE; }
+function brandSlug(){
+  const b=((P().brand||'')+(P().brand2||'')).replace(/[^0-9A-Za-z가-힣]/g,'');
+  return b||'BOOTH';
+}
+Object.defineProperty(window,'ITEMS',{get:()=>P().g1.opts||[]});
+Object.defineProperty(window,'BOOKS',{get:()=>P().g2.opts||[]});
+Object.defineProperty(window,'SPEC_BOOK',{get:()=>P().spec.trigger||''});
+function bookLabel(id){ return id; }
+const $=i=>document.getElementById(i);
+let rows=[], draft=null, cfg={staff:'',key:'',model:'claude-sonnet-5',profile:null};
+
+/* ───── 설정 저장 (작은 값) ───── */
+function cfgLoad(){try{const v=localStorage.getItem('bd-cfg');if(v)cfg={...cfg,...JSON.parse(v)}}catch(e){}
+  if(!cfg.profile)cfg.profile=JSON.parse(JSON.stringify(DEFAULT_PROFILE));}
+function cfgSave(){try{localStorage.setItem('bd-cfg',JSON.stringify(cfg))}catch(e){}}
+
+/* ───── 기록 저장 (IndexedDB · 사진 포함) ───── */
+let db=null, memOnly=false, dbReady=null;
+function openDB(){
+  if(dbReady)return dbReady;
+  dbReady = new Promise(res=>{
+    try{
+      const r=indexedDB.open('boothdesk',1);
+      r.onupgradeneeded=e=>{const d=e.target.result;if(!d.objectStoreNames.contains('recs'))d.createObjectStore('recs',{keyPath:'id'})};
+      r.onsuccess=e=>{db=e.target.result;res(true)};
+      r.onerror=()=>{memOnly=true;lastDbError='open: '+((r.error&&r.error.message)||'unknown');res(false)};
+      r.onblocked=()=>{memOnly=true;res(false)};
+    }catch(e){memOnly=true;res(false)}
+  });
+  return dbReady;
+}
+function tx(mode){return db.transaction('recs',mode).objectStore('recs')}
+async function dbAll(){
+  await openDB();
+  return new Promise(res=>{if(!db)return res([]);const q=tx('readonly').getAll();q.onsuccess=()=>res(q.result||[]);q.onerror=()=>res([])});
+}
+async function dbPut(r){
+  await openDB();
+  return new Promise(res=>{
+    if(!db){toast(t('tNoStore'));return res(false)}
+    try{const q=tx('readwrite').put(r);q.onsuccess=()=>res(true);q.onerror=()=>{lastDbError='put: '+((q.error&&q.error.message)||'unknown');toast(t('tNoStore'));res(false)}}
+    catch(e){lastDbError='put: '+e.message;toast(t('tNoStore'));res(false)}
+  });
+}
+async function dbDel(id){
+  await openDB();
+  return new Promise(res=>{if(!db)return res();const q=tx('readwrite').delete(id);q.onsuccess=()=>res();q.onerror=()=>res()});
+}
+async function dbClear(){
+  await openDB();
+  return new Promise(res=>{if(!db)return res();const q=tx('readwrite').clear();q.onsuccess=()=>res();q.onerror=()=>res()});
+}
+
+
+/* ═════ 예비 저장소 (IndexedDB 실패 대비) ═════
+   사진을 뺀 글자 정보만 별도로 한 벌 더 보관합니다. */
+const MIRROR='boothdesk-mirror';
+let lastDbError='';
+function mirrorSave(){
+  try{
+    const lite=rows.map(r=>{const o={...r};delete o.photo;return o});
+    localStorage.setItem(MIRROR,JSON.stringify(lite));
+    return true;
+  }catch(e){ lastDbError=lastDbError||('mirror: '+e.message); return false; }
+}
+function mirrorLoad(){
+  try{ const v=localStorage.getItem(MIRROR); return v?JSON.parse(v):[] }catch(e){ return [] }
+}
+
+/* 저장소 진단 */
+$('s-diag').addEventListener('click',async()=>{
+  const o=$('diagOut'); o.className='ai'; o.innerHTML='<span class="spin"></span>확인 중…';
+  const L=[];
+  L.push('IndexedDB 사용 가능: '+(('indexedDB' in window)?'예':'아니오'));
+  const ok=await openDB();
+  L.push('저장소 열기: '+(ok?'성공':'실패'));
+  let cnt='-';
+  try{ cnt=(await dbAll()).length }catch(e){ cnt='읽기 실패' }
+  L.push('저장소에 있는 기록: '+cnt+'건');
+  L.push('화면에 있는 기록: '+rows.length+'건');
+  L.push('예비 저장본: '+mirrorLoad().length+'건');
+  // 쓰기 시험
+  try{
+    const testId=-999999;
+    await new Promise((res,rej)=>{
+      if(!db)return rej(new Error('db 없음'));
+      const q=tx('readwrite').put({id:testId,test:1});
+      q.onsuccess=()=>res(); q.onerror=()=>rej(q.error||new Error('put 실패'));
+    });
+    await dbDel(testId);
+    L.push('쓰기 시험: 성공');
+  }catch(e){ L.push('쓰기 시험: 실패 ('+(e.message||e)+')') }
+  try{
+    const est=await navigator.storage.estimate();
+    L.push('여유 공간: 약 '+Math.round((est.quota-est.usage)/1048576)+'MB');
+  }catch(e){}
+  if(lastDbError)L.push('마지막 오류: '+lastDbError);
+  o.className='ai'; o.innerHTML=L.map(x=>esc(x)).join('<br>');
+});
+
+/* ───── 유틸 ───── */
+const pad=n=>String(n).padStart(3,'0');
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2000)}
+function nowStr(){const d=new Date(),p=n=>String(n).padStart(2,'0');
+  return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+' '+p(d.getHours())+':'+p(d.getMinutes())}
+function stamp(txt){const d=document.createElement('div');d.className='flash';
+  d.innerHTML='<div>✓<small>'+txt+'</small></div>';document.body.appendChild(d);
+  setTimeout(()=>d.remove(),950); if(navigator.vibrate)navigator.vibrate(55)}
+
+
+/* ───── 스캔 보정 ─────
+   조명 얼룩과 그림자를 걷어내고 배경을 하얗게 펴서
+   스캐너로 뜬 것처럼 만듭니다. */
+function scanify(blob){
+  return new Promise((res)=>{
+    const im=new Image();
+    im.onload=()=>{
+      try{
+        const w=im.width,h=im.height;
+        const c=document.createElement('canvas');c.width=w;c.height=h;
+        const ctx=c.getContext('2d',{willReadFrequently:true});
+        ctx.drawImage(im,0,0);
+        const d=ctx.getImageData(0,0,w,h), px=d.data;
+
+        // 1) 흑백으로
+        const g=new Float32Array(w*h);
+        for(let i=0,j=0;i<px.length;i+=4,j++)
+          g[j]=0.299*px[i]+0.587*px[i+1]+0.114*px[i+2];
+
+        // 2) 적분영상으로 넓은 범위 평균(= 조명 상태) 계산
+        const ii=new Float64Array((w+1)*(h+1));
+        for(let y=0;y<h;y++){
+          let row=0;
+          for(let x=0;x<w;x++){
+            row+=g[y*w+x];
+            ii[(y+1)*(w+1)+(x+1)]=ii[y*(w+1)+(x+1)]+row;
+          }
+        }
+        const r=Math.max(8,Math.floor(Math.min(w,h)/12));
+        const mean=(x,y)=>{
+          const x0=Math.max(0,x-r),y0=Math.max(0,y-r),
+                x1=Math.min(w-1,x+r),y1=Math.min(h-1,y+r);
+          const a=ii[y0*(w+1)+x0],b=ii[y0*(w+1)+(x1+1)],
+                cc=ii[(y1+1)*(w+1)+x0],dd=ii[(y1+1)*(w+1)+(x1+1)];
+          return (dd-b-cc+a)/((x1-x0+1)*(y1-y0+1));
+        };
+
+        // 3) 조명으로 나눠 평탄화한 뒤 대비를 세웁니다
+        const LO=0.80, HI=1.02;
+        for(let y=0;y<h;y++){
+          for(let x=0;x<w;x++){
+            const j=y*w+x, bg=mean(x,y)+1;
+            let v=(g[j]/bg - LO)/(HI-LO);
+            v=v<0?0:v>1?1:v;
+            v=v*v*(3-2*v);              // 중간톤 정리
+            const o=Math.round(v*255), i4=j*4;
+            px[i4]=px[i4+1]=px[i4+2]=o; px[i4+3]=255;
+          }
+        }
+        ctx.putImageData(d,0,0);
+        c.toBlob(b=>res(b||blob),'image/jpeg',0.72);
+      }catch(e){ res(blob) }
+    };
+    im.onerror=()=>res(blob);
+    im.src=URL.createObjectURL(blob);
+  });
+}
+
+/* 사진 압축 */
+function shrink(file){
+  return new Promise((res,rej)=>{
+    const fr=new FileReader();
+    fr.onload=()=>{
+      const im=new Image();
+      im.onload=()=>{
+        const M=1100, s=Math.min(1,M/Math.max(im.width,im.height));
+        const c=document.createElement('canvas');
+        c.width=Math.round(im.width*s); c.height=Math.round(im.height*s);
+        c.getContext('2d').drawImage(im,0,0,c.width,c.height);
+        c.toBlob(b=>b?res(b):rej('압축 실패'),'image/jpeg',0.62);
+      };
+      im.onerror=()=>rej('이미지를 읽지 못했습니다');
+      im.src=fr.result;
+    };
+    fr.onerror=()=>rej('파일을 읽지 못했습니다');
+    fr.readAsDataURL(file);
+  });
+}
+function blobToB64(b){return new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(b)})}
+
+/* ───── 자동 인식 ───── */
+async function readBadge(blob){
+  const s=$('aiStatus');
+  if(!cfg.key){s.className='ai';s.textContent=t('aiOff');return}
+  s.className='ai';s.innerHTML='<span class="spin"></span>'+t('aiRead');
+  try{
+    const b64=await blobToB64(blob);
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'content-type':'application/json','x-api-key':cfg.key,
+        'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:cfg.model||'claude-sonnet-5',max_tokens:600,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+          {type:'text',text:'전시회 방문증 또는 명함 사진입니다. 인쇄된 글자를 읽어 아래 항목을 뽑아 주세요.\n- company: 회사명 (한글이 있으면 한글 우선, 없으면 영문)\n- name: 사람 이름만 (한글·영문·한자 중 인쇄된 그대로. 한글과 영문이 함께 있으면 한글)\n- title: 직함 (부장, 대표, Manager 등). 없으면 빈 문자열\n- phone: 휴대폰 번호 우선, 없으면 대표번호. 숫자와 하이픈만\n- email: 이메일 주소\n- address: 회사 주소\n읽을 수 없는 항목은 빈 문자열로 두세요. 추측하지 말고 보이는 대로만 적으세요.\n오직 JSON만 출력하고 다른 말은 절대 쓰지 마세요.\n{"company":"","name":"","title":"","phone":"","email":"","address":""}'}
+        ]}]})
+    });
+    if(!r.ok){const e=await r.text();throw new Error(r.status+' '+e.slice(0,120))}
+    const d=await r.json();
+    const txt=(d.content||[]).map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    const j=JSON.parse(txt.slice(txt.indexOf('{'),txt.lastIndexOf('}')+1));
+    const map={company:'f-company',name:'f-name',title:'f-title',phone:'f-phone',email:'f-email',address:'f-addr'};
+    let got=0;
+    Object.keys(map).forEach(k=>{ if(j[k]){$(map[k]).value=String(j[k]).trim();got++} });
+    s.className='ai on';s.textContent=got?('자동으로 '+got+'개 항목을 채웠습니다 — 틀린 곳은 고쳐 주세요'):'글자를 읽지 못했습니다. 직접 입력하세요';
+  }catch(err){
+    s.className='ai err';s.textContent='자동 인식 실패 — 직접 입력하세요 ('+String(err.message||err).slice(0,60)+')';
+  }
+}
+
+/* ───── 촬영 / 사진첩 ───── */
+$('shootBtn').addEventListener('click',()=>$('cam').click());
+$('pickBtn').addEventListener('click',()=>$('gal').click());
+
+async function startDraft(file){
+  const orig=await shrink(file);
+  const scanned=cfg.scan?await scanify(orig):null;
+  draft={orig,scanned,blob:(scanned||orig),scanOn:!!scanned,grade:'',items:[],books:[],editId:null};
+  $('draft').hidden=false; showPhoto();
+  ['f-company','f-name','f-title','f-phone','f-email','f-addr','f-spec','f-memo'].forEach(i=>$(i).value='');
+  $('specWrap').hidden=true;
+  $('saveBtn').textContent=t('save');
+  renderChips();renderBooks();renderGrade();
+  $('draft').scrollIntoView({behavior:'smooth',block:'start'});
+  readBadge(orig);
+}
+
+/* 명부에서 불러와 수정 */
+function startEdit(r){
+  draft={blob:r.photo,orig:r.photo,scanned:null,scanOn:false,grade:r.grade||'',items:[...(r.items||[])],books:[...(r.books||[])],editId:r.id};
+  $('draft').hidden=false; showPhoto();
+  $('f-company').value=r.company||'';$('f-name').value=r.name||'';$('f-title').value=r.title||'';
+  $('f-phone').value=r.phone||'';$('f-email').value=r.email||'';$('f-addr').value=r.addr||'';
+  $('f-spec').value=r.spec||'';$('f-memo').value=r.memo||'';
+  $('aiStatus').className='ai';$('aiStatus').textContent=t('aiEdit');
+  $('saveBtn').textContent=t('saveEdit');
+  renderChips();renderBooks();renderGrade();showSpec();
+  $('f-spec').value=r.spec||'';
+  $('t-new').click();
+  $('draft').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+$('cam').addEventListener('change',async e=>{
+  const f=e.target.files&&e.target.files[0]; e.target.value='';
+  if(!f)return;
+  try{ await startDraft(f) }catch(err){toast(String(err))}
+});
+
+$('gal').addEventListener('change',async e=>{
+  const files=[...(e.target.files||[])]; e.target.value='';
+  if(!files.length)return;
+  if(files.length===1){ try{ await startDraft(files[0]) }catch(err){toast(String(err))} return; }
+  if(!confirm('사진 '+files.length+'장을 한 번에 명부에 넣습니다.\n회사명과 이름은 나중에 명부에서 수정할 수 있습니다.\n\n계속할까요?'))return;
+  await bulkImport(files);
+});
+
+/* 여러 장 일괄 저장 */
+async function bulkImport(files){
+  const box=$('bulk'), fill=$('bulkFill'), msg=$('bulkMsg'), ttl=$('bulkTitle');
+  box.hidden=false; $('draft').hidden=true; draft=null;
+  $('shootBtn').disabled=true; $('pickBtn').disabled=true;
+  let done=0, failed=0, read=0;
+  for(const f of files){
+    ttl.textContent='불러오는 중 '+(done+1)+' / '+files.length;
+    try{
+      const raw=await shrink(f);
+      const blob=cfg.scan?await scanify(raw):raw;
+      const rec={id:Date.now()+done,at:nowStr(),staff:cfg.staff||'',
+        company:'',name:'',title:'',phone:'',email:'',addr:'',items:[],books:[],grade:'',memo:'',spec:'',photo:blob,uid:uid(),updated:Date.now(),dirty:true};
+      if(cfg.key){
+        msg.textContent='방문증 글자를 읽는 중…';
+        const got=await readBadgeQuiet(raw);
+        if(got){rec.company=got.company||'';rec.name=got.name||'';rec.title=got.title||'';
+          rec.phone=got.phone||'';rec.email=got.email||'';rec.addr=got.address||'';read++}
+      }
+      rows.unshift(rec); await dbPut(rec); mirrorSave();
+    }catch(err){ failed++ }
+    done++;
+    fill.style.width=Math.round(done/files.length*100)+'%';
+    msg.textContent='저장 '+(done-failed)+'건'+(failed?' · 실패 '+failed+'건':'');
+    render();
+  }
+  ttl.textContent='완료';
+  msg.textContent=(done-failed)+'건을 명부에 넣었습니다.'+(cfg.key?' 자동 인식 '+read+'건.':' 명부에서 회사명과 이름을 입력하세요.');
+  $('shootBtn').disabled=false; $('pickBtn').disabled=false;
+  usage(); pill(); if(cfg.sync)syncNow(true);
+  if(navigator.vibrate)navigator.vibrate([50,80,50]);
+  setTimeout(()=>{box.hidden=true;fill.style.width='0'},6000);
+}
+
+async function readBadgeQuiet(blob){
+  try{
+    const b64=await blobToB64(blob);
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'content-type':'application/json','x-api-key':cfg.key,
+        'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:cfg.model||'claude-sonnet-5',max_tokens:600,
+        messages:[{role:'user',content:[
+          {type:'image',source:{type:'base64',media_type:'image/jpeg',data:b64}},
+          {type:'text',text:'전시회 방문증 또는 명함 사진입니다. 인쇄된 글자를 읽어 아래 항목을 뽑아 주세요.\n- company: 회사명 (한글이 있으면 한글 우선, 없으면 영문)\n- name: 사람 이름만 (한글·영문·한자 중 인쇄된 그대로. 한글과 영문이 함께 있으면 한글)\n- title: 직함 (부장, 대표, Manager 등). 없으면 빈 문자열\n- phone: 휴대폰 번호 우선, 없으면 대표번호. 숫자와 하이픈만\n- email: 이메일 주소\n- address: 회사 주소\n읽을 수 없는 항목은 빈 문자열로 두세요. 추측하지 말고 보이는 대로만 적으세요.\n오직 JSON만 출력하고 다른 말은 절대 쓰지 마세요.\n{"company":"","name":"","title":"","phone":"","email":"","address":""}'}
+        ]}]})
+    });
+    if(!r.ok)return null;
+    const d=await r.json();
+    const t=(d.content||[]).map(c=>c.text||'').join('').replace(/```json|```/g,'').trim();
+    return JSON.parse(t.slice(t.indexOf('{'),t.lastIndexOf('}')+1));
+  }catch(e){return null}
+}
+
+function renderChips(){
+  $('chips').innerHTML=ITEMS.map(i=>
+    `<button data-i="${esc(i)}" aria-pressed="${!!(draft&&draft.items.includes(i))}">${esc(itemLabel(i))}</button>`).join('');
+}
+function renderBooks(){
+  $('books').innerHTML=BOOKS.map(i=>
+    `<button data-i="${esc(i)}" aria-pressed="${!!(draft&&(draft.books||[]).includes(i))}">${esc(bookLabel(i))}</button>`).join('');
+}
+function renderGrade(){
+  [...$('grade').children].forEach(b=>b.setAttribute('aria-pressed',String(!!(draft&&draft.grade===b.dataset.g))));
+}
+$('chips').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b||!draft)return;
+  const i=b.dataset.i;
+  draft.items=draft.items.includes(i)?draft.items.filter(x=>x!==i):[...draft.items,i];
+  renderChips(); showSpec();
+});
+$('books').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b||!draft)return;
+  const i=b.dataset.i;
+  draft.books=draft.books||[];
+  draft.books=draft.books.includes(i)?draft.books.filter(x=>x!==i):[...draft.books,i];
+  renderBooks(); showSpec();
+});
+/* 지정한 버튼을 누르면 추가 입력칸이 나타납니다 */
+function showSpec(){
+  const tr=SPEC_BOOK;
+  const on=!!(P().spec.on&&tr&&draft&&(((draft.books||[]).includes(tr))||((draft.items||[]).includes(tr))));
+  $('specWrap').hidden=!on;
+  if(on)setTimeout(()=>$('f-spec').focus(),80);
+  else $('f-spec').value='';
+}
+$('grade').addEventListener('click',e=>{
+  const b=e.target.closest('button');if(!b||!draft)return;
+  draft.grade=draft.grade===b.dataset.g?'':b.dataset.g;renderGrade();
+});
+$('cancelBtn').addEventListener('click',()=>{draft=null;$('draft').hidden=true;$('saveBtn').textContent=t('save')});
+
+$('saveBtn').addEventListener('click',async()=>{
+  if(!draft)return;
+  const v=i=>$(i).value.trim();
+  const company=v('f-company'), name=v('f-name'), title=v('f-title'),
+        phone=v('f-phone'), email=v('f-email'), addr=v('f-addr'),
+        spec=v('f-spec'), memo=v('f-memo');
+
+  if(draft.editId){
+    const r=rows.find(x=>x.id===draft.editId);
+    if(r){
+      r.company=company;r.name=name;r.title=title;r.phone=phone;r.email=email;r.addr=addr;r.memo=memo;
+      r.items=draft.items;r.books=draft.books||[];r.grade=draft.grade;r.spec=spec;
+      r.uid=r.uid||uid(); r.updated=Date.now(); r.dirty=true;
+      await dbPut(r); mirrorSave(); pill(); if(cfg.sync)syncNow(true);
+    }
+    draft=null;$('draft').hidden=true;$('saveBtn').textContent=t('save');
+    render();toast(t('tEdited'));$('t-list').click();return;
+  }
+
+  const rec={id:Date.now(),at:nowStr(),staff:cfg.staff||'',
+    company,name,title,phone,email,addr,spec,items:draft.items,books:draft.books||[],grade:draft.grade,memo,
+    photo:draft.blob,uid:uid(),updated:Date.now(),dirty:true};
+  if(!rec.company&&!rec.name&&!rec.phone&&!rec.email&&!rec.memo){
+    if(!draft.blob){toast('내용을 입력하거나 사진을 넣어 주세요');return;}
+    if(!confirm('회사명·이름·메모가 모두 비어 있습니다. 사진만 저장할까요?'))return;
+  }
+  rows.unshift(rec); filterStaff=''; const okw=await dbPut(rec); mirrorSave();
+  if(!okw)toast(t('tNoStore'));
+  stamp(pad(rows.length)+' 번');
+  pill(); if(cfg.sync)syncNow(true);
+  draft=null;$('draft').hidden=true;render();usage();
+});
+
+/* 접수 카드의 사진 표시 상태 */
+function showPhoto(){
+  const has=!!(draft&&draft.blob);
+  $('preview').hidden=!has;
+  $('photoActs').hidden=!has;
+  $('noPhoto').hidden=has;
+  if(has)$('preview').src=URL.createObjectURL(draft.blob);
+  const tb=$('toggleScan');
+  if(tb){ tb.hidden=!(draft&&draft.orig); tb.textContent=t((draft&&draft.scanOn)?'scanOrig':'scanFix'); }
+}
+$('delPhoto').addEventListener('click',()=>{
+  if(!draft)return;
+  if(!confirm(t('cDelPhoto')))return;
+  draft.blob=null; showPhoto(); toast(t('tDeleted'));
+});
+$('toggleScan').addEventListener('click',async()=>{
+  if(!draft||!draft.orig)return;
+  const btn=$('toggleScan');
+  if(draft.scanOn){ draft.blob=draft.orig; draft.scanOn=false; }
+  else{
+    if(!draft.scanned){ btn.textContent='보정 중…'; draft.scanned=await scanify(draft.orig); }
+    draft.blob=draft.scanned; draft.scanOn=true;
+  }
+  showPhoto();
+});
+$('rePhoto').addEventListener('click',()=>{$('recam').click()});
+$('rePick').addEventListener('click',()=>{$('regal').click()});
+async function replacePhoto(f){
+  if(!f||!draft)return;
+  try{
+    draft.orig=await shrink(f);
+    draft.scanned=cfg.scan?await scanify(draft.orig):null;
+    draft.scanOn=!!draft.scanned;
+    draft.blob=draft.scanned||draft.orig;
+    showPhoto();
+    toast(t('tReplaced'));
+    if(cfg.key&&!draft.editId)readBadge(draft.orig);
+  }catch(err){toast(String(err))}
+}
+$('recam').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];e.target.value='';replacePhoto(f)});
+$('regal').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];e.target.value='';replacePhoto(f)});
+
+/* 한글 조합 중에는 화면을 다시 그리지 않습니다 */
+let composing=false;
+document.addEventListener('compositionstart',()=>{composing=true});
+document.addEventListener('compositionend',()=>{composing=false});
+
+
+
+/* ═════ 실시간 공유 (구글 시트) ═════
+   폰 저장이 먼저, 서버 전송은 나중. 끊겨도 기록은 남습니다. */
+let syncing=false;
+
+function uid(){
+  return (cfg.staff||'x').replace(/\s/g,'').slice(0,6)+'-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,7);
+}
+function pill(){
+  const p=$('syncPill'); if(!p)return;
+  if(!cfg.sync){p.hidden=true;return}
+  p.hidden=false;
+  const wait=rows.filter(r=>r.dirty).length;
+  if(!navigator.onLine){p.className='syncpill off';p.textContent=t('syncOff')+(wait?' '+wait:'')}
+  else if(syncing){p.className='syncpill wait';p.textContent=t('syncing')}
+  else if(wait){p.className='syncpill wait';p.textContent=t('syncWait')+' '+wait}
+  else{p.className='syncpill on';p.textContent=t('syncOn')}
+}
+function strip(r){
+  return {uid:r.uid,at:r.at,staff:r.staff,company:r.company,name:r.name,title:r.title,
+    phone:r.phone,email:r.email,addr:r.addr,spec:r.spec||'',grade:r.grade,items:r.items||[],
+    books:r.books||[],memo:r.memo,updated:r.updated||Date.now()};
+}
+async function syncNow(quiet){
+  if(!cfg.sync||syncing)return {ok:false};
+  if(!navigator.onLine){pill();return {ok:false,msg:'인터넷 연결 없음'}}
+  syncing=true; pill();
+  try{
+    const push=rows.filter(r=>r.dirty&&!r.imported).map(strip);
+    const r=await fetch(cfg.sync,{method:'POST',
+      headers:{'content-type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({push,since:cfg.lastPull||0})});
+    if(!r.ok)throw new Error('서버 응답 '+r.status);
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'서버 오류');
+
+    // 보낸 것은 완료 처리
+    for(const rec of rows){ if(rec.dirty&&!rec.imported){rec.dirty=false;await dbPut(rec)} }
+
+    // 받은 것 반영
+    let added=0;
+    const mine=new Map(rows.map(x=>[x.uid,x]));
+    for(const o of (d.rows||[])){
+      const cur=mine.get(o.uid);
+      if(cur){
+        if(!cur.dirty&&(o.updated||0)>(cur.updated||0)){
+          Object.assign(cur,{at:o.at,staff:o.staff,company:o.company,name:o.name,title:o.title,
+            phone:o.phone,email:o.email,addr:o.addr,grade:o.grade,items:o.items,books:o.books,
+            memo:o.memo,updated:o.updated,spec:(o.spec!==undefined?o.spec:cur.spec)});
+          await dbPut(cur);
+        }
+      }else{
+        const rec={id:Date.now()+Math.floor(Math.random()*9999),uid:o.uid,at:o.at,staff:o.staff,
+          company:o.company,name:o.name,title:o.title,phone:o.phone,email:o.email,addr:o.addr,
+          grade:o.grade,items:o.items||[],books:o.books||[],memo:o.memo,spec:o.spec||'',updated:o.updated,
+          photo:null,imported:true,dirty:false};
+        rows.push(rec); await dbPut(rec); added++;
+      }
+    }
+    cfg.lastPull=d.now||Date.now(); cfgSave();
+    rows.sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+    syncing=false; render(); pill();
+    if(!quiet)toast(added?(t('tSyncOk')+' +'+added):t('tSyncOk'));
+    return {ok:true,added};
+  }catch(e){
+    syncing=false; pill();
+    if(!quiet)toast('동기화 실패: '+String(e.message||e).slice(0,50));
+    return {ok:false,msg:String(e.message||e)};
+  }
+}
+
+$('s-syncPaste').addEventListener('click',async()=>{
+  try{ $('s-sync').value=(await navigator.clipboard.readText()||'').trim(); }
+  catch(e){ $('syncStatus').className='ai err'; $('syncStatus').textContent='입력칸을 길게 눌러 붙여넣기 하세요'; }
+});
+$('s-syncTest').addEventListener('click',async()=>{
+  const st=$('syncStatus'), u=$('s-sync').value.trim();
+  if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)){
+    st.className='ai err';st.textContent='주소가 script.google.com 으로 시작하고 /exec 로 끝나야 합니다';return}
+  st.className='ai';st.innerHTML='<span class="spin"></span>연결 확인 중…';
+  try{
+    const r=await fetch(u,{method:'POST',headers:{'content-type':'text/plain;charset=utf-8'},
+      body:JSON.stringify({push:[],since:Date.now()})});
+    const d=await r.json();
+    if(!d.ok)throw new Error(d.error||'서버 오류');
+    cfg.sync=u; cfgSave();
+    st.className='ai on';st.textContent='연결 성공 — 시트에 '+(d.total||0)+'건이 있습니다';
+    pill(); syncNow(true);
+  }catch(e){ st.className='ai err'; st.textContent='실패: '+String(e.message||e).slice(0,90)+' (배포 시 액세스 권한을 모든 사용자로 했는지 확인하세요)'; }
+});
+$('s-syncNow').addEventListener('click',async()=>{
+  if(!cfg.sync){toast('먼저 주소를 연결하세요');return}
+  const res=await syncNow(false);
+  const st=$('syncStatus');
+  st.className=res.ok?'ai on':'ai err';
+  st.textContent=res.ok?'동기화 완료':('실패: '+(res.msg||''));
+});
+
+setInterval(()=>{ if(cfg.sync&&navigator.onLine)syncNow(true) },25000);
+window.addEventListener('online',()=>{pill();syncNow(true)});
+window.addEventListener('offline',pill);
+
+
+/* ═════ 명부 선택 · 상세 · 정보카드 ═════ */
+const sel=new Set();
+function visibleRows(){ return filterStaff?rows.filter(r=>(r.staff||'').trim()===filterStaff):rows; }
+function paintSel(){
+  const vis=visibleRows(), bar=$('selBar');
+  bar.hidden = vis.length===0;
+  const on=vis.filter(r=>sel.has(r.id)).length;
+  $('selCnt').textContent = on?(on+t('selCnt')):'';
+  const all=$('selAll'); all.checked = on>0 && on===vis.length;
+  all.indeterminate = on>0 && on<vis.length;
+}
+$('selAll').addEventListener('change',e=>{
+  const vis=visibleRows();
+  if(e.target.checked)vis.forEach(r=>sel.add(r.id)); else vis.forEach(r=>sel.delete(r.id));
+  render();
+});
+$('selClear').addEventListener('click',()=>{ sel.clear(); render(); });
+$('selDel').addEventListener('click',async()=>{
+  const targets=rows.filter(r=>sel.has(r.id));
+  if(!targets.length){ toast(t('tNoRec')); return; }
+  if(!confirm(t('cDelSel').replace('%n',targets.length)))return;
+  for(const r of targets){ await dbDel(r.id); sel.delete(r.id); }
+  rows=rows.filter(r=>!targets.some(x=>x.id===r.id));
+  mirrorSave(); render(); usage(); pill();
+  toast(t('tDelSel').replace('%n',targets.length));
+});
+
+/* ── 상세 보기 ── */
+let detailId=null;
+function drow(label,val,link){
+  const empty=!val;
+  const body=empty?t('dNoValue'):(link?`<a href="${link}">${esc(val)}</a>`:esc(val));
+  return `<div class="drow"><label>${label}</label><div class="val${empty?' empty':''}">${body}</div></div>`;
+}
+function openDetail(r){
+  detailId=r.id;
+  const items=(r.items||[]).map(itemLabel).join(', ');
+  const books=(r.books||[]).map(bookLabel).join(', ');
+  const gmap={A:t('gA'),B:t('gB'),C:t('gC')};
+  $('dBody').innerHTML=
+    (r.photo?`<img src="${URL.createObjectURL(r.photo)}" alt="badge">`:'')+
+    drow(t('lCompany'),r.company)+
+    drow(t('lName'),[r.name,r.title].filter(Boolean).join(' '))+
+    drow(t('lPhone'),r.phone,r.phone?('tel:'+r.phone.replace(/[^0-9+]/g,'')):'')+
+    drow(t('lEmail'),r.email,r.email?('mailto:'+r.email):'')+
+    drow(t('lAddr'),r.addr)+
+    drow(t('lItems'),items)+
+    drow(t('lBooks'),books)+
+    (r.spec?drow(t('lSpec'),r.spec):'')+
+    drow(t('lMemo'),r.memo)+
+    drow(t('lGrade'),gmap[r.grade]||'')+
+    drow(t('dAt'),r.at)+
+    drow(t('dStaff'),r.staff);
+  $('detail').hidden=false;
+  $('dBody').scrollTop=0;
+}
+$('dClose').addEventListener('click',()=>{$('detail').hidden=true;detailId=null});
+$('dEdit').addEventListener('click',()=>{
+  const r=rows.find(x=>x.id===detailId); if(!r)return;
+  $('detail').hidden=true; startEdit(r);
+});
+$('dCard').addEventListener('click',async()=>{
+  const r=rows.find(x=>x.id===detailId); if(!r)return;
+  toast(t('cardMaking'));
+  const b=await cardImage(r,1);
+  dl(b,cardName(r,1)); toast(t('cardDone'));
+});
+
+/* ── 정보카드 이미지 ── */
+function cardName(r,no){
+  const safe=(r.company||r.name||'card').replace(/[\\/:*?"<>|\s]/g,'').slice(0,20);
+  return 'CARD_'+pad(no)+'_'+safe+'.png';
+}
+function wrap(ctx,text,x,y,maxW,lh){
+  const out=[]; let line='';
+  for(const ch of String(text)){
+    if(ch==='\n'){out.push(line);line='';continue}
+    const test=line+ch;
+    if(ctx.measureText(test).width>maxW&&line){out.push(line);line=ch}
+    else line=test;
+  }
+  if(line)out.push(line);
+  out.forEach((l,i)=>ctx.fillText(l,x,y+i*lh));
+  return out.length*lh;
+}
+async function cardImage(r,no){
+  try{ await document.fonts.ready }catch(e){}
+  const W=1000, PAD=56, tall=document.createElement('canvas');
+  tall.width=W; tall.height=2600;
+  const c=tall.getContext('2d');
+  const F=(w,sz)=>{c.font=w+' '+sz+'px Pretendard, -apple-system, "Malgun Gothic", sans-serif'};
+
+  c.fillStyle='#FDFCF8'; c.fillRect(0,0,W,2600);
+  // 머리글
+  c.fillStyle='#1B1A17'; c.fillRect(0,0,W,10);
+  let y=PAD+34;
+  const _b1=P().brand||'BOOTH', _b2=P().brand2||'';
+  F(800,40); c.fillStyle='#1B1A17'; c.fillText(_b1,PAD,y);
+  const aw=c.measureText(_b1).width;
+  if(_b2){F(500,34); c.fillStyle='#C8342A'; c.fillText(_b2,PAD+aw+14,y);}
+  F(400,20); c.fillStyle='#8A8378';
+  c.fillText(P().event||'',PAD,y+34);
+  F(700,22); c.fillStyle='#8A8378';
+  c.textAlign='right'; c.fillText('NO.'+pad(no),W-PAD,y); c.textAlign='left';
+  y+=68;
+  c.fillStyle='#CFC6B4'; c.fillRect(PAD,y,W-PAD*2,2); y+=44;
+
+  // 사진
+  if(r.photo){
+    try{
+      const im=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=URL.createObjectURL(r.photo)});
+      const maxW=W-PAD*2, maxH=620;
+      const sc=Math.min(maxW/im.width,maxH/im.height);
+      const w=im.width*sc,h=im.height*sc;
+      c.strokeStyle='#CFC6B4'; c.lineWidth=2;
+      c.drawImage(im,PAD+(maxW-w)/2,y,w,h);
+      c.strokeRect(PAD+(maxW-w)/2,y,w,h);
+      y+=h+40;
+    }catch(e){}
+  }
+
+  const rowOut=(label,val)=>{
+    if(!val)return;
+    F(600,19); c.fillStyle='#8A8378'; c.fillText(label,PAD,y); y+=30;
+    F(500,29); c.fillStyle='#1B1A17';
+    y+=wrap(c,val,PAD,y,W-PAD*2,40)+22;
+  };
+  const gmap={A:t('gA'),B:t('gB'),C:t('gC')};
+  F(800,46); c.fillStyle='#1B1A17';
+  y+=wrap(c,r.company||t('noName'),PAD,y,W-PAD*2,58)+14;
+  const who=[r.name,r.title].filter(Boolean).join(' ');
+  if(who){ F(500,30); c.fillStyle='#5C564C'; y+=wrap(c,who,PAD,y,W-PAD*2,42)+26; }
+  c.fillStyle='#E4DDCE'; c.fillRect(PAD,y,W-PAD*2,2); y+=34;
+
+  rowOut(t('lPhone'),r.phone);
+  rowOut(t('lEmail'),r.email);
+  rowOut(t('lAddr'),r.addr);
+  rowOut(t('lItems'),(r.items||[]).map(itemLabel).join(', '));
+  rowOut(t('lBooks'),(r.books||[]).map(bookLabel).join(', '));
+  rowOut(t('lSpec'),r.spec);
+  rowOut(t('lGrade'),gmap[r.grade]||'');
+
+  if(r.memo){
+    F(600,19); c.fillStyle='#8A8378'; c.fillText(t('lMemo'),PAD,y); y+=30;
+    const bx=y; F(500,27); c.fillStyle='#1B1A17';
+    const h=wrap(c,r.memo,PAD+20,y+34,W-PAD*2-40,38);
+    c.strokeStyle='#CFC6B4'; c.lineWidth=2; c.strokeRect(PAD,bx,W-PAD*2,h+52);
+    y=bx+h+52+26;
+  }
+
+  y+=10; c.fillStyle='#CFC6B4'; c.fillRect(PAD,y,W-PAD*2,2); y+=34;
+  F(400,20); c.fillStyle='#8A8378';
+  c.fillText(t('dAt')+'  '+(r.at||'')+(r.staff?('   ·   '+t('dStaff')+'  '+r.staff):''),PAD,y);
+  y+=PAD;
+
+  const out=document.createElement('canvas');
+  out.width=W; out.height=Math.max(600,Math.round(y));
+  const o=out.getContext('2d');
+  o.fillStyle='#FDFCF8'; o.fillRect(0,0,out.width,out.height);
+  o.drawImage(tall,0,0);
+  return await new Promise(res=>out.toBlob(b=>res(b),'image/png'));
+}
+
+
+/* ── 연락처(vCard) 저장 ── */
+function vEsc(v){ return String(v==null?'':v).replace(/\\/g,'\\\\').replace(/\n/g,'\\n').replace(/,/g,'\\,').replace(/;/g,'\\;'); }
+function makeVCard(r){
+  const gmap={A:t('gA'),B:t('gB'),C:t('gC')};
+  const note=[
+    r.company?('['+t('lCompany')+'] '+r.company):'',
+    (r.items||[]).length?('['+t('lItems')+'] '+(r.items||[]).map(itemLabel).join(', ')):'',
+    (r.books||[]).length?('['+t('lBooks')+'] '+(r.books||[]).map(bookLabel).join(', ')):'',
+    r.spec?('['+t('lSpec')+'] '+r.spec):'',
+    r.grade?('['+t('lGrade')+'] '+(gmap[r.grade]||r.grade)):'',
+    r.memo?('['+t('lMemo')+'] '+r.memo):'',
+    'K-print 2026 · '+(r.at||'')+(r.staff?(' · '+r.staff):'')
+  ].filter(Boolean).join('\n');
+
+  const name=(r.name||r.company||'K-print').trim();
+  const L=['BEGIN:VCARD','VERSION:3.0'];
+  L.push('N:'+vEsc(name)+';;;;');
+  L.push('FN:'+vEsc(name));
+  if(r.company)L.push('ORG:'+vEsc(r.company));
+  if(r.title)L.push('TITLE:'+vEsc(r.title));
+  if(r.phone){
+    const digits=String(r.phone).replace(/[^0-9+\-]/g,'');
+    L.push('TEL;TYPE=CELL,VOICE:'+vEsc(digits));
+  }
+  if(r.email)L.push('EMAIL;TYPE=WORK,INTERNET:'+vEsc(r.email));
+  if(r.addr)L.push('ADR;TYPE=WORK:;;'+vEsc(r.addr)+';;;;');
+  L.push('NOTE:'+vEsc(note));
+  L.push('CATEGORIES:K-print 2026');
+  L.push('END:VCARD');
+  return L.join('\r\n');
+}
+async function exportVCF(list){
+  if(!list||!list.length){toast(t('tNoRec'));return}
+  const usable=list.filter(r=>r.name||r.company||r.phone||r.email);
+  if(!usable.length){toast(t('tNoRec'));return}
+  const text='\uFEFF'+usable.map(makeVCard).join('\r\n');
+  const blob=new Blob([text],{type:'text/vcard;charset=utf-8'});
+  const fname = usable.length===1
+    ? ((usable[0].company||usable[0].name||'contact').replace(/[\\/:*?"<>|\s]/g,'').slice(0,24)+'.vcf')
+    : (brandSlug()+'_연락처_'+usable.length+'_'+today()+'.vcf');
+  // 폰에서는 공유 시트로 넘기면 연락처 앱으로 바로 보낼 수 있습니다
+  try{
+    const file=new File([blob],fname,{type:'text/vcard'});
+    if(navigator.canShare&&navigator.canShare({files:[file]})){
+      await navigator.share({files:[file],title:fname});
+      toast(t('vcfDone')); return;
+    }
+  }catch(e){ if(e&&e.name==='AbortError')return; }
+  dl(blob,fname);
+  toast(t('vcfDone')+' — '+t('vcfHint'));
+}
+$('exVcf').addEventListener('click',()=>{ $('exSheet').hidden=true; exportVCF([...targetRows()].reverse()); });
+$('dVcf').addEventListener('click',()=>{
+  const r=rows.find(x=>x.id===detailId); if(!r)return;
+  exportVCF([r]);
+});
+
+/* ── 내보내기 메뉴 ── */
+function targetRows(){
+  const vis=visibleRows();
+  const picked=vis.filter(r=>sel.has(r.id));
+  return picked.length?picked:vis;
+}
+$('exMenu').addEventListener('click',()=>{$('exSheet').hidden=false});
+$('exClose').addEventListener('click',()=>{$('exSheet').hidden=true});
+$('exSheet').addEventListener('click',e=>{ if(e.target.id==='exSheet')$('exSheet').hidden=true });
+$('exCard').addEventListener('click',async()=>{
+  $('exSheet').hidden=true;
+  const list=[...targetRows()].reverse();
+  if(!list.length){toast(t('tNoRec'));return}
+  toast(t('cardMaking'));
+  if(list.length===1){ dl(await cardImage(list[0],1),cardName(list[0],1)); toast(t('cardDone')); return; }
+  if(typeof JSZip==='undefined'){toast('압축 기능을 불러오지 못했습니다');return}
+  const zip=new JSZip();
+  for(let i=0;i<list.length;i++){ zip.file(cardName(list[i],i+1),await cardImage(list[i],i+1)); }
+  dl(await zip.generateAsync({type:'blob'}),brandSlug()+'_정보카드_'+today()+'.zip');
+  toast(t('cardDone'));
+});
+
+
+
+/* ── 검색 · 통계 ── */
+let query='';
+$('q').addEventListener('input',e=>{ query=e.target.value.trim().toLowerCase(); render(); });
+$('fToggle').addEventListener('click',()=>{
+  const f=$('filters'), on=f.hidden;
+  f.hidden=!on; $('fToggle').setAttribute('aria-pressed',String(on));
+});
+function matchQ(r){
+  if(!query)return true;
+  return [r.company,r.name,r.title,r.phone,r.email,r.addr,r.memo,r.spec,r.staff]
+    .filter(Boolean).join(' ').toLowerCase().includes(query);
+}
+function renderStats(){
+  const box=$('stats'); if(!box)return;
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  const todayStr=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+  const wd=['일','월','화','수','목','금','토'][d.getDay()];
+  const dn=$('todayDate'); if(dn)dn.textContent=todayStr.replace(/-/g,'.')+(cfg.lang==='ko'?(' ('+wd+')'):'');
+  const base=visibleRows();
+  const total=base.length;
+  const newT=base.filter(r=>String(r.at||'').startsWith(todayStr)).length;
+  const follow=base.filter(r=>r.grade==='A').length;
+  const sample=base.filter(r=>(r.books||[]).length>0).length;
+  box.innerHTML=[[total,'stTotal'],[newT,'stNew'],[follow,'stFollow'],[sample,'stSample']]
+    .map(([v,k])=>`<div><b>${v}</b><span>${t(k)}</span></div>`).join('');
+}
+
+/* ── 담당자 필터 ── */
+let filterStaff='';
+function renderFilters(){
+  const box=$('filters'); if(!box)return;
+  const names=[...new Set(rows.map(r=>(r.staff||'').trim()).filter(Boolean))].sort();
+  if(names.length<2){ box.innerHTML=''; filterStaff=''; return; }
+  const cnt=n=>rows.filter(r=>(r.staff||'').trim()===n).length;
+  box.innerHTML=`<button data-s="" aria-pressed="${filterStaff===''}">${t('all')}<em>${rows.length}</em></button>`+
+    names.map(n=>`<button data-s="${esc(n)}" aria-pressed="${filterStaff===n}">${esc(n)}<em>${cnt(n)}</em></button>`).join('');
+}
+document.addEventListener('click',e=>{
+  const b=e.target.closest('#filters button'); if(!b)return;
+  filterStaff=b.dataset.s||''; render();
+});
+
+/* ───── CSV 불러와 합치기 ───── */
+function parseCSV(text){
+  const rowsOut=[]; let f='',row=[],q=false;
+  text=text.replace(/^\uFEFF/,'');
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){f+='"';i++} else q=false }
+      else f+=c;
+    }else{
+      if(c==='"')q=true;
+      else if(c===','){row.push(f);f=''}
+      else if(c==='\n'){row.push(f);rowsOut.push(row);row=[];f=''}
+      else if(c!=='\r')f+=c;
+    }
+  }
+  if(f.length||row.length){row.push(f);rowsOut.push(row)}
+  return rowsOut.filter(r=>r.some(x=>x!==''));
+}
+$('s-import').addEventListener('click',()=>$('impFile').click());
+$('impFile').addEventListener('change',async e=>{
+  const f=e.target.files&&e.target.files[0]; e.target.value='';
+  if(!f)return;
+  const st=$('impStatus');
+  st.className='ai'; st.innerHTML='<span class="spin"></span>파일을 읽는 중…';
+  try{
+    const text=await f.text();
+    const t=parseCSV(text);
+    if(t.length<2)throw new Error('내용이 없습니다');
+    const head=t[0].map(x=>x.trim());
+    const col=n=>head.indexOf(n);
+    const need=col('접수시각'); 
+    if(need<0)throw new Error('이 앱에서 내보낸 CSV가 아닙니다');
+    const key=r=>[r.at,r.company,r.name,r.staff].join('|');
+    const seen=new Set(rows.map(key));
+    let added=0, dup=0;
+    for(let i=1;i<t.length;i++){
+      const c=t[i], g=n=>{const k=col(n);return k>=0?(c[k]||'').trim():''};
+      const rec={id:Date.now()+i, at:g('접수시각'), staff:g('담당자'),
+        company:g('회사명'), name:g('성함')||g('이름직함'), title:g('직함'),
+        phone:g('전화번호'), email:g('이메일'), addr:g('회사주소'),
+        grade:g('등급'), spec:g('추가입력')||g('속지품번'), memo:g('메모'),
+        items:(g('관심항목')||g('관심품목'))?(g('관심항목')||g('관심품목')).split(' / ').filter(Boolean):[],
+        books:(g('요청사항')||g('샘플북요청'))?(g('요청사항')||g('샘플북요청')).split(' / ').filter(Boolean):[],
+        photo:null, imported:true};
+      if(!rec.at&&!rec.company&&!rec.name)continue;
+      if(seen.has(key(rec))){dup++;continue}
+      seen.add(key(rec)); rows.push(rec); await dbPut(rec); added++;
+    }
+    rows.sort((a,b)=>String(b.at).localeCompare(String(a.at)));
+    render(); usage();
+    st.className='ai on';
+    st.textContent=added+'건을 합쳤습니다.'+(dup?' 이미 있는 '+dup+'건은 건너뛰었습니다.':'');
+  }catch(err){
+    st.className='ai err'; st.textContent='실패: '+String(err.message||err).slice(0,90);
+  }
+});
+
+/* ───── 명부 ───── */
+function render(){
+  if(typeof composing!=='undefined'&&composing){setTimeout(render,300);return}
+  $('count').textContent=rows.length;
+  $('staffName').textContent=cfg.staff||t('unset');
+  renderFilters(); renderStats();
+  const list=(filterStaff?rows.filter(r=>(r.staff||'').trim()===filterStaff):rows).filter(matchQ);
+  const box=$('slips');
+  if(!list.length){
+    box.innerHTML='<div class="empty"><b>'+t('emptyT')+'</b>'+t('emptyS')+'</div>';paintSel();return;
+  }
+  box.innerHTML=list.map((r,idx)=>{
+    const no=list.length-idx;
+    return `<article class="slip${r.imported?' imp':''}${sel.has(r.id)?' on':''}" data-id="${r.id}">
+      <div class="pick"><input type="checkbox" class="pk" ${sel.has(r.id)?'checked':''}></div>
+      <div class="tapzone">${r.photo?`<img src="${URL.createObjectURL(r.photo)}" alt="badge">`:`<div class="nopic">${t('noPic')}</div>`}</div>
+      <div class="body">
+        <div class="no"><span>NO.${pad(no)}</span><span>${esc(r.at)}${r.staff?' · '+esc(r.staff):''}</span></div>
+        <h3 class="tapzone">${esc(r.company||t('noName'))}</h3>
+        <div class="sub">${esc([r.name,r.title].filter(Boolean).join(' ')||'—')}</div>
+        ${(r.phone||r.email)?`<div class="contact">${r.phone?`<a href="tel:${esc(r.phone.replace(/[^0-9+]/g,''))}">${esc(r.phone)}</a>`:''}${r.email?`<a href="mailto:${esc(r.email)}">${esc(r.email)}</a>`:''}</div>`:''}
+        <div class="tags">${r.grade?`<i class="g">${r.grade}</i>`:''}${(r.items||[]).map(i=>`<i>${esc(itemLabel(i))}</i>`).join('')}${(r.books||[]).map(i=>`<i class="b">${esc(bookLabel(i))}</i>`).join('')}${r.imported?`<i class="im">${t('imported')}</i>`:''}</div>
+        ${r.spec?`<div class="m"><b>${t('lSpec')}</b> ${esc(r.spec)}</div>`:''}
+        ${r.memo?`<div class="m">${esc(r.memo)}</div>`:''}
+        <div class="acts"><button class="edit">${t('edit')}</button><button class="del">${t('del')}</button></div>
+      </div></article>`;
+  }).join('');
+  paintSel();
+}
+$('slips').addEventListener('click',async e=>{
+  const s=e.target.closest('.slip');if(!s)return;
+  const r=rows.find(x=>x.id==s.dataset.id);if(!r)return;
+  if(e.target.classList.contains('pk')){
+    if(e.target.checked)sel.add(r.id); else sel.delete(r.id);
+    s.classList.toggle('on',sel.has(r.id)); paintSel(); return;
+  }
+  if(e.target.closest('.tapzone')){ openDetail(r); return; }
+  if(e.target.classList.contains('del')){
+    if(!confirm(t('cDelRec')))return;
+    rows=rows.filter(x=>x.id!==r.id);sel.delete(r.id);await dbDel(r.id);mirrorSave();mirrorSave();render();usage();pill();return;
+  }
+  if(e.target.classList.contains('edit')){ startEdit(r); }
+});
+
+/* ───── 탭 ───── */
+function paintBar(k){
+  const bar=document.querySelector('.bar');
+  if(bar)bar.hidden = (k!=='list');           // 명부에서만 내보내기 바를 보여줍니다
+  document.body.style.paddingBottom = (k==='list')
+    ? 'calc(84px + env(safe-area-inset-bottom))' : '24px';
+}
+['new','list','set'].forEach(k=>$('t-'+k).addEventListener('click',()=>{
+  ['new','list','set'].forEach(x=>{$('t-'+x).setAttribute('aria-selected',String(x===k));$('p-'+x).hidden=x!==k});
+  paintBar(k);
+  if(k==='set')usage();
+}));
+
+/* ───── 설정 ───── */
+$('s-staffSave').addEventListener('click',()=>{cfg.staff=$('s-staff').value.trim();cfgSave();render();toast(t('tSaved'))});
+$('s-paste').addEventListener('click',async()=>{
+  const s=$('testStatus');
+  try{
+    const t=(await navigator.clipboard.readText()||'').trim();
+    if(!t){s.className='ai err';s.textContent='복사된 내용이 없습니다';return}
+    $('s-key').value=t;
+    s.className='ai';s.textContent='붙여넣었습니다. 키 연결 확인을 누르세요';
+  }catch(e){
+    s.className='ai err';s.textContent='붙여넣기 권한이 없습니다. 입력칸을 길게 눌러 붙여넣기 하세요';
+  }
+});
+$('s-eye').addEventListener('click',()=>{
+  const f=$('s-key');
+  const on=f.type==='password';
+  f.type=on?'text':'password';
+  $('s-eye').textContent=t(on?'bHide':'bShow');
+});
+$('s-keySave').addEventListener('click',()=>{cfg.key=$('s-key').value.trim();cfg.model=$('s-model').value.trim();cfgSave();toast(t('tSaved'))});
+const MODEL_CANDIDATES=['claude-sonnet-5','claude-haiku-4-5-20251001','claude-opus-5','claude-sonnet-4-5-20250929'];
+async function pingModel(key,model){
+  const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',
+    headers:{'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model,max_tokens:10,messages:[{role:'user',content:'ok 이라고만 답하세요'}]})});
+  if(r.ok)return {ok:true};
+  return {ok:false,status:r.status,text:(await r.text()).slice(0,200)};
+}
+$('s-test').addEventListener('click',async()=>{
+  const k=$('s-key').value.trim();
+  const s=$('testStatus');
+  if(!k){s.className='ai err';s.textContent='먼저 API 키를 붙여넣으세요';return}
+  if(!/^sk-ant-/.test(k)){s.className='ai err';s.textContent='키 형식이 다릅니다. sk-ant- 으로 시작해야 합니다';return}
+
+  const first=$('s-model').value.trim();
+  const list=[...new Set([first,...MODEL_CANDIDATES].filter(Boolean))];
+  s.className='ai';s.innerHTML='<span class="spin"></span>확인 중…';
+  let lastErr='';
+  for(const m of list){
+    s.innerHTML='<span class="spin"></span>'+m+' 확인 중…';
+    let res;
+    try{ res=await pingModel(k,m) }catch(e){ lastErr='인터넷 연결을 확인하세요'; break }
+    if(res.ok){
+      cfg.key=k;cfg.model=m;cfgSave();$('s-model').value=m;
+      s.className='ai on';s.textContent='연결 성공 — 자동 인식이 켜졌습니다 ('+m+')';
+      return;
+    }
+    if(res.status===401||res.status===403){ lastErr='키가 올바르지 않거나 권한이 없습니다'; break }
+    if(res.status===429){ lastErr='요청이 많습니다. 잠시 후 다시 시도하세요'; break }
+    if(res.status===400&&/credit|balance/i.test(res.text)){ lastErr='계정 잔액이 부족합니다'; break }
+    lastErr=res.status+' '+res.text;
+  }
+  s.className='ai err';s.textContent='실패: '+lastErr;
+});
+async function usage(){
+  let b=0;rows.forEach(r=>{if(r.photo)b+=r.photo.size});
+  let q='';
+  try{const est=await navigator.storage.estimate();if(est&&est.quota)q=' · 사용 가능 약 '+Math.round(est.quota/1048576)+'MB'}catch(e){}
+  $('usage').textContent='기록 '+rows.length+'건 · 사진 '+(b/1048576).toFixed(1)+'MB'+q;
+}
+$('langBtns').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  cfg.lang=b.dataset.l; cfgSave(); applyLang();
+});
+function applyFont(){
+  document.documentElement.style.fontSize=(cfg.font||18)+'px';
+  [...document.querySelectorAll('#fontBtns button')].forEach(b=>
+    b.setAttribute('aria-pressed',String(Number(b.dataset.f)===Number(cfg.font||18))));
+}
+$('fontBtns').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b)return;
+  cfg.font=Number(b.dataset.f); cfgSave(); applyFont();
+});
+function paintKeyState(){
+  const st=$('testStatus');
+  if(cfg.key){ st.className='ai on'; st.textContent=t('aiOn'); }
+  else{ st.className='ai'; st.textContent=t('aiOff'); }
+}
+function paintScanBtn(){ $('s-scan').textContent = t(cfg.scan?'scanOnBtn':'scanOffBtn'); }
+$('s-scan').addEventListener('click',()=>{ cfg.scan=!cfg.scan; cfgSave(); paintScanBtn(); toast(t(cfg.scan?'scanOnBtn':'scanOffBtn')); });
+$('s-wipe').addEventListener('click',async()=>{
+  if(!rows.length)return;
+  if(!confirm('기록 '+rows.length+'건과 사진을 모두 삭제합니다. 되돌릴 수 없습니다.\n\nCSV와 사진을 먼저 내보냈는지 확인하세요.'))return;
+  if(!confirm('정말 삭제할까요?'))return;
+  rows=[];await dbClear();render();usage();toast('전체 삭제했습니다');
+});
+
+/* ───── 내보내기 ───── */
+function dl(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)}
+const today=()=>new Date().toISOString().slice(0,10);
+$('exCsv').addEventListener('click',()=>{
+  $('exSheet').hidden=true;
+  if(!rows.length){toast(t('tNoRec'));return}
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const list=[...targetRows()].reverse();
+  if(!list.length){toast(t('tNoRec'));return}
+  const csv='\uFEFF'+['번호,접수시각,담당자,회사명,성함,직함,전화번호,이메일,회사주소,등급,관심항목,요청사항,추가입력,메모,사진파일명']
+    .concat(list.map((r,i)=>[i+1,r.at,r.staff,r.company,r.name,r.title,r.phone,r.email,r.addr,r.grade,(r.items||[]).join(' / '),(r.books||[]).join(' / '),r.spec,r.memo,
+      pad(i+1)+'_'+(r.company||'무명').replace(/[\\/:*?"<>|]/g,'')+'.jpg'].map(q).join(',')))
+    .join('\r\n');
+  dl(new Blob([csv],{type:'text/csv;charset=utf-8'}),brandSlug()+'_명부_'+(cfg.staff||'담당자')+'_'+today()+'.csv');
+  toast(t('tCsv'));
+});
+$('exZip').addEventListener('click',async()=>{
+  if(!rows.length){toast(t('tNoRec'));return}
+  if(typeof JSZip==='undefined'){toast('압축 기능을 불러오지 못했습니다 (인터넷 확인)');return}
+  toast('사진을 묶는 중…');
+  const zip=new JSZip(), list=[...targetRows()].reverse();
+  list.forEach((r,i)=>{if(r.photo)zip.file(pad(i+1)+'_'+(r.company||'무명').replace(/[\\/:*?"<>|]/g,'')+'.jpg',r.photo)});
+  const b=await zip.generateAsync({type:'blob'});
+  dl(b,brandSlug()+'_사진_'+(cfg.staff||'담당자')+'_'+today()+'.zip');
+  toast(t('tZip'));
+});
+
+/* ───── 로고 자동 전환 ───── */
+(function(){
+  const img=$('logo'), wm=$('wordmark');
+  const show=()=>{img.hidden=false;wm.hidden=true};
+  const fall=()=>{img.hidden=true;wm.hidden=false};
+  img.addEventListener('load',show);
+  img.addEventListener('error',fall);
+  // 스크립트가 늦게 실행돼 load/error 를 놓친 경우까지 처리
+  if(img.complete) (img.naturalWidth>0 ? show() : fall());
+})();
+
+/* ───── 설치 링크 ───── */
+$('s-link').addEventListener('click',async()=>{
+  const st=$('linkStatus');
+  const k=(cfg.key||$('s-key').value).trim();
+  if(!k){st.className='ai err';st.textContent='먼저 키를 넣고 연결 확인을 하세요';return}
+  const base=location.origin+location.pathname;
+  const link=base+'?k='+encodeURIComponent(btoa(unescape(encodeURIComponent(k))))+(cfg.model?'&m='+encodeURIComponent(cfg.model):'')+(cfg.sync?'&s='+encodeURIComponent(btoa(cfg.sync)):'');
+  try{ await navigator.clipboard.writeText(link); st.className='ai on'; st.textContent='링크를 복사했습니다. 직원에게 보내세요'+(cfg.sync?' (구글 시트 연결도 함께 전달됩니다)':''); }
+  catch(e){ st.className='ai'; st.textContent=link; }
+});
+
+/* 링크로 들어온 설정을 저장하고 주소에서 지웁니다 */
+function applyInstallLink(){
+  const src=(location.search||'')+'&'+(location.hash||'').replace(/^#/,'');
+  if(src.indexOf('k=')<0&&src.indexOf('s=')<0)return false;
+  let changed=false;
+  try{
+    const p=new URLSearchParams(src.replace(/^[?&]+/,''));
+    const dec=v=>decodeURIComponent(escape(atob(decodeURIComponent(v))));
+    const raw=p.get('k');
+    if(raw){
+      const key=dec(raw);
+      if(/^sk-ant-/.test(key)){ cfg.key=key; changed=true; }
+    }
+    const m=p.get('m'); if(m){ cfg.model=decodeURIComponent(m); changed=true; }
+    const sv=p.get('s');
+    if(sv){ const u=dec(sv); if(/^https:\/\/script\.google\.com\//.test(u)){ cfg.sync=u; changed=true; } }
+    if(changed)cfgSave();
+  }catch(e){}
+  history.replaceState(null,'',location.pathname);
+  return changed;
+}
+
+/* ───── 인앱 브라우저 감지 ───── */
+(function(){
+  const ua=navigator.userAgent||'';
+  const isKakao=/KAKAOTALK/i.test(ua);
+  const isOther=/(NAVER|Instagram|FBAN|FBAV|Line\/|DaumApps|everytimeApp|WhatsApp|zaloPC|BAND)/i.test(ua);
+  if(!isKakao&&!isOther)return;
+  if(sessionStorage.getItem('skipInapp'))return;
+
+  const url=location.href;   // 설치 링크의 키 부분까지 그대로 넘깁니다
+  const isiOS=/iPhone|iPad|iPod/i.test(ua);
+
+  // 카톡은 바로 기본 브라우저로 넘길 수 있습니다
+  if(isKakao){ location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(url); }
+
+  const box=document.createElement('div');
+  box.id='inapp';
+  box.innerHTML=`
+    <h2>기본 브라우저에서 열어 주세요</h2>
+    <p>지금은 카카오톡·SNS 안에 있는 임시 브라우저입니다.
+    여기서 접수한 기록은 <b>다른 곳에서 열면 사라집니다.</b>
+    크롬이나 사파리로 옮겨서 사용하세요.</p>
+    <button class="go">기본 브라우저로 열기</button>
+    <div class="url">${url}</div>
+    <button class="cp">주소 복사하기</button>
+    <p>버튼이 안 되면 위 주소를 복사해서 ${isiOS?'사파리':'크롬'} 주소창에 붙여넣으세요.
+    또는 오른쪽 위 <b>⋯</b> 메뉴에서 <b>다른 브라우저로 열기</b>를 누르세요.</p>
+    <button class="skip">그래도 여기서 볼래요</button>`;
+  document.body.appendChild(box);
+
+  box.querySelector('.go').addEventListener('click',()=>{
+    if(isKakao) location.href='kakaotalk://web/openExternal?url='+encodeURIComponent(url);
+    else if(!isiOS) location.href='intent://'+url.replace(/^https?:\/\//,'')+'#Intent;scheme=https;package=com.android.chrome;end';
+    else window.open(url,'_blank');
+  });
+  box.querySelector('.cp').addEventListener('click',async e=>{
+    try{ await navigator.clipboard.writeText(url); e.target.textContent='복사했습니다'; }
+    catch(err){
+      const t=document.createElement('textarea');t.value=url;document.body.appendChild(t);
+      t.select();try{document.execCommand('copy');e.target.textContent='복사했습니다'}catch(_){e.target.textContent='주소를 길게 눌러 복사하세요'}
+      t.remove();
+    }
+  });
+  box.querySelector('.skip').addEventListener('click',()=>{
+    if(!confirm('여기서 저장한 기록은 크롬·사파리에서 보이지 않습니다.\n시험용으로만 사용하세요.\n\n계속할까요?'))return;
+    try{sessionStorage.setItem('skipInapp','1')}catch(e){}
+    box.remove();
+  });
+})();
+
+/* ───── 시작 ───── */
+
+/* ═════ 항목 설정 화면 ═════ */
+const pfLines=v=>String(v||'').split('\n').map(x=>x.trim()).filter(Boolean);
+function pfFill(pr){
+  const V=(i,v)=>{const e=$(i); if(e)e.value=v||''};
+  V('pf-b1',pr.brand); V('pf-b2',pr.brand2); V('pf-sub',pr.sub); V('pf-event',pr.event);
+  V('pf-g1l',pr.g1.label); V('pf-g1o',(pr.g1.opts||[]).join('\n'));
+  V('pf-g2l',pr.g2.label); V('pf-g2o',(pr.g2.opts||[]).join('\n'));
+  V('pf-sptr',pr.spec.trigger); V('pf-spl',pr.spec.label); V('pf-spp',pr.spec.ph);
+  const g=pr.grades||[];
+  V('pf-gr1',(g[0]||{}).label); V('pf-gr2',(g[1]||{}).label); V('pf-gr3',(g[2]||{}).label);
+  const lk=$('pf-lock'); if(lk)lk.checked=!!pr.locked;
+  pfLockUI();
+}
+function pfRead(){
+  const g=i=>($(i)?$(i).value.trim():'');
+  const grades=[['A',g('pf-gr1')],['B',g('pf-gr2')],['C',g('pf-gr3')]]
+    .filter(x=>x[1]).map(x=>({k:x[0],label:x[1]}));
+  const tr=g('pf-sptr');
+  return {
+    brand:g('pf-b1'), brand2:g('pf-b2'), sub:g('pf-sub')||'부스 접수대', event:g('pf-event'),
+    g1:{on:pfLines(g('pf-g1o')).length>0, label:g('pf-g1l')||'관심 품목', opts:pfLines(g('pf-g1o'))},
+    g2:{on:pfLines(g('pf-g2o')).length>0, label:g('pf-g2l')||'요청 자료', opts:pfLines(g('pf-g2o'))},
+    spec:{on:!!tr, trigger:tr, label:g('pf-spl')||'추가 입력', ph:g('pf-spp')},
+    grades:grades.length?grades:DEFAULT_PROFILE.grades,
+    locked:!!($('pf-lock')&&$('pf-lock').checked)
+  };
+}
+function pfLockUI(){
+  const r=$('rowProfile'); if(!r)return;
+  r.classList.toggle('lock', !!($('pf-lock')&&$('pf-lock').checked));
+}
+function pfStat(msg,bad){ const e=$('pfStatus'); if(e){e.className='ai'+(bad?' bad':''); e.textContent=msg;} }
+function pfEncode(pr){ return 'BD1:'+btoa(unescape(encodeURIComponent(JSON.stringify(pr)))); }
+function pfDecode(code){
+  const c=String(code||'').trim().replace(/^BD1:/,'');
+  return JSON.parse(decodeURIComponent(escape(atob(c))));
+}
+function pfInit(){
+  const sel=$('pf-tpl'); if(!sel)return;
+  sel.innerHTML=Object.keys(TEMPLATES).map(k=>`<option value="${k}">${esc(TEMPLATES[k].name)}</option>`).join('');
+  pfFill(P());
+
+  $('pf-load').addEventListener('click',()=>{
+    const k=sel.value, tp=TEMPLATES[k];
+    if(!tp)return;
+    if(!confirm('지금 입력된 내용을 '+tp.name+' 기본값으로 덮어씁니다. 계속할까요?'))return;
+    pfFill(JSON.parse(JSON.stringify(tp.p)));
+    pfStat('불러왔습니다 — 내용을 고친 뒤 저장을 누르세요');
+  });
+
+  $('pf-save').addEventListener('click',()=>{
+    const pr=pfRead();
+    if(!pr.g1.opts.length&&!pr.g2.opts.length){pfStat('버튼을 하나 이상 적어 주세요',1);return}
+    if(pr.spec.trigger&&!pr.g1.opts.includes(pr.spec.trigger)&&!pr.g2.opts.includes(pr.spec.trigger)){
+      pfStat('“'+pr.spec.trigger+'”라는 버튼이 위 목록에 없습니다 — 철자를 확인해 주세요',1);return;
+    }
+    cfg.profile=pr; cfgSave(); applyProfile();
+    pfStat('저장했습니다'); toast('항목 설정을 저장했습니다');
+  });
+
+  $('pf-copy').addEventListener('click',async()=>{
+    const code=pfEncode(P());
+    try{ await navigator.clipboard.writeText(code); pfStat('설정 코드를 복사했습니다'); }
+    catch(e){ prompt('아래 코드를 길게 눌러 복사하세요', code); }
+  });
+
+  $('pf-apply').addEventListener('click',()=>{
+    const v=$('pf-paste').value.trim();
+    if(!v){pfStat('코드를 붙여넣어 주세요',1);return}
+    try{
+      const pr=pfDecode(v);
+      if(!pr||!pr.g1||!pr.g2)throw new Error('형식 오류');
+      cfg.profile=pr; cfgSave(); pfFill(pr); applyProfile();
+      $('pf-paste').value=''; pfStat('적용했습니다'); toast('설정을 적용했습니다');
+    }catch(e){ pfStat('코드를 읽을 수 없습니다 — 전체를 복사했는지 확인해 주세요',1); }
+  });
+
+  $('pf-lock').addEventListener('change',()=>{
+    if(cfg.profile){cfg.profile.locked=$('pf-lock').checked; cfgSave();}
+    pfLockUI();
+  });
+}
+
+paintBar('new');
+(async()=>{
+  cfgLoad();
+  const linked=applyInstallLink();
+  applyFont();
+  applyLang();
+  pfInit();
+  $('s-staff').value=cfg.staff; $('s-key').value=cfg.key; $('s-model').value=cfg.model||'';
+  if(linked)setTimeout(()=>toast('설정을 받았습니다 — 자동 인식이 켜졌습니다'),800);
+  const ok=await openDB();
+  if(!ok)$('storeWarn').hidden=false;
+  rows=(await dbAll()).sort((a,b)=>b.id-a.id);
+  if(!rows.length){
+    const mir=mirrorLoad();
+    if(mir.length){                       // 저장소가 비었는데 예비본이 있으면 되살립니다
+      rows=mir.sort((a,b)=>b.id-a.id);
+      for(const r of rows){ try{ await dbPut(r) }catch(e){} }
+      setTimeout(()=>toast('예비 저장본에서 '+rows.length+'건을 복구했습니다'),900);
+    }
+  }
+  mirrorSave();
+  render(); usage(); renderChips(); renderBooks(); paintScanBtn(); paintBar('new');
+  $('s-sync').value=cfg.sync||''; pill();
+  if(cfg.sync)syncNow(true);
+  paintKeyState();
+  if(!cfg.staff){$('t-set').click();toast(t('tSetStaff'))}
+})();
+</script>
+</body>
+</html>
