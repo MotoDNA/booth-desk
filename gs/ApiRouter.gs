@@ -10,7 +10,8 @@ var ApiRouter = (function () {
     ping:            function () { return Utils.ok({ pong: true, version: '3.0' }); },
     setup:           function ()  { SheetService.ensureAll(); return Utils.ok({ sheets: Object.keys(CONFIG.SHEETS) }); },
     sync:            function (p, ctx) { return SyncService.sync(p, ctx.deviceId); },
-    generateLeadAnalysis: function (p) { return Utils.ok(AIService.run('lead_analysis', p)); }
+    generateLeadAnalysis: function (p) { return Utils.ok(AIService.run('lead_analysis', p)); },
+    generateEmail:   function (p) { return Utils.ok(AIService.run('email_draft', p)); }
   };
 
   function reply_(obj) {

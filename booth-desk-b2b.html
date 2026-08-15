@@ -194,8 +194,9 @@ section[hidden]{display:none}
 .setrow{margin-bottom:14px;padding:20px}
 .setrow h4{margin:0 0 4px;font-size:.62rem;font-weight:800;letter-spacing:.17em;color:var(--mut);text-transform:uppercase}
 .setrow p{margin:8px 0 13px;font-size:.72rem;color:var(--mut);line-height:1.7}
-.setrow input{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:11px;padding:13px 14px;font-size:.84rem}
-.setrow input:focus{outline:0;border-color:var(--brand);background:var(--card)}
+.setrow input,.setrow textarea{width:100%;background:var(--bg);border:1.5px solid transparent;border-radius:11px;padding:13px 14px;font-size:.84rem}
+.setrow textarea{resize:vertical;line-height:1.65;font-size:.8rem}
+.setrow input:focus,.setrow textarea:focus{outline:0;border-color:var(--brand);background:var(--card)}
 .setrow button{margin-top:10px;padding:13px 20px;border-radius:11px;background:var(--dark);color:#fff;font-size:.76rem;font-weight:700}
 .setrow button.sec{background:var(--bg);color:var(--ink)}
 .langbtns{display:flex;flex-direction:column;margin-top:10px}
@@ -307,6 +308,37 @@ section[hidden]{display:none}
 .fucard .acts button{flex:1;padding:11px 0;border-radius:10px;font-size:.7rem;font-weight:700;
   background:var(--bg);color:var(--sub)}
 .fucard .acts button.pri{background:var(--dark);color:#fff}
+.fucard .acts button.mail{flex:0 0 auto;padding-left:13px;padding-right:13px}
+.emtag{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:6px;
+  font-size:.58rem;font-weight:800;letter-spacing:.04em;background:var(--soft);color:var(--brand)}
+.emtag.ok{background:#E4F0E6;color:#2F6B3A}
+/* The draft screen. A warning the eye cannot skip sits above the text,
+   because the one thing that must not happen is a hallucinated promise
+   going out unread (spec 32). */
+.emwarn{background:#FBF1E4;border-radius:12px;padding:13px 14px;margin-bottom:16px;
+  font-size:.71rem;line-height:1.65;color:#7A5320}
+.emwarn b{display:block;margin-bottom:4px;font-size:.66rem;letter-spacing:.04em;color:#8A5A18}
+.emwarn.stale{background:#EDF1F7;color:#3C5476}
+.emwarn.stale b{color:#2F4A70}
+.emto{font-size:.74rem;color:var(--sub);line-height:1.6;margin-bottom:14px}
+.emto b{color:var(--ink)}
+.emto .warn{color:#C0402A}
+.emfld{margin-bottom:14px}
+.emfld label{display:block;font-size:.6rem;font-weight:800;letter-spacing:.06em;
+  color:var(--mut);text-transform:uppercase;margin-bottom:6px}
+.emfld input,.emfld textarea,.emfld select{width:100%;background:var(--card);
+  border:1.5px solid var(--line);border-radius:11px;padding:12px 13px;
+  font-size:.82rem;line-height:1.7;color:var(--ink)}
+.emfld textarea{min-height:260px;resize:vertical}
+.emfld input:focus,.emfld textarea:focus,.emfld select:focus{outline:0;border-color:var(--brand)}
+.emread{background:var(--card);border-radius:12px;padding:14px 15px;box-shadow:var(--sh)}
+.emread .subj{margin:0 0 10px;font-size:.86rem;font-weight:800;line-height:1.45;color:var(--ink)}
+.emread .bd{margin:0;font-size:.79rem;line-height:1.85;color:var(--ink);white-space:pre-wrap;
+  padding-top:11px;border-top:1px solid var(--line)}
+.emfacts{margin:6px 0 0;padding-left:16px}
+.emfacts li{font-size:.72rem;line-height:1.6;color:var(--ink)}
+.dfoot button.warnbtn{background:#FBEDEB;color:#C0402A}
+.dfoot button:disabled{opacity:.4}
 .fudate{font-family:var(--mono);font-size:.62rem;font-weight:600;color:var(--mut)}
 .fudate.late{color:#C8342A}
 
@@ -624,6 +656,13 @@ section[hidden]{display:none}
   </div>
 
   <div class="setrow">
+    <h4 data-i18n="emSigH">이메일 서명</h4>
+    <p data-i18n="emSigP">AI가 후속 이메일 초안을 만들 때 본문 맨 끝에 이 내용을 그대로 붙입니다.</p>
+    <textarea id="em-sig" rows="4" spellcheck="false" autocapitalize="off" data-i18n-ph="emSigPh" placeholder="홍길동 / 영업팀"></textarea>
+    <button id="em-sig-save" data-i18n="bSave">저장</button>
+  </div>
+
+  <div class="setrow">
     <h4 data-i18n="sSyncH">실시간 공유 (구글 시트)</h4>
     <p>연결하면 접수 기록이 자동으로 구글 시트에 올라가고, 다른 직원의 기록도 자동으로 내려받아 명부에 함께 표시됩니다. 인터넷이 끊겨도 폰에는 정상 저장되며, 연결되는 순간 밀린 기록이 알아서 올라갑니다.<br><br>
     <b>사진은 올라가지 않습니다.</b> 용량이 커서 폰에만 보관됩니다.</p>
@@ -685,6 +724,15 @@ section[hidden]{display:none}
     <button id="b2bClose" data-i18n="dClose">닫기</button>
   </div>
   <div class="dbody" id="b2bBody"></div>
+</div>
+
+<div class="detail" id="emDetail" hidden>
+  <div class="dhead">
+    <b data-i18n="emTitle">이메일 초안</b>
+    <button id="emClose" data-i18n="dClose">닫기</button>
+  </div>
+  <div class="dbody" id="emBody"></div>
+  <div class="dfoot" id="emFoot"></div>
 </div>
 
 <div class="sheet" id="evSheet" hidden>
@@ -867,6 +915,30 @@ ko:{evCurrent:'현재 전시회',evPickTitle:'전시회 선택',evNew:'+ 새 전
  aiBatchDone:'%ok건 분석 완료%fail',aiBatchFail:' · %n건 실패',
  aiNowBtn:'지금 AI 분석',aiLaterHint:'저장했습니다 — 나중에 리드 탭에서 한꺼번에 분석할 수 있습니다',
  aiRecommended:'AI 추천',
+ emTitle:'이메일 초안',emDraft:'이메일 초안',emOpen:'초안 보기',
+ emWarnH:'보내기 전에 반드시 읽어 주세요',
+ emWarnP:'AI가 쓴 초안입니다. 상담하지 않은 내용이나 임의로 만든 가격·납기·약속이 들어 있으면 고치거나 다시 만드세요. 이 앱은 이메일을 자동으로 보내지 않습니다.',
+ emTo:'받는 사람',emNoAddr:'이메일 주소가 없습니다 — 발송 단계에서 필요합니다',
+ emLang:'작성 언어',emSubject:'제목',emBody:'본문',
+ emNone:'아직 초안이 없습니다',emNoneS:'상담 내용으로 AI가 초안을 써 줍니다. 쓴 다음 직접 고칠 수 있습니다.',
+ emMake:'AI로 초안 만들기',emWorking:'초안 쓰는 중…',
+ emRegen:'다시 생성',emEditB:'수정',emSaveB:'저장',emCancelB:'취소',
+ emApprove:'승인',emApproved:'승인됨',emUnapprove:'승인 취소',
+ emApprovedAt:'승인 %d · %s',
+ emSendNext:'발송은 다음 단계(Gmail 연결)에서 붙습니다. 승인해 두면 그때 바로 보낼 수 있습니다.',
+ emSaved:'초안을 저장했습니다',emApprovedMsg:'승인했습니다',emUnapprovedMsg:'승인을 취소했습니다',
+ emEmpty:'제목과 본문을 모두 채워 주세요',
+ emEdited:'사람이 고침',emAsIs:'AI 초안 그대로',
+ emStaleH:'초안을 쓴 뒤 상담 내용이 바뀌었습니다',
+ emStaleP:'메모나 요청이 달라졌습니다. 지금 내용으로 다시 만들거나, 바뀐 부분을 직접 반영해 주세요.',
+ emRegenAsk:'고친 내용이 사라집니다. 다시 만들까요?',
+ emFail:'초안을 만들지 못했습니다',emRetry:'다시 시도',
+ emSummaryL:'요약',emActionL:'권장 행동',emDaysL:'권장 후속 간격',emDaysN:'%n일 뒤',
+ emFactsL:'AI가 근거로 든 내용',emFactsS:'상담 기록에 없는 것이 있으면 그 초안은 쓰지 마세요',
+ emTagDraft:'초안',emTagApproved:'승인됨',
+ emSigH:'이메일 서명',
+ emSigP:'AI가 후속 이메일 초안을 만들 때 본문 맨 끝에 이 내용을 그대로 붙입니다. 회사명·담당자·연락처를 적어 두세요. 비워 두면 담당자 이름만 들어갑니다.',
+ emSigPh:'홍길동 / 영업팀\n예우시스템\n02-000-0000 / hong@example.com',
  sB2bH:'서버 연결 (Ver 3.0)',
  sB2bP:'회사 구글 계정에 Apps Script를 설치하면 리드·회사·후속 일정이 구글 시트로 모이고, AI 기능이 켜집니다. Claude API 키는 그 스크립트 안에만 저장됩니다.',
  b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'스크립트에 설정한 SHARED_TOKEN',
@@ -922,6 +994,30 @@ en:{evCurrent:'Current event',evPickTitle:'Select event',evNew:'+ New event',
  aiBatchDone:'%ok analysed%fail',aiBatchFail:' · %n failed',
  aiNowBtn:'Analyse now',aiLaterHint:'Saved — you can analyse them together later from the Leads tab',
  aiRecommended:'AI suggested',
+ emTitle:'Email draft',emDraft:'Draft email',emOpen:'Open draft',
+ emWarnH:'Read this before you send it',
+ emWarnP:'This draft was written by AI. If it mentions anything you did not discuss, or a price, lead time or promise nobody agreed to, edit it or regenerate it. This app never sends email on its own.',
+ emTo:'To',emNoAddr:'No email address on file — needed to send',
+ emLang:'Language',emSubject:'Subject',emBody:'Body',
+ emNone:'No draft yet',emNoneS:'AI writes a first draft from the consultation notes. You can edit it afterwards.',
+ emMake:'Write a draft with AI',emWorking:'Writing the draft…',
+ emRegen:'Regenerate',emEditB:'Edit',emSaveB:'Save',emCancelB:'Cancel',
+ emApprove:'Approve',emApproved:'Approved',emUnapprove:'Withdraw approval',
+ emApprovedAt:'Approved %d · %s',
+ emSendNext:'Sending arrives with the next step (Gmail). Approving now means it can go out straight away then.',
+ emSaved:'Draft saved',emApprovedMsg:'Approved',emUnapprovedMsg:'Approval withdrawn',
+ emEmpty:'Fill in both the subject and the body',
+ emEdited:'edited by hand',emAsIs:'AI draft, unchanged',
+ emStaleH:'The consultation changed after this draft was written',
+ emStaleP:'The notes or requests have moved on. Regenerate from what is recorded now, or fold the change in by hand.',
+ emRegenAsk:'Your edits will be lost. Write a new draft?',
+ emFail:'Could not write the draft',emRetry:'Try again',
+ emSummaryL:'Summary',emActionL:'Suggested action',emDaysL:'Suggested follow-up',emDaysN:'in %n days',
+ emFactsL:'Facts the AI says it used',emFactsS:'If anything here was not in the notes, do not use this draft',
+ emTagDraft:'draft',emTagApproved:'approved',
+ emSigH:'Email signature',
+ emSigP:'Pasted verbatim at the end of every AI follow-up draft. Put your company, name and contact details here. Left blank, only the sender name is used.',
+ emSigPh:'Jane Kim / Sales\nYewoo Systems\n+82 2 000 0000 / jane@example.com',
  sB2bH:'Server connection (Ver 3.0)',
  sB2bP:'Installing the Apps Script in your own Google account collects leads, companies and follow-ups into a Google Sheet and switches the AI features on. The Claude API key is stored only inside that script.',
  b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'The SHARED_TOKEN you set in the script',
@@ -977,6 +1073,30 @@ zh:{evCurrent:'当前展会',evPickTitle:'选择展会',evNew:'+ 新建展会',
  aiBatchDone:'已分析%ok条%fail',aiBatchFail:' · %n条失败',
  aiNowBtn:'立即分析',aiLaterHint:'已保存 — 稍后可在客户页批量分析',
  aiRecommended:'AI 建议',
+ emTitle:'邮件草稿',emDraft:'邮件草稿',emOpen:'查看草稿',
+ emWarnH:'发送前请务必阅读',
+ emWarnP:'这是 AI 写的草稿。如果出现未曾洽谈的内容，或擅自写出的价格、交期、承诺，请修改或重新生成。本应用不会自动发送邮件。',
+ emTo:'收件人',emNoAddr:'没有邮箱地址 — 发送时需要',
+ emLang:'撰写语言',emSubject:'主题',emBody:'正文',
+ emNone:'尚无草稿',emNoneS:'AI 会根据洽谈记录写出初稿，之后可以自行修改。',
+ emMake:'用 AI 生成草稿',emWorking:'正在生成草稿…',
+ emRegen:'重新生成',emEditB:'修改',emSaveB:'保存',emCancelB:'取消',
+ emApprove:'批准',emApproved:'已批准',emUnapprove:'撤销批准',
+ emApprovedAt:'批准 %d · %s',
+ emSendNext:'发送功能将在下一步（Gmail 连接）加入。现在批准，届时即可直接发出。',
+ emSaved:'已保存草稿',emApprovedMsg:'已批准',emUnapprovedMsg:'已撤销批准',
+ emEmpty:'请填写主题和正文',
+ emEdited:'已人工修改',emAsIs:'AI 草稿原文',
+ emStaleH:'写完草稿后，洽谈内容有变化',
+ emStaleP:'备注或需求已更新。请按现在的内容重新生成，或自行补充改动部分。',
+ emRegenAsk:'修改内容将丢失。要重新生成吗？',
+ emFail:'未能生成草稿',emRetry:'重试',
+ emSummaryL:'摘要',emActionL:'建议行动',emDaysL:'建议跟进间隔',emDaysN:'%n 天后',
+ emFactsL:'AI 使用的依据',emFactsS:'若出现洽谈记录中没有的内容，请勿使用此草稿',
+ emTagDraft:'草稿',emTagApproved:'已批准',
+ emSigH:'邮件签名',
+ emSigP:'AI 生成跟进邮件草稿时，会将此内容原样附在正文末尾。请填写公司名、负责人和联系方式。留空则只使用负责人姓名。',
+ emSigPh:'金某 / 销售部\n예우시스템\n+82 2 000 0000 / kim@example.com',
  sB2bH:'服务器连接 (Ver 3.0)',
  sB2bP:'在贵公司的谷歌账号中安装 Apps Script 后，客户、公司与跟进计划会汇总到谷歌表格，并启用 AI 功能。Claude API 密钥仅保存在该脚本中。',
  b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'脚本中设置的 SHARED_TOKEN',
@@ -1463,6 +1583,140 @@ async function applyAiToFollowUp(lead,data){
   return save('followups',f);
 }
 
+/* ---- AI email drafts (spec 31-35) ---------------------------------------
+   The draft is written by the server and is never sent by this step. It
+   lands on the follow-up as text a person still has to read, edit and
+   approve; sending is a later step and a separate press (spec 33). */
+
+/* Data minimisation with one deliberate exception (spec 72). Scoring needs
+   no name, but an email has to greet someone, so fullName is sent for this
+   task and only this task. The address, phone and the email address itself
+   never leave the device: the server writes the words, the device knows who
+   they are for. */
+async function aiEmailInput(lead,fu,opt){
+  opt=opt||{};
+  const co=lead.companyId?await get('companies',lead.companyId):null;
+  const ev=lead.eventId?await get('events',lead.eventId):null;
+  const profile=(typeof P==='function')?P():{};
+  const history=(await byIndex('interactions','leadId',lead.id))
+    .filter(x=>!x.deleted)
+    .sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))
+    .slice(-5)
+    .map(x=>({when:new Date(x.createdAt||Date.now()).toISOString().slice(0,10),
+              type:x.type||'note',summary:x.summary||'',notes:x.notes||''}));
+  return {
+    recipientName:lead.fullName||'',
+    jobTitle:lead.jobTitle||'',
+    company:co?co.companyName:'',
+    country:lead.country||(co&&co.country)||'',
+    event:ev?ev.eventName:'',
+    eventDates:ev?[ev.startDate,ev.endDate].filter(Boolean).join(' ~ '):'',
+    venue:(ev&&ev.venue)||'',
+    interests:(lead.interests||[]).join(', '),
+    requests:(lead.requests||[]).join(', '),
+    notes:lead.notes||'',
+    history,
+    followUpType:(fu&&fu.type)||'general_followup',
+    ourCompany:[profile.brand,profile.brand2].filter(Boolean).join(' '),
+    ourProducts:((profile.g1&&profile.g1.opts)||[]).join(', '),
+    senderName:(typeof cfg!=='undefined'&&cfg.staff)||'',
+    signature:(typeof cfg!=='undefined'&&cfg.emailSignature)||'',
+    lang:opt.lang||(typeof cfg!=='undefined'&&cfg.lang)||'ko'
+  };
+}
+
+/* There is no cached-answer shortcut here, unlike the lead score. A draft
+   is only ever written from the "no draft yet" button or from an explicit
+   [regenerate], and regenerate means the person wants different words —
+   handing back the previous email would be the one thing they did not ask
+   for. The input hash is still recorded, so the screen can notice later
+   that the lead changed underneath a draft (emailInputStale). */
+async function draftEmail(followUpId,opt){
+  opt=opt||{};
+  const fu=await get('followups',followUpId);
+  if(!fu||fu.deleted)throw new Error('NO_FOLLOWUP');
+  if(fu.sentAt)throw new Error('ALREADY_SENT');
+  const lead=await get('leads',fu.leadId);
+  if(!lead||lead.deleted)throw new Error('NO_LEAD');
+
+  const input=await aiEmailInput(lead,fu,opt);
+  const inputHash=hashInput(input);
+  const data=await api('generateEmail',input);
+
+  const rec=await save('aiResults',{leadId:lead.id,companyId:lead.companyId||'',
+    followUpId,type:'email_draft',provider:AI_CONFIG.provider,model:AI_CONFIG.model,
+    inputHash,result:data,confidence:Number(data.confidence||0)},{queue:false});
+
+  const fresh=await get('followups',followUpId);
+  fresh.emailSubject=data.subject||'';
+  fresh.emailBody=data.body||'';
+  fresh.emailLang=input.lang;
+  fresh.emailEdited=false;
+  fresh.aiDraftedAt=Date.now();
+  /* 'ready' means a draft exists. Approval stays a separate act, and a
+     re-draft withdraws an approval that no longer matches the text. */
+  fresh.status='ready';
+  fresh.approvedAt=null;
+  fresh.approvedBy='';
+  await save('followups',fresh);
+
+  return {result:data,at:rec.createdAt};
+}
+
+async function emailDraftMeta(fu){
+  if(!fu||!fu.leadId)return null;
+  const rec=await aiLatest(fu.leadId,'email_draft');
+  return rec&&rec.followUpId===fu.id?rec:null;
+}
+
+/* True when the consultation has moved on since the draft was written — new
+   notes, another request, a fresh interaction. The draft is still perfectly
+   valid text, so it is not thrown away; the screen just says so. */
+async function emailInputStale(fu,meta){
+  if(!fu||!meta||!meta.inputHash)return false;
+  const lead=await get('leads',fu.leadId);
+  if(!lead)return false;
+  const input=await aiEmailInput(lead,fu,{lang:fu.emailLang||''});
+  return hashInput(input)!==meta.inputHash;
+}
+
+async function saveEmailDraft(followUpId,edit){
+  const fu=await get('followups',followUpId);
+  if(!fu||fu.deleted)throw new Error('NO_FOLLOWUP');
+  if(fu.sentAt)throw new Error('ALREADY_SENT');
+  const subject=String(edit.subject||'').replace(/[\r\n]+/g,' ').trim().slice(0,200);
+  const body=String(edit.body||'').replace(/\r\n?/g,'\n').trim().slice(0,8000);
+  if(!subject||!body)throw new Error('EMPTY_DRAFT');
+  fu.emailSubject=subject;
+  fu.emailBody=body;
+  fu.emailEdited=true;
+  /* An edit withdraws approval: what was approved is no longer what would
+     go out. */
+  if(fu.status==='approved'){ fu.status='ready'; fu.approvedAt=null; fu.approvedBy=''; }
+  return save('followups',fu);
+}
+
+async function approveEmailDraft(followUpId,by){
+  const fu=await get('followups',followUpId);
+  if(!fu||fu.deleted)throw new Error('NO_FOLLOWUP');
+  if(fu.sentAt)throw new Error('ALREADY_SENT');
+  if(!(fu.emailSubject||'').trim()||!(fu.emailBody||'').trim())throw new Error('EMPTY_DRAFT');
+  fu.status='approved';
+  fu.approvedAt=Date.now();
+  fu.approvedBy=by||'';
+  return save('followups',fu);
+}
+
+async function unapproveEmailDraft(followUpId){
+  const fu=await get('followups',followUpId);
+  if(!fu||fu.deleted)throw new Error('NO_FOLLOWUP');
+  if(fu.sentAt)throw new Error('ALREADY_SENT');
+  fu.status='ready';
+  fu.approvedAt=null;
+  fu.approvedBy='';
+  return save('followups',fu);
+}
+
 async function unanalyzedLeads(eventId){
   const leads=(await live('leads')).filter(l=>!eventId||l.eventId===eventId);
   const out=[];
@@ -1759,6 +2013,8 @@ return {NS,AI_CONFIG,SCHEMA,LEGACY_DB,open,get,all,byIndex,live,save,remove,
         fuPlan,fuType,scheduleFollowUp,ensureFollowUps,openFollowUps,FU_OPEN,
         api,flushQueue,queueStatus,retryFailed,deviceId,applyPull,fromRow,MAX_RETRY,
         analyzeLead,aiLatest,aiLeadInput,unanalyzedLeads,hashInput,
+        aiEmailInput,draftEmail,emailDraftMeta,emailInputStale,saveEmailDraft,
+        approveEmailDraft,unapproveEmailDraft,
         error:()=>lastError};
 })();
 
@@ -2458,6 +2714,16 @@ $('b2b-sync').addEventListener('click',async()=>{
   }
 });
 
+/* The signature goes into every AI draft verbatim, which is the only way
+   the model is allowed to produce contact details at all — it is told to
+   invent none. */
+$('em-sig-save').addEventListener('click',()=>{
+  cfg.emailSignature=$('em-sig').value.replace(/\r\n?/g,'\n').trim().slice(0,600);
+  cfgSave();
+  $('em-sig').value=cfg.emailSignature;
+  toast(t('tSaved'));
+});
+
 /* Same cadence as Ver 2.0's sheet sync, and a drain the moment the network
    comes back — the whole point of the queue is that the booth never waits. */
 setInterval(()=>{ if(cfg.b2bApi&&navigator.onLine)B2B.flushQueue().catch(()=>{}); },60000);
@@ -2490,6 +2756,7 @@ async function renderFollowUps(){
     box.innerHTML='<div class="empty"><b>'+t('fuEmpty')+'</b>'+t('fuEmptyS')+'</div>';
     return;
   }
+  const hasServer=!!(cfg.b2bApi||'').trim();
   const now=Date.now(), groups={fuOverdue:[],fuToday:[],fuWeek:[],fuLater:[]};
   list.forEach(f=>{ if(leadById.has(f.leadId))groups[fuBucket(f,now)].push(f); });
 
@@ -2504,12 +2771,16 @@ async function renderFollowUps(){
           (l.leadGrade?'<span class="gbadge '+esc(l.leadGrade)+'">'+esc(l.leadGrade)+'</span>':'')+
         '</div>'+
         '<p class="who">'+esc([l.fullName,l.jobTitle].filter(Boolean).join(' · ')||'—')+'</p>'+
-        '<p class="why"><b>'+esc(t('ft_'+f.type))+'</b> · '+
+        '<p class="why"><b>'+esc(t('ft_'+f.type))+'</b>'+
+          (f.status==='approved'?'<span class="emtag ok">'+esc(t('emTagApproved'))+'</span>'
+            :f.emailSubject?'<span class="emtag">'+esc(t('emTagDraft'))+'</span>':'')+' · '+
           (f.aiRecommended?'<i class="aitag">'+esc(t('aiRecommended'))+'</i> '+esc(f.aiReason||'')
                           :esc(t('fu_'+f.reason)))+
           '<br><span class="fudate'+(k==='fuOverdue'?' late':'')+'">'+
           esc(t('fuDue'))+' '+esc(shortDate(f.scheduledAt))+'</span></p>'+
         '<div class="acts">'+
+          (hasServer?'<button data-act="email" class="mail">'+
+            esc(f.emailSubject?t('emOpen'):t('emDraft'))+'</button>':'')+
           '<button data-act="snooze">'+esc(t('fuSnooze'))+'</button>'+
           '<button data-act="done" class="pri">'+esc(t('fuDone'))+'</button>'+
         '</div></article>';
@@ -2522,6 +2793,8 @@ $('fuBody').addEventListener('click',async e=>{
   const btn=e.target.closest('[data-act]'); if(!btn)return;
   const card=btn.closest('[data-fu]'); if(!card)return;
   const f=await B2B.get('followups',card.dataset.fu); if(!f)return;
+
+  if(btn.dataset.act==='email')return openEmail(f.id);
 
   if(btn.dataset.act==='snooze'){
     f.scheduledAt=(f.scheduledAt||Date.now())+3*86400000;
@@ -2541,6 +2814,166 @@ $('fuBody').addEventListener('click',async e=>{
     toast(t('fuDoneMsg'));
   }
   renderFollowUps();
+});
+
+/* ═════ AI 이메일 초안 (Ver 3.0) ═════
+   Two rules shape this screen. The draft is never sent from here — sending
+   is a later step and a separate press (spec 33) — and the person approving
+   it has to be able to see what the model claimed to be working from, so
+   the facts it says it used sit under the text (spec 32). */
+let emFu=null, emMeta=null, emStale=false, emMode='view', emLang='ko';
+
+function emClosePanel(){ $('emDetail').hidden=true; emFu=null; emMeta=null; emMode='view'; }
+$('emClose').addEventListener('click',emClosePanel);
+
+async function openEmail(followUpId){
+  const fu=await B2B.get('followups',followUpId); if(!fu)return;
+  emFu=fu;
+  emMeta=await B2B.emailDraftMeta(fu);
+  emStale=await B2B.emailInputStale(fu,emMeta);
+  emLang=fu.emailLang||cfg.lang||'ko';
+  emMode='view';
+  await emPaint();
+  $('emDetail').hidden=false;
+  $('emBody').scrollTop=0;
+}
+
+async function emPaint(){
+  if(!emFu)return;
+  emFu=await B2B.get('followups',emFu.id);
+  const lead=await B2B.get('leads',emFu.leadId);
+  const co=lead&&lead.companyId?await B2B.get('companies',lead.companyId):null;
+  const has=!!(emFu.emailSubject||emFu.emailBody);
+  const r=(emMeta&&emMeta.result)||{};
+
+  let h='<div class="emwarn"><b>'+esc(t('emWarnH'))+'</b>'+esc(t('emWarnP'))+'</div>';
+  if(has&&emStale)h+='<div class="emwarn stale"><b>'+esc(t('emStaleH'))+'</b>'+esc(t('emStaleP'))+'</div>';
+
+  h+='<p class="emto"><b>'+esc(t('emTo'))+'</b> · '+
+     esc([lead&&lead.fullName,lead&&lead.jobTitle].filter(Boolean).join(' · ')||'—')+
+     (co?' · '+esc(co.companyName):'')+'<br>'+
+     (lead&&lead.email ? esc(lead.email)
+                       : '<span class="warn">'+esc(t('emNoAddr'))+'</span>')+
+     '<br>'+esc(t('ft_'+emFu.type))+'</p>';
+
+  if(emMode==='edit'){
+    h+='<div class="emfld"><label>'+esc(t('emSubject'))+'</label>'+
+       '<input id="em-subject" type="text" autocomplete="off" value="'+esc(emFu.emailSubject||'')+'"></div>'+
+       '<div class="emfld"><label>'+esc(t('emBody'))+'</label>'+
+       '<textarea id="em-bodytext" spellcheck="false">'+esc(emFu.emailBody||'')+'</textarea></div>';
+  }else if(has){
+    h+='<div class="emread"><p class="subj">'+esc(emFu.emailSubject||'')+'</p>'+
+       '<p class="bd">'+esc(emFu.emailBody||'')+'</p></div>';
+  }else{
+    h+='<div class="empty"><b>'+esc(t('emNone'))+'</b>'+esc(t('emNoneS'))+'</div>';
+  }
+
+  /* The language is what the next draft is written in, so it belongs with
+     the generate button rather than with the text already on screen. */
+  h+='<div class="emfld" style="margin-top:16px"><label>'+esc(t('emLang'))+'</label>'+
+     '<select id="em-lang">'+
+     [['ko','한국어'],['en','English'],['zh','中文']].map(([k,v])=>
+       '<option value="'+k+'"'+(emLang===k?' selected':'')+'>'+esc(v)+'</option>').join('')+
+     '</select></div>';
+
+  if(has&&emMode==='view'){
+    const bits=[];
+    if(r.summary)bits.push('<div class="airow"><em>'+esc(t('emSummaryL'))+'</em><p>'+esc(r.summary)+'</p></div>');
+    if(r.recommendedAction)bits.push('<div class="airow"><em>'+esc(t('emActionL'))+'</em><p>'+esc(r.recommendedAction)+'</p></div>');
+    if(r.recommendedFollowupDays)bits.push('<div class="airow"><em>'+esc(t('emDaysL'))+'</em><p>'+
+      esc(t('emDaysN').replace('%n',Number(r.recommendedFollowupDays)))+'</p></div>');
+    if((r.usedFacts||[]).length)bits.push('<div class="airow"><em>'+esc(t('emFactsL'))+'</em>'+
+      '<ul class="emfacts">'+r.usedFacts.map(f=>'<li>'+esc(f)+'</li>').join('')+'</ul>'+
+      '<p style="color:var(--mut);font-size:.68rem">'+esc(t('emFactsS'))+'</p></div>');
+    const foot=[emFu.emailEdited?t('emEdited'):t('emAsIs')];
+    if(emMeta){ foot.push(t('aiConf')+' '+confWord(Number(r.confidence||0)));
+                foot.push(t('aiAt')+' '+aiStamp(emMeta.createdAt)); }
+    if(emFu.status==='approved'&&emFu.approvedAt)
+      foot.push(t('emApprovedAt').replace('%d',aiStamp(emFu.approvedAt))
+                                 .replace('%s',emFu.approvedBy||cfg.staff||'—'));
+    h+='<div class="aibox">'+bits.join('')+
+       '<div class="aifoot">'+esc(foot.filter(Boolean).join(' · '))+'</div></div>';
+    h+='<p class="emto" style="margin:14px 0 0">'+esc(t('emSendNext'))+'</p>';
+  }
+
+  $('emBody').innerHTML=h;
+
+  const btn=(act,label,cls)=>'<button data-em="'+act+'"'+(cls?' class="'+cls+'"':'')+'>'+esc(label)+'</button>';
+  let f='';
+  if(emMode==='edit'){
+    f=btn('cancel',t('emCancelB'))+btn('save',t('emSaveB'),'pri');
+  }else if(!has){
+    f=btn('make',t('emMake'),'pri');
+  }else if(emFu.status==='approved'){
+    f=btn('unapprove',t('emUnapprove'),'warnbtn')+btn('edit',t('emEditB'))+
+      btn('regen',t('emRegen'));
+  }else{
+    f=btn('regen',t('emRegen'))+btn('edit',t('emEditB'))+btn('approve',t('emApprove'),'pri');
+  }
+  $('emFoot').innerHTML=f;
+
+  const sel=$('em-lang');
+  if(sel)sel.addEventListener('change',e=>{ emLang=e.target.value; });
+}
+
+async function emGenerate(force){
+  if(!emFu)return;
+  const id=emFu.id;
+  $('emFoot').innerHTML='';
+  $('emBody').innerHTML='<div class="aibox"><p style="margin:0;font-size:.72rem">'+
+    '<span class="spin"></span>'+esc(t('emWorking'))+'</p></div>';
+  try{
+    await B2B.draftEmail(id,{lang:emLang});
+    emFu=await B2B.get('followups',id);
+    emMeta=await B2B.emailDraftMeta(emFu);
+    emStale=false;
+    emMode='view';
+    await emPaint();
+    renderFollowUps();
+  }catch(err){
+    /* Spec 74 applies here too: a failed draft leaves the follow-up exactly
+       as it was, and the screen says what to do next. */
+    $('emBody').innerHTML='<div class="aibox err"><p style="margin:0;font-size:.72rem">'+
+      esc(t('emFail'))+' — '+esc(aiReadable(err))+'</p></div>';
+    $('emFoot').innerHTML='<button data-em="'+(force?'regen':'make')+'" class="pri">'+
+      esc(t('emRetry'))+'</button>';
+  }
+}
+
+$('emFoot').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-em]'); if(!b||!emFu)return;
+  const act=b.dataset.em, id=emFu.id;
+
+  if(act==='make')return emGenerate(false);
+  if(act==='regen'){
+    if(emFu.emailEdited&&!confirm(t('emRegenAsk')))return;
+    return emGenerate(true);
+  }
+  if(act==='edit'){ emMode='edit'; return emPaint(); }
+  if(act==='cancel'){ emMode='view'; return emPaint(); }
+
+  if(act==='save'){
+    try{
+      await B2B.saveEmailDraft(id,{subject:$('em-subject').value,body:$('em-bodytext').value});
+      emMode='view'; await emPaint(); renderFollowUps(); toast(t('emSaved'));
+    }catch(err){
+      toast(String(err.message||err)==='EMPTY_DRAFT'?t('emEmpty'):aiReadable(err));
+    }
+    return;
+  }
+  if(act==='approve'){
+    try{
+      await B2B.approveEmailDraft(id,cfg.staff||'');
+      await emPaint(); renderFollowUps(); toast(t('emApprovedMsg'));
+    }catch(err){
+      toast(String(err.message||err)==='EMPTY_DRAFT'?t('emEmpty'):aiReadable(err));
+    }
+    return;
+  }
+  if(act==='unapprove'){
+    await B2B.unapproveEmailDraft(id);
+    await emPaint(); renderFollowUps(); toast(t('emUnapprovedMsg'));
+  }
 });
 
 /* ═════ 대시보드 (Ver 3.0) ═════
@@ -3649,6 +4082,7 @@ paintBar('new');
   evPaint();
   $('s-sync').value=cfg.sync||''; pill();
   $('b2b-url').value=cfg.b2bApi||''; $('b2b-token').value=cfg.b2bToken||'';
+  $('em-sig').value=cfg.emailSignature||'';
   b2bPaintQueue(); if(cfg.b2bApi&&navigator.onLine)B2B.flushQueue().catch(()=>{});
   if(cfg.sync)syncNow(true);
   paintKeyState();

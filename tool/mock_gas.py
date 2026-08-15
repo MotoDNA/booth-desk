@@ -64,6 +64,11 @@ class H(BaseHTTPRequestHandler):
                 for k, v in pay.items():
                     if k in ('id',): continue
                     row[k] = ' / '.join(v) if isinstance(v, list) else v
+                # The real SyncService renames the draft columns on the way in;
+                # mirror it, or the mock quietly disagrees with the sheet.
+                if ent == 'followups':
+                    row['subject'] = pay.get('emailSubject') or ''
+                    row['body'] = pay.get('emailBody') or ''
                 STORE[ent][eid] = row
                 applied.append(eid)
             since = float(p.get('since') or 0)
@@ -77,6 +82,23 @@ class H(BaseHTTPRequestHandler):
                 'summary': '샘플과 견적을 함께 요청', 'nextAction': '샘플 발송 후 단가 안내',
                 'recommendedDays': 2, 'priority': 'high', 'reason': '명시적 요청',
                 'factors': [{'name': 'request specificity', 'points': 20}], 'confidence': 0.9}))
+
+        if action == 'generateEmail':
+            who = p.get('recipientName') or '담당자'
+            ev = p.get('event') or '전시회'
+            sig = p.get('signature') or p.get('senderName') or ''
+            body = (who + '님, 안녕하세요.\n\n' + ev + ' 부스에서 나눈 이야기 감사합니다.\n'
+                    '요청하신 ' + (p.get('requests') or '자료') + ' 건으로 연락드립니다.\n\n'
+                    '필요한 내용을 알려 주시면 준비해 보내드리겠습니다.\n\n' + sig)
+            return self._send(envelope(True, {
+                'subject': ev + ' 부스 방문 감사합니다 — ' + (p.get('requests') or '후속 안내'),
+                'body': body, 'summary': '부스 상담 후속 · 요청 자료 확인',
+                'recommendedAction': '요청 자료 준비 후 발송',
+                'recommendedFollowupDays': 3,
+                'usedFacts': [x for x in ['requests: ' + (p.get('requests') or ''),
+                                          'interests: ' + (p.get('interests') or ''),
+                                          'notes: ' + (p.get('notes') or '')] if not x.endswith(': ')],
+                'confidence': 0.82}))
 
         if action == '__control':
             MODE['fail'] = bool(p.get('fail'))
