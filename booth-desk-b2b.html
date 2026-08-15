@@ -57,7 +57,10 @@ header{padding:22px 22px 0;display:flex;justify-content:space-between;align-item
 .syncpill.off{background:#FBE4E0;color:#C0402A}
 
 /* ═══ 탭 ═══ */
-nav{display:flex;gap:26px;padding:18px 22px 0;border-bottom:1px solid var(--line);margin-top:16px}
+nav{display:flex;gap:22px;padding:18px 22px 0;border-bottom:1px solid var(--line);margin-top:16px;
+  overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+nav::-webkit-scrollbar{display:none}
+nav button{flex:0 0 auto;white-space:nowrap}
 nav button{padding:0 0 13px;font-size:.83rem;font-weight:700;color:var(--mut);position:relative;letter-spacing:-.01em}
 nav button::before{content:attr(data-no);font-family:var(--mono);font-size:.72rem;font-weight:600;margin-right:6px;opacity:.75}
 nav button[aria-selected=true]{color:var(--brand)}
@@ -258,6 +261,33 @@ section[hidden]{display:none}
 #rowProfile.lock input,#rowProfile.lock textarea,#rowProfile.lock select,#rowProfile.lock #pf-save,#rowProfile.lock #pf-load,#rowProfile.lock #pf-apply{opacity:.45;pointer-events:none}
 #rowProfile.lock #pf-lock,#rowProfile.lock #pf-copy{opacity:1;pointer-events:auto}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+/* ── 대시보드 (Ver 3.0) ── */
+.hev{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:17px 18px;margin-bottom:14px}
+.hev b{display:block;font-size:1rem;font-weight:800;letter-spacing:-.02em}
+.hev span{display:block;margin-top:5px;font-size:.68rem;font-weight:600;color:var(--mut)}
+.hblock{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:16px 18px;margin-bottom:14px}
+.hblock>h4{margin:0 0 13px;font-size:.7rem;font-weight:800;letter-spacing:.04em;color:var(--sub)}
+.hbar{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+.hbar:last-child{margin-bottom:0}
+.hbar em{font-style:normal;flex:0 0 74px;font-size:.68rem;font-weight:700;color:var(--sub);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hbar .track{flex:1;height:9px;border-radius:5px;background:var(--bg);overflow:hidden}
+.hbar .track i{display:block;height:100%;border-radius:5px;background:var(--brand)}
+.hbar .track i.g2{background:#7FA8C4}
+.hbar .track i.g3{background:var(--mut)}
+.hbar b{flex:0 0 38px;text-align:right;font-size:.74rem;font-weight:800}
+.hconv{display:flex;gap:9px}
+.hconv div{flex:1;text-align:center;background:var(--bg);border-radius:11px;padding:12px 4px}
+.hconv b{display:block;font-size:.92rem;font-weight:800;letter-spacing:-.03em}
+.hconv span{display:block;margin-top:4px;font-size:.56rem;font-weight:700;letter-spacing:.08em;color:var(--mut)}
+.hconv u{display:block;margin-top:3px;font-size:.56rem;color:var(--mut);text-decoration:none}
+.hnote{margin:0 0 12px;font-size:.68rem;color:var(--mut);line-height:1.6}
+.hlead{display:flex;align-items:center;gap:10px;padding:11px 0;border-top:1px solid var(--line);cursor:pointer}
+.hlead:first-of-type{border-top:0}
+.hlead .n{flex:1;min-width:0}
+.hlead .n b{display:block;font-size:.78rem;font-weight:800;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hlead .n span{display:block;font-size:.68rem;color:var(--mut);margin-top:2px}
+
 /* ── 리드 · 회사 (Ver 3.0) ── */
 .lcard{background:var(--card);border-radius:var(--r);box-shadow:var(--sh);padding:15px 16px;margin-bottom:11px;cursor:pointer}
 .lcard .top{display:flex;align-items:baseline;gap:9px}
@@ -331,14 +361,19 @@ section[hidden]{display:none}
 </div>
 
 <nav role="tablist">
-  <button role="tab" id="t-new" aria-selected="true" data-no="01" data-i18n="tabNew">접수</button>
-  <button role="tab" id="t-list" aria-selected="false" data-no="02" data-i18n="tabList">명부</button>
-  <button role="tab" id="t-lead" aria-selected="false" data-no="03" data-i18n="tabLead">리드</button>
-  <button role="tab" id="t-co" aria-selected="false" data-no="04" data-i18n="tabCo">회사</button>
-  <button role="tab" id="t-set" aria-selected="false" data-no="05" data-i18n="tabSet">설정</button>
+  <button role="tab" id="t-home" aria-selected="false" data-no="01" data-i18n="tabHome">홈</button>
+  <button role="tab" id="t-new" aria-selected="true" data-no="02" data-i18n="tabNew">접수</button>
+  <button role="tab" id="t-list" aria-selected="false" data-no="03" data-i18n="tabList">명부</button>
+  <button role="tab" id="t-lead" aria-selected="false" data-no="04" data-i18n="tabLead">리드</button>
+  <button role="tab" id="t-co" aria-selected="false" data-no="05" data-i18n="tabCo">회사</button>
+  <button role="tab" id="t-set" aria-selected="false" data-no="06" data-i18n="tabSet">설정</button>
 </nav>
 
 <main>
+<section id="p-home" hidden>
+  <div id="homeBody"></div>
+</section>
+
 <section id="p-new">
   <div class="warn" id="storeWarn" hidden data-i18n="storeWarn">저장 기능이 작동하지 않는 환경입니다.</div>
   <input type="file" id="cam" accept="image/*" capture="environment" hidden>
@@ -737,7 +772,13 @@ ko:{evCurrent:'현재 전시회',evPickTitle:'전시회 선택',evNew:'+ 새 전
  evLocked:'전시회가 잠겨 있습니다. 아래에서 잠금을 풀어 주세요',
  evNeedName:'전시회명을 입력해 주세요',evSwitched:'전시회를 바꿨습니다',
  evCreated:'전시회를 만들었습니다',evSaved:'전시회를 저장했습니다',evUnset:'전시회 설정 필요',
- tabLead:'리드',tabCo:'회사',
+ tabHome:'홈',tabLead:'리드',tabCo:'회사',
+ hTotal:'전체',hToday:'오늘',hGradeA:'A등급',hReq:'요청 있음',
+ hGrade:'등급 분포',hPipe:'진행 단계',hConv:'전환율',hAttention:'먼저 챙길 리드',
+ hAttentionS:'A등급인데 아직 연락 전인 리드입니다',hAttentionNone:'A등급 리드를 모두 챙겼습니다',
+ hEmpty:'아직 데이터가 없습니다',hEmptyS:'접수 탭에서 명함을 촬영하면 여기에 집계됩니다',
+ hConvContact:'연락',hConvSample:'샘플',hConvQuote:'견적',hConvWon:'성사',
+ hOfFmt:'%t건 중 %n건',hNoDate:'날짜 미설정',
  ldSearchPh:'이름, 회사명, 연락처 검색',ldAll:'전체',ldCurEvent:'현재 전시회',
  ldAllGrade:'전체 등급',ldEmpty:'아직 리드가 없습니다',ldEmptyS:'접수 탭에서 명함을 촬영하면 여기에 쌓입니다',
  coEmpty:'아직 회사가 없습니다',coPeople:'명',coNoName:'(회사 미상)',
@@ -757,7 +798,13 @@ en:{evCurrent:'Current event',evPickTitle:'Select event',evNew:'+ New event',
  evLocked:'The event is locked. Unlock it below to change.',
  evNeedName:'Please enter an event name',evSwitched:'Event changed',
  evCreated:'Event created',evSaved:'Event saved',evUnset:'No event set',
- tabLead:'Leads',tabCo:'Companies',
+ tabHome:'Home',tabLead:'Leads',tabCo:'Companies',
+ hTotal:'Total',hToday:'Today',hGradeA:'Grade A',hReq:'With requests',
+ hGrade:'Grades',hPipe:'Pipeline',hConv:'Conversion',hAttention:'Needs attention',
+ hAttentionS:'Grade A leads with no contact yet',hAttentionNone:'Every grade A lead has been picked up',
+ hEmpty:'Nothing to show yet',hEmptyS:'Capture a card on the Booth tab and it lands here',
+ hConvContact:'Contacted',hConvSample:'Sample',hConvQuote:'Quotation',hConvWon:'Won',
+ hOfFmt:'%n of %t',hNoDate:'No dates set',
  ldSearchPh:'Search name, company, contact',ldAll:'All',ldCurEvent:'Current event',
  ldAllGrade:'All grades',ldEmpty:'No leads yet',ldEmptyS:'Capture a card on the Booth tab and it lands here',
  coEmpty:'No companies yet',coPeople:' people',coNoName:'(no company)',
@@ -777,7 +824,13 @@ zh:{evCurrent:'当前展会',evPickTitle:'选择展会',evNew:'+ 新建展会',
  evLocked:'展会已锁定，请先在下方解锁。',
  evNeedName:'请输入展会名称',evSwitched:'已切换展会',
  evCreated:'已创建展会',evSaved:'已保存展会',evUnset:'尚未设置展会',
- tabLead:'客户',tabCo:'公司',
+ tabHome:'首页',tabLead:'客户',tabCo:'公司',
+ hTotal:'合计',hToday:'今日',hGradeA:'A级',hReq:'有需求',
+ hGrade:'等级分布',hPipe:'进展阶段',hConv:'转化率',hAttention:'优先跟进',
+ hAttentionS:'A级但尚未联系的客户',hAttentionNone:'A级客户均已跟进',
+ hEmpty:'暂无数据',hEmptyS:'在登记页拍摄名片后会汇总在这里',
+ hConvContact:'已联系',hConvSample:'样品',hConvQuote:'报价',hConvWon:'成交',
+ hOfFmt:'%t 中 %n',hNoDate:'未设置日期',
  ldSearchPh:'搜索姓名、公司、联系方式',ldAll:'全部',ldCurEvent:'当前展会',
  ldAllGrade:'全部等级',ldEmpty:'暂无客户',ldEmptyS:'在登记页拍摄名片后会显示在这里',
  coEmpty:'暂无公司',coPeople:'人',coNoName:'（无公司名）',
@@ -1709,6 +1762,93 @@ $('ev-save').addEventListener('click',async()=>{
   toast(t(prev?'evSaved':'evCreated'));
 });
 
+/* ═════ 대시보드 (Ver 3.0) ═════
+   Answers "what do I do now?" from data that is actually recorded. Nothing
+   here is inferred or estimated; the AI-scored version arrives in a later
+   step and will be labelled as such. */
+const FUNNEL=['new','qualified','contacted','sample_requested',
+              'quotation_requested','quotation_sent','negotiation','won'];
+
+function evDates(ev){
+  if(!ev||!ev.startDate)return '';
+  return ev.endDate&&ev.endDate!==ev.startDate ? ev.startDate+' ~ '+ev.endDate : ev.startDate;
+}
+/* Used to decide the landing tab: during the show the booth comes first. */
+function evRunning(ev){
+  if(!ev||!ev.startDate)return false;
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  const today=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+  return today>=ev.startDate && today<=(ev.endDate||ev.startDate);
+}
+
+async function renderHome(){
+  const box=$('homeBody'); if(!box)return;
+  const ev=await B2B.ensureEvent(cfg.eventId);
+  const [leads,cos]=await Promise.all([B2B.live('leads'),B2B.live('companies')]);
+  const mine=leads.filter(l=>l.eventId===ev.id);
+  const coName=new Map(cos.map(c=>[c.id,c.companyName]));
+
+  const head='<div class="hev"><b>'+esc(ev.eventName)+'</b><span>'+
+    esc([evDates(ev)||t('hNoDate'),ev.venue].filter(Boolean).join(' · '))+'</span></div>';
+
+  if(!mine.length){
+    box.innerHTML=head+'<div class="empty"><b>'+t('hEmpty')+'</b>'+t('hEmptyS')+'</div>';
+    return;
+  }
+
+  const d=new Date(), p=n=>String(n).padStart(2,'0');
+  const today=d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate());
+  const isToday=l=>shortDate(l.createdAt).replace(/\./g,'-')===today;
+  const stat=[[mine.length,'hTotal'],[mine.filter(isToday).length,'hToday'],
+              [mine.filter(l=>l.leadGrade==='A').length,'hGradeA'],
+              [mine.filter(l=>(l.requests||[]).length).length,'hReq']];
+  const stats='<div class="stats">'+stat.map(([v,k])=>
+    '<div><b>'+v+'</b><span>'+esc(t(k))+'</span></div>').join('')+'</div>';
+
+  const bar=(label,n,cls)=>{
+    const pct=mine.length?Math.round(n/mine.length*100):0;
+    return '<div class="hbar"><em>'+esc(label)+'</em><div class="track">'+
+      '<i class="'+cls+'" style="width:'+pct+'%"></i></div><b>'+n+'</b></div>';
+  };
+  const grades='<div class="hblock"><h4>'+t('hGrade')+'</h4>'+
+    bar(t('gA'),mine.filter(l=>l.leadGrade==='A').length,'')+
+    bar(t('gB'),mine.filter(l=>l.leadGrade==='B').length,'g2')+
+    bar(t('gC'),mine.filter(l=>l.leadGrade==='C').length,'g3')+'</div>';
+
+  const byStatus=k=>mine.filter(l=>(l.status||'new')===k).length;
+  const pipe='<div class="hblock"><h4>'+t('hPipe')+'</h4>'+
+    FUNNEL.filter(k=>byStatus(k)).map(k=>bar(stLabel(k),byStatus(k),'')).join('')+'</div>';
+
+  /* A lead that reached a later stage necessarily passed the earlier ones,
+     so "reached" counts by funnel position rather than by exact status.
+     lost and nurture sit off the funnel and are excluded. */
+  const reached=k=>mine.filter(l=>FUNNEL.indexOf(l.status||'new')>=FUNNEL.indexOf(k)).length;
+  const pct=n=>mine.length?Math.round(n/mine.length*1000)/10+'%':'0%';
+  const conv='<div class="hblock"><h4>'+t('hConv')+'</h4><div class="hconv">'+
+    [['hConvContact','contacted'],['hConvSample','sample_requested'],
+     ['hConvQuote','quotation_requested'],['hConvWon','won']].map(([k,st])=>
+      '<div><b>'+pct(reached(st))+'</b><span>'+esc(t(k))+'</span>'+
+      '<u>'+esc(t('hOfFmt').replace('%n',reached(st)).replace('%t',mine.length))+'</u></div>').join('')+
+    '</div></div>';
+
+  const waiting=mine.filter(l=>l.leadGrade==='A'&&FUNNEL.indexOf(l.status||'new')<FUNNEL.indexOf('contacted'))
+    .sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  const attention='<div class="hblock"><h4>'+t('hAttention')+'</h4>'+
+    (waiting.length
+      ? '<p class="hnote">'+t('hAttentionS')+'</p>'+waiting.slice(0,5).map(l=>
+          '<div class="hlead" data-lead="'+esc(l.id)+'"><div class="n"><b>'+
+          esc(coName.get(l.companyId)||t('coNoName'))+'</b><span>'+
+          esc([l.fullName,l.jobTitle].filter(Boolean).join(' · ')||'—')+'</span></div>'+
+          '<span class="gbadge A">A</span></div>').join('')
+      : '<p class="hnote">'+t('hAttentionNone')+'</p>')+'</div>';
+
+  box.innerHTML=head+stats+grades+pipe+conv+attention;
+}
+
+$('homeBody').addEventListener('click',e=>{
+  const l=e.target.closest('[data-lead]'); if(l)openLead(l.dataset.lead);
+});
+
 /* ═════ 리드 · 회사 (Ver 3.0) ═════
    Reads through B2B.live(), so soft-deleted records never reach a screen. */
 const LEAD_STATUS=['new','qualified','contacted','sample_requested','quotation_requested',
@@ -2374,11 +2514,12 @@ function paintBar(k){
   document.body.style.paddingBottom = (k==='list')
     ? 'calc(84px + env(safe-area-inset-bottom))' : '24px';
 }
-const TABS=['new','list','lead','co','set'];
+const TABS=['home','new','list','lead','co','set'];
 TABS.forEach(k=>$('t-'+k).addEventListener('click',()=>{
   TABS.forEach(x=>{$('t-'+x).setAttribute('aria-selected',String(x===k));$('p-'+x).hidden=x!==k});
   paintBar(k);
   if(k==='set')usage();
+  if(k==='home')renderHome();
   if(k==='lead')renderLeads();
   if(k==='co')renderCompanies();
 }));
@@ -2701,7 +2842,11 @@ paintBar('new');
   $('s-sync').value=cfg.sync||''; pill();
   if(cfg.sync)syncNow(true);
   paintKeyState();
-  if(!cfg.staff){$('t-set').click();toast(t('tSetStaff'))}
+  if(!cfg.staff){$('t-set').click();toast(t('tSetStaff'));}
+  else{
+    const ev=await B2B.ensureEvent(cfg.eventId);
+    if(ev&&ev.startDate&&!evRunning(ev))$('t-home').click();
+  }
 })();
 </script>
 </body>
