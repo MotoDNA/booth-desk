@@ -13,9 +13,13 @@ var CONFIG = {
   AI: {
     model: 'claude-sonnet-5',
     maxTokens: 1200,
-    temperature: 0,
     apiVersion: '2023-06-01',
-    endpoint: 'https://api.anthropic.com/v1/messages'
+    endpoint: 'https://api.anthropic.com/v1/messages',
+    /* Sonnet 5 rejects a non-default `temperature` outright, and runs thinking
+       by default with max_tokens capping thinking and answer together — a
+       short budget spends itself on thinking and truncates the JSON. This is
+       structured extraction, so thinking is turned off rather than paid for. */
+    thinking: { type: 'disabled' }
   },
   SHEETS: {
     Events:       ['eventId','eventName','startDate','endDate','venue','country','status','description','createdAt','updatedAt','deleted'],

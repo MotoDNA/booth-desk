@@ -1,4 +1,4 @@
-/**
+<!doctype html><html><head><meta charset="utf-8"><title>ALL_IN_ONE.gs</title><style>body{margin:0}pre{margin:0;font:13px/1.5 ui-monospace,Menlo,monospace;white-space:pre}</style></head><body><pre>/**
  * BOOTH DESK B2B — 서버 (합본)
  *
  * Apps Script 편집기에 이 파일 하나만 붙여넣으면 됩니다.
@@ -7,9 +7,9 @@
  *
  * 설치 순서는 README.md 를 보세요. 요약하면:
  *   1) 이 내용을 코드.gs 에 통째로 붙여넣기
- *   2) 프로젝트 설정 > 스크립트 속성에 SHARED_TOKEN, ANTHROPIC_API_KEY 추가
+ *   2) 프로젝트 설정 &gt; 스크립트 속성에 SHARED_TOKEN, ANTHROPIC_API_KEY 추가
  *   3) 함수 목록에서 setup 실행 (권한 허용)
- *   4) 배포 > 새 배포 > 웹 앱 (실행: 나, 액세스: 모든 사용자)
+ *   4) 배포 &gt; 새 배포 &gt; 웹 앱 (실행: 나, 액세스: 모든 사용자)
  */
 
 /* ═══════════ Config.gs ═══════════ */
@@ -18,7 +18,7 @@
  *
  * Nothing secret lives in this file. Keys are read from Script Properties,
  * which stay inside the customer's own Apps Script project:
- *   File > Project settings > Script properties
+ *   File &gt; Project settings &gt; Script properties
  *
  *   ANTHROPIC_API_KEY   required for the AI actions
  *   SHARED_TOKEN        required; the app sends it on every request
@@ -88,13 +88,13 @@ var Utils = (function () {
   }
 
   function isEmail(v) {
-    return typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+    return typeof v === 'string' &amp;&amp; /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
   }
 
   /* Ids come from the device and are echoed into sheet formulas and logs, so
      they are restricted rather than trusted. */
   function isId(v) {
-    return typeof v === 'string' && v.length > 0 && v.length <= 64 && /^[A-Za-z0-9_\-]+$/.test(v);
+    return typeof v === 'string' &amp;&amp; v.length &gt; 0 &amp;&amp; v.length &lt;= 64 &amp;&amp; /^[A-Za-z0-9_\-]+$/.test(v);
   }
 
   function num(v, dflt) {
@@ -150,7 +150,7 @@ var SheetService = (function () {
     var have = sh.getLastColumn()
       ? sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String)
       : [];
-    var missing = headers.filter(function (h) { return have.indexOf(h) < 0; });
+    var missing = headers.filter(function (h) { return have.indexOf(h) &lt; 0; });
     if (missing.length) {
       sh.getRange(1, have.length + 1, 1, missing.length).setValues([missing]);
       sh.setFrozenRows(1);
@@ -168,7 +168,7 @@ var SheetService = (function () {
 
   function readAll(name) {
     var sh = ensure(name);
-    if (sh.getLastRow() < 2) return { headers: headers(sh), rows: [] };
+    if (sh.getLastRow() &lt; 2) return { headers: headers(sh), rows: [] };
     var head = headers(sh);
     var values = sh.getRange(2, 1, sh.getLastRow() - 1, head.length).getValues();
     var rows = values.map(function (r, i) {
@@ -198,7 +198,7 @@ var SheetService = (function () {
       if (!cur) {
         appends.push(row);
         applied.push(id);
-      } else if (Utils.num(rec.updatedAt) >= Utils.num(cur.updatedAt)) {
+      } else if (Utils.num(rec.updatedAt) &gt;= Utils.num(cur.updatedAt)) {
         sh.getRange(cur.__row, 1, 1, head.length).setValues([row]);
         applied.push(id);
       } else {
@@ -215,7 +215,7 @@ var SheetService = (function () {
   function since(name, ts) {
     var data = readAll(name);
     return data.rows.filter(function (r) {
-      return Utils.num(r.updatedAt) > Utils.num(ts);
+      return Utils.num(r.updatedAt) &gt; Utils.num(ts);
     }).map(function (r) { delete r.__row; return r; });
   }
 
@@ -291,7 +291,7 @@ var SyncService = (function () {
 
   function sync(payload, deviceId) {
     var queue = payload.queue || [];
-    if (queue.length > CONFIG.MAX_BATCH) return Utils.fail('BATCH_TOO_LARGE',
+    if (queue.length &gt; CONFIG.MAX_BATCH) return Utils.fail('BATCH_TOO_LARGE',
       'queue of ' + queue.length + ' exceeds ' + CONFIG.MAX_BATCH);
 
     var grouped = {}, order = [];
@@ -326,7 +326,7 @@ var SyncService = (function () {
           .filter(function (x) { return x.why === 'older'; })
           .map(function (x) { return x.id; }));
       } catch (err) {
-        failed.push({ entity: entity, message: String(err && err.message || err) });
+        failed.push({ entity: entity, message: String(err &amp;&amp; err.message || err) });
       }
     });
 
@@ -398,7 +398,7 @@ var AIService = (function () {
   function json_(text) {
     var t = String(text || '').replace(/```json|```/g, '').trim();
     var a = t.indexOf('{'), b = t.lastIndexOf('}');
-    if (a < 0 || b <= a) throw new Error('no JSON in model reply');
+    if (a &lt; 0 || b &lt;= a) throw new Error('no JSON in model reply');
     return JSON.parse(t.slice(a, b + 1));
   }
 
@@ -438,11 +438,11 @@ var AIService = (function () {
 
     var out = json_(call_(SYSTEM_LEAD, lines, 1200));
     out.leadScore = Math.max(0, Math.min(100, Utils.num(out.leadScore)));
-    if (['A', 'B', 'C'].indexOf(out.grade) < 0) {
-      out.grade = out.leadScore >= 80 ? 'A' : out.leadScore >= 50 ? 'B' : 'C';
+    if (['A', 'B', 'C'].indexOf(out.grade) &lt; 0) {
+      out.grade = out.leadScore &gt;= 80 ? 'A' : out.leadScore &gt;= 50 ? 'B' : 'C';
     }
     out.recommendedDays = Math.max(1, Math.min(90, Utils.num(out.recommendedDays, 3)));
-    if (['high', 'normal', 'low'].indexOf(out.priority) < 0) out.priority = 'normal';
+    if (['high', 'normal', 'low'].indexOf(out.priority) &lt; 0) out.priority = 'normal';
     out.confidence = Math.max(0, Math.min(1, Utils.num(out.confidence, 0.5)));
     return out;
   }
@@ -508,7 +508,7 @@ var ApiRouter = (function () {
         deviceId: String(body.deviceId || ''), userId: String(body.userId || '')
       }));
     } catch (err) {
-      return reply_(Utils.fail('SERVER_ERROR', err && err.message || err));
+      return reply_(Utils.fail('SERVER_ERROR', err &amp;&amp; err.message || err));
     } finally {
       lock.releaseLock();
     }
@@ -536,3 +536,4 @@ function setup() {
   return 'ok';
 }
 
+</pre></body></html>

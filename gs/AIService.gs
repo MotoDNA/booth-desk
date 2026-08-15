@@ -20,7 +20,7 @@ var AIService = (function () {
       payload: JSON.stringify({
         model: CONFIG.AI.model,
         max_tokens: maxTokens || CONFIG.AI.maxTokens,
-        temperature: CONFIG.AI.temperature,
+        thinking: CONFIG.AI.thinking,
         system: system,
         messages: [{ role: 'user', content: userText }]
       })
@@ -77,7 +77,7 @@ var AIService = (function () {
       '', 'Reply language: ' + (p.lang === 'en' ? 'English' : p.lang === 'zh' ? 'Simplified Chinese' : 'Korean')
     ].join('\n');
 
-    var out = json_(call_(SYSTEM_LEAD, lines, 900));
+    var out = json_(call_(SYSTEM_LEAD, lines, 1200));
     out.leadScore = Math.max(0, Math.min(100, Utils.num(out.leadScore)));
     if (['A', 'B', 'C'].indexOf(out.grade) < 0) {
       out.grade = out.leadScore >= 80 ? 'A' : out.leadScore >= 50 ? 'B' : 'C';
