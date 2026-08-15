@@ -261,6 +261,33 @@ section[hidden]{display:none}
 #rowProfile.lock input,#rowProfile.lock textarea,#rowProfile.lock select,#rowProfile.lock #pf-save,#rowProfile.lock #pf-load,#rowProfile.lock #pf-apply{opacity:.45;pointer-events:none}
 #rowProfile.lock #pf-lock,#rowProfile.lock #pf-copy{opacity:1;pointer-events:auto}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+/* ── AI (Ver 3.0) ── */
+.aibox{background:var(--soft);border-radius:12px;padding:14px 15px;margin-top:8px}
+.aibox.err{background:#FBEDEB}
+.aiscore{display:flex;align-items:baseline;gap:9px}
+.aiscore b{font-size:1.5rem;font-weight:800;letter-spacing:-.04em;color:var(--brand)}
+.aiscore span{font-size:.62rem;font-weight:700;letter-spacing:.08em;color:var(--mut)}
+.airow{margin-top:11px}
+.airow em{display:block;font-style:normal;font-size:.6rem;font-weight:800;letter-spacing:.06em;color:var(--mut)}
+.airow p{margin:4px 0 0;font-size:.74rem;line-height:1.6;color:var(--ink);white-space:pre-wrap}
+.aifoot{margin-top:12px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  font-family:var(--mono);font-size:.58rem;color:var(--mut)}
+.aiacts{margin-top:11px;display:flex;gap:7px}
+.aiacts button{flex:1;padding:10px 0;border-radius:9px;font-size:.68rem;font-weight:700;
+  background:var(--card);color:var(--sub)}
+.aiacts button.pri{background:var(--dark);color:#fff}
+.aitag{font-style:normal;font-size:.6rem;font-weight:800;padding:3px 7px;border-radius:6px;
+  background:var(--brand);color:#fff;letter-spacing:.03em}
+.aibar{position:fixed;left:14px;right:14px;bottom:calc(14px + env(safe-area-inset-bottom));z-index:110;
+  background:var(--dark);color:#fff;border-radius:13px;padding:13px 15px;display:flex;
+  align-items:center;gap:11px;box-shadow:0 8px 26px rgba(28,26,24,.22)}
+.aibar[hidden]{display:none!important}
+.aibar p{flex:1;margin:0;font-size:.7rem;line-height:1.45}
+.aibar button{flex:0 0 auto;padding:9px 14px;border-radius:9px;background:#fff;color:var(--ink);
+  font-size:.68rem;font-weight:800}
+.aibatch{width:100%;padding:12px;border-radius:11px;background:var(--card);box-shadow:var(--sh);
+  font-size:.7rem;font-weight:700;color:var(--sub);margin-bottom:11px}
+
 /* ── 후속 연락 (Ver 3.0) ── */
 .fugrp{margin-bottom:18px}
 .fugrp>h4{margin:0 0 10px;font-size:.7rem;font-weight:800;letter-spacing:.04em;color:var(--sub);
@@ -481,6 +508,7 @@ section[hidden]{display:none}
     <div class="sbox"><span>⌕</span><input id="ldQ" type="search" lang="ko" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="ldSearchPh" placeholder="이름, 회사명, 연락처 검색"></div>
   </div>
   <div class="lfilter" id="ldFilter"></div>
+  <button class="aibatch" id="ldBatch" hidden></button>
   <div id="ldList"></div>
 </section>
 
@@ -684,6 +712,11 @@ section[hidden]{display:none}
   </div>
 </div>
 
+<div class="aibar" id="aiBar" hidden>
+  <p id="aiBarMsg"></p>
+  <button id="aiBarBtn"></button>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -822,6 +855,18 @@ ko:{evCurrent:'현재 전시회',evPickTitle:'전시회 선택',evNew:'+ 새 전
  ft_thank_you:'감사 인사',ft_sample_followup:'샘플 후속',ft_quotation_followup:'견적 후속',
  ft_general_followup:'일반 후속',ft_recontact:'재연락',
  hFollow:'후속 연락',
+ aiSection:'AI 분석',aiRun:'AI 분석',aiRerun:'다시 분석',aiWorking:'분석 중…',
+ aiScore:'리드 점수',aiSummaryL:'요약',aiNextL:'다음 행동',aiWhy:'판단 근거',
+ aiConf:'확신도',aiConfHi:'높음',aiConfMid:'보통',aiConfLo:'낮음',
+ aiAt:'분석 시각',aiNone:'아직 분석하지 않았습니다',
+ aiFail:'분석하지 못했습니다',aiRetry:'다시 시도',aiNoServer:'설정에서 서버를 먼저 연결해 주세요',
+ aiOffline:'인터넷이 없어 분석할 수 없습니다',
+ aiSuggest:'AI 제안 등급',aiApply:'이 등급으로 바꾸기',aiApplied:'등급을 바꿨습니다',
+ aiSame:'담당자 등급과 같음',aiDiffer:'담당자 등급은 %g 입니다',
+ aiBatch:'분석 안 된 %n건 분석',aiBatchRun:'%i / %n 분석 중…',
+ aiBatchDone:'%ok건 분석 완료%fail',aiBatchFail:' · %n건 실패',
+ aiNowBtn:'지금 AI 분석',aiLaterHint:'저장했습니다 — 나중에 리드 탭에서 한꺼번에 분석할 수 있습니다',
+ aiRecommended:'AI 추천',
  sB2bH:'서버 연결 (Ver 3.0)',
  sB2bP:'회사 구글 계정에 Apps Script를 설치하면 리드·회사·후속 일정이 구글 시트로 모이고, AI 기능이 켜집니다. Claude API 키는 그 스크립트 안에만 저장됩니다.',
  b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'스크립트에 설정한 SHARED_TOKEN',
@@ -831,7 +876,7 @@ ko:{evCurrent:'현재 전시회',evPickTitle:'전시회 선택',evNew:'+ 새 전
  b2bOffline:'오프라인 — 연결되면 자동으로 보냅니다',b2bAiOn:'AI 사용 가능',b2bAiOff:'AI 키 미설정',
  hTotal:'전체',hToday:'오늘',hGradeA:'A등급',hReq:'요청 있음',
  hGrade:'등급 분포',hPipe:'진행 단계',hConv:'전환율',hAttention:'먼저 챙길 리드',
- hAttentionS:'A등급인데 아직 연락 전인 리드입니다',hAttentionNone:'A등급 리드를 모두 챙겼습니다',
+ hAttentionS:'A등급인데 아직 연락 전인 리드입니다',hAttentionAi:'AI 점수가 높은 순 · 아직 연락 전',hAttentionNone:'A등급 리드를 모두 챙겼습니다',
  hEmpty:'아직 데이터가 없습니다',hEmptyS:'접수 탭에서 명함을 촬영하면 여기에 집계됩니다',
  hConvContact:'연락',hConvSample:'샘플',hConvQuote:'견적',hConvWon:'성사',
  hOfFmt:'%t건 중 %n건',hNoDate:'날짜 미설정',
@@ -865,6 +910,18 @@ en:{evCurrent:'Current event',evPickTitle:'Select event',evNew:'+ New event',
  ft_thank_you:'Thank you',ft_sample_followup:'Sample',ft_quotation_followup:'Quotation',
  ft_general_followup:'General',ft_recontact:'Re-contact',
  hFollow:'Follow-up',
+ aiSection:'AI analysis',aiRun:'Analyse',aiRerun:'Re-analyse',aiWorking:'Analysing…',
+ aiScore:'Lead score',aiSummaryL:'Summary',aiNextL:'Next action',aiWhy:'Why',
+ aiConf:'Confidence',aiConfHi:'High',aiConfMid:'Medium',aiConfLo:'Low',
+ aiAt:'Analysed',aiNone:'Not analysed yet',
+ aiFail:'Could not analyse',aiRetry:'Try again',aiNoServer:'Connect the server in Settings first',
+ aiOffline:'No connection, cannot analyse',
+ aiSuggest:'AI suggested grade',aiApply:'Use this grade',aiApplied:'Grade updated',
+ aiSame:'Same as the staff grade',aiDiffer:'Staff grade is %g',
+ aiBatch:'Analyse %n unanalysed',aiBatchRun:'Analysing %i / %n…',
+ aiBatchDone:'%ok analysed%fail',aiBatchFail:' · %n failed',
+ aiNowBtn:'Analyse now',aiLaterHint:'Saved — you can analyse them together later from the Leads tab',
+ aiRecommended:'AI suggested',
  sB2bH:'Server connection (Ver 3.0)',
  sB2bP:'Installing the Apps Script in your own Google account collects leads, companies and follow-ups into a Google Sheet and switches the AI features on. The Claude API key is stored only inside that script.',
  b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'The SHARED_TOKEN you set in the script',
@@ -874,7 +931,7 @@ en:{evCurrent:'Current event',evPickTitle:'Select event',evNew:'+ New event',
  b2bOffline:'Offline — will send once reconnected',b2bAiOn:'AI available',b2bAiOff:'AI key not set',
  hTotal:'Total',hToday:'Today',hGradeA:'Grade A',hReq:'With requests',
  hGrade:'Grades',hPipe:'Pipeline',hConv:'Conversion',hAttention:'Needs attention',
- hAttentionS:'Grade A leads with no contact yet',hAttentionNone:'Every grade A lead has been picked up',
+ hAttentionS:'Grade A leads with no contact yet',hAttentionAi:'Highest AI score, not contacted yet',hAttentionNone:'Every grade A lead has been picked up',
  hEmpty:'Nothing to show yet',hEmptyS:'Capture a card on the Booth tab and it lands here',
  hConvContact:'Contacted',hConvSample:'Sample',hConvQuote:'Quotation',hConvWon:'Won',
  hOfFmt:'%n of %t',hNoDate:'No dates set',
@@ -908,6 +965,18 @@ zh:{evCurrent:'当前展会',evPickTitle:'选择展会',evNew:'+ 新建展会',
  ft_thank_you:'致谢',ft_sample_followup:'样品跟进',ft_quotation_followup:'报价跟进',
  ft_general_followup:'常规跟进',ft_recontact:'再联系',
  hFollow:'跟进',
+ aiSection:'AI 分析',aiRun:'AI 分析',aiRerun:'重新分析',aiWorking:'分析中…',
+ aiScore:'客户评分',aiSummaryL:'摘要',aiNextL:'下一步',aiWhy:'判断依据',
+ aiConf:'置信度',aiConfHi:'高',aiConfMid:'中',aiConfLo:'低',
+ aiAt:'分析时间',aiNone:'尚未分析',
+ aiFail:'无法分析',aiRetry:'重试',aiNoServer:'请先在设置中连接服务器',
+ aiOffline:'无网络，无法分析',
+ aiSuggest:'AI 建议等级',aiApply:'采用此等级',aiApplied:'已更新等级',
+ aiSame:'与负责人评级相同',aiDiffer:'负责人评级为 %g',
+ aiBatch:'分析未分析的%n条',aiBatchRun:'分析中 %i / %n…',
+ aiBatchDone:'已分析%ok条%fail',aiBatchFail:' · %n条失败',
+ aiNowBtn:'立即分析',aiLaterHint:'已保存 — 稍后可在客户页批量分析',
+ aiRecommended:'AI 建议',
  sB2bH:'服务器连接 (Ver 3.0)',
  sB2bP:'在贵公司的谷歌账号中安装 Apps Script 后，客户、公司与跟进计划会汇总到谷歌表格，并启用 AI 功能。Claude API 密钥仅保存在该脚本中。',
  b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'脚本中设置的 SHARED_TOKEN',
@@ -917,7 +986,7 @@ zh:{evCurrent:'当前展会',evPickTitle:'选择展会',evNew:'+ 新建展会',
  b2bOffline:'离线 — 恢复后会自动发送',b2bAiOn:'AI 可用',b2bAiOff:'未设置 AI 密钥',
  hTotal:'合计',hToday:'今日',hGradeA:'A级',hReq:'有需求',
  hGrade:'等级分布',hPipe:'进展阶段',hConv:'转化率',hAttention:'优先跟进',
- hAttentionS:'A级但尚未联系的客户',hAttentionNone:'A级客户均已跟进',
+ hAttentionS:'A级但尚未联系的客户',hAttentionAi:'AI 评分最高且尚未联系',hAttentionNone:'A级客户均已跟进',
  hEmpty:'暂无数据',hEmptyS:'在登记页拍摄名片后会汇总在这里',
  hConvContact:'已联系',hConvSample:'样品',hConvQuote:'报价',hConvWon:'成交',
  hOfFmt:'%t 中 %n',hNoDate:'未设置日期',
@@ -1312,6 +1381,102 @@ async function captureFromV2(rec,eventId){
   return out;
 }
 
+/* ---- AI analysis --------------------------------------------------------
+   The model advises; it never decides. Its score and grade are stored
+   alongside the staff's grade rather than replacing it (spec 98), and a
+   failed call can never cost a lead (spec 74). */
+function hashInput(o){
+  const s=JSON.stringify(o); let h=5381;
+  for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;
+  return 'h'+(h>>>0).toString(36);
+}
+
+/* Data minimisation (spec 72): scoring a conversation needs what was said
+   and who said it professionally — not the visitor's name, phone, email or
+   address. Those never leave the device. */
+async function aiLeadInput(lead){
+  const co=lead.companyId?await get('companies',lead.companyId):null;
+  const ev=lead.eventId?await get('events',lead.eventId):null;
+  const profile=(typeof P==='function')?P():{};
+  return {
+    company:co?co.companyName:'',
+    jobTitle:lead.jobTitle||'',
+    interests:(lead.interests||[]).join(', '),
+    requests:(lead.requests||[]).join(', '),
+    notes:lead.notes||'',
+    leadGrade:lead.leadGrade||'',
+    event:ev?ev.eventName:'',
+    ourCompany:[profile.brand,profile.brand2].filter(Boolean).join(' '),
+    ourProducts:((profile.g1&&profile.g1.opts)||[]).join(', '),
+    lang:(typeof cfg!=='undefined'&&cfg.lang)||'ko'
+  };
+}
+
+async function aiLatest(leadId,type){
+  return (await byIndex('aiResults','leadId',leadId))
+    .filter(r=>!r.deleted&&r.type===(type||'lead_score'))
+    .sort((a,b)=>(b.createdAt||0)-(a.createdAt||0))[0]||null;
+}
+
+async function analyzeLead(leadId,opt){
+  opt=opt||{};
+  const lead=await get('leads',leadId);
+  if(!lead||lead.deleted)throw new Error('NO_LEAD');
+  const input=await aiLeadInput(lead);
+  const inputHash=hashInput(input);
+
+  /* Spec 82: same inputs, same answer — don't pay for it twice. */
+  if(!opt.force){
+    const prev=await aiLatest(leadId,'lead_score');
+    if(prev&&prev.inputHash===inputHash)return {result:prev.result,cached:true,at:prev.createdAt};
+  }
+
+  const data=await api('generateLeadAnalysis',input);
+
+  const rec=await save('aiResults',{leadId,companyId:lead.companyId||'',type:'lead_score',
+    provider:AI_CONFIG.provider,model:AI_CONFIG.model,inputHash,result:data,
+    confidence:Number(data.confidence||0)},{queue:false});
+
+  const fresh=await get('leads',leadId);
+  fresh.leadScore=Number(data.leadScore||0);
+  fresh.aiGrade=data.grade||'';            // kept apart from the staff's grade
+  fresh.nextAction=data.nextAction||'';
+  await save('leads',fresh);
+
+  await applyAiToFollowUp(fresh,data);
+  return {result:data,cached:false,at:rec.createdAt};
+}
+
+/* Moves the follow-up date only while it is still the one the rule picked.
+   A date the user chose by hand outranks the model. */
+async function applyAiToFollowUp(lead,data){
+  const open=(await byIndex('followups','leadId',lead.id))
+    .filter(f=>!f.deleted&&FU_OPEN.includes(f.status));
+  if(!open.length)return null;
+  const f=open[0];
+  if(f.adjusted)return f;
+  const days=Math.max(1,Math.min(90,Number(data.recommendedDays||3)));
+  f.scheduledAt=(lead.createdAt||Date.now())+days*86400000;
+  f.priority=['high','normal','low'].includes(data.priority)?data.priority:f.priority;
+  f.aiRecommended=true;
+  f.aiReason=String(data.reason||'').slice(0,300);
+  return save('followups',f);
+}
+
+async function unanalyzedLeads(eventId){
+  const leads=(await live('leads')).filter(l=>!eventId||l.eventId===eventId);
+  const out=[];
+  for(const l of leads){
+    const prev=await aiLatest(l.id,'lead_score');
+    if(!prev)out.push(l);
+    else{
+      const h=hashInput(await aiLeadInput(l));
+      if(prev.inputHash!==h)out.push(l);
+    }
+  }
+  return out;
+}
+
 /* ---- Server API ---------------------------------------------------------
    text/plain dodges the CORS preflight that Apps Script cannot answer; the
    body is still JSON. Ver 2.0 does the same thing against its own endpoint. */
@@ -1593,6 +1758,7 @@ return {NS,AI_CONFIG,SCHEMA,LEGACY_DB,open,get,all,byIndex,live,save,remove,
         events,ensureEvent,importRow,captureFromV2,
         fuPlan,fuType,scheduleFollowUp,ensureFollowUps,openFollowUps,FU_OPEN,
         api,flushQueue,queueStatus,retryFailed,deviceId,applyPull,fromRow,MAX_RETRY,
+        analyzeLead,aiLatest,aiLeadInput,unanalyzedLeads,hashInput,
         error:()=>lastError};
 })();
 
@@ -1976,8 +2142,10 @@ $('saveBtn').addEventListener('click',async()=>{
     if(!confirm('회사명·이름·메모가 모두 비어 있습니다. 사진만 저장할까요?'))return;
   }
   rows.unshift(rec); filterStaff=''; const okw=await dbPut(rec); mirrorSave();
-  try{ await B2B.captureFromV2(rec,cfg.eventId); }
-  catch(err){ console.warn('B2B capture failed:',err); }
+  try{
+    const cap=await B2B.captureFromV2(rec,cfg.eventId);
+    if(cap&&cap.lead)aiOffer(cap.lead.id);
+  }catch(err){ console.warn('B2B capture failed:',err); }
   if(!okw)toast(t('tNoStore'));
   stamp(pad(rows.length)+' 번');
   pill(); if(cfg.sync)syncNow(true);
@@ -2100,6 +2268,136 @@ $('ev-save').addEventListener('click',async()=>{
   toast(t(prev?'evSaved':'evCreated'));
 });
 
+/* ═════ AI 분석 화면 (Ver 3.0) ═════ */
+function aiReadable(err){
+  const m=String(err&&err.message||err||'');
+  if(m==='NO_ENDPOINT')return t('aiNoServer');
+  if(m==='OFFLINE')return t('aiOffline');
+  return m.slice(0,110);
+}
+function confWord(c){
+  return c>=0.75?t('aiConfHi'):c>=0.45?t('aiConfMid'):t('aiConfLo');
+}
+function aiStamp(ms){
+  if(!ms)return '';
+  const d=new Date(ms), p=n=>String(n).padStart(2,'0');
+  return shortDate(ms)+' '+p(d.getHours())+':'+p(d.getMinutes());
+}
+
+/* Rendered from a stored result, so the panel shows the same thing after a
+   reload and states when it was produced (spec 80). */
+function aiBlockHtml(lead,rec){
+  if(!rec){
+    return '<div class="aibox"><p style="margin:0;font-size:.72rem;color:var(--sub)">'+
+      esc(t('aiNone'))+'</p><div class="aiacts">'+
+      '<button class="pri" data-ai="run">'+esc(t('aiRun'))+'</button></div></div>';
+  }
+  const r=rec.result||{};
+  const staff=lead.leadGrade||'';
+  const gradeNote=!r.grade?'':(staff&&staff!==r.grade
+    ? esc(t('aiDiffer').replace('%g',gradeLabel(staff)))
+    : staff?esc(t('aiSame')):'');
+  return '<div class="aibox">'+
+    '<div class="aiscore"><b>'+Number(r.leadScore||0)+'</b><span>/ 100 · '+esc(t('aiScore'))+'</span>'+
+      (r.grade?'<span class="gbadge '+esc(r.grade)+'" style="margin-left:auto">'+esc(r.grade)+'</span>':'')+'</div>'+
+    (r.grade?'<div class="aifoot" style="margin-top:6px">'+esc(t('aiSuggest'))+' · '+gradeNote+'</div>':'')+
+    (r.summary?'<div class="airow"><em>'+esc(t('aiSummaryL'))+'</em><p>'+esc(r.summary)+'</p></div>':'')+
+    (r.nextAction?'<div class="airow"><em>'+esc(t('aiNextL'))+'</em><p>'+esc(r.nextAction)+'</p></div>':'')+
+    (r.reason?'<div class="airow"><em>'+esc(t('aiWhy'))+'</em><p>'+esc(r.reason)+'</p></div>':'')+
+    '<div class="aifoot">'+esc(t('aiConf'))+' '+esc(confWord(Number(r.confidence||0)))+
+      ' · '+esc(t('aiAt'))+' '+esc(aiStamp(rec.createdAt))+
+      ' · '+esc(rec.model||'')+'</div>'+
+    '<div class="aiacts">'+
+      (r.grade&&r.grade!==staff?'<button data-ai="grade" data-g="'+esc(r.grade)+'">'+esc(t('aiApply'))+'</button>':'')+
+      '<button data-ai="run">'+esc(t('aiRerun'))+'</button>'+
+    '</div></div>';
+}
+
+async function aiPaint(leadId){
+  const host=$('aiHost'); if(!host)return;
+  const lead=await B2B.get('leads',leadId);
+  const rec=await B2B.aiLatest(leadId,'lead_score');
+  host.innerHTML=aiBlockHtml(lead,rec);
+}
+
+async function aiRun(leadId,force){
+  const host=$('aiHost'); if(!host)return;
+  host.innerHTML='<div class="aibox"><p style="margin:0;font-size:.72rem"><span class="spin"></span>'+
+    esc(t('aiWorking'))+'</p></div>';
+  try{
+    await B2B.analyzeLead(leadId,{force:!!force});
+    await aiPaint(leadId);
+    renderFollowUps(); renderHome(); renderLeads();
+  }catch(err){
+    /* Spec 74: a failed analysis costs nothing. The record is untouched and
+       the user is told what to do next. */
+    host.innerHTML='<div class="aibox err"><p style="margin:0;font-size:.72rem">'+
+      esc(t('aiFail'))+' — '+esc(aiReadable(err))+'</p>'+
+      '<div class="aiacts"><button class="pri" data-ai="run">'+esc(t('aiRetry'))+'</button></div></div>';
+  }
+}
+
+$('b2bBody').addEventListener('click',async e=>{
+  const b=e.target.closest('[data-ai]'); if(!b)return;
+  const id=$('aiHost')&&$('aiHost').dataset.lead; if(!id)return;
+  if(b.dataset.ai==='run')return aiRun(id,true);
+  if(b.dataset.ai==='grade'){
+    const lead=await B2B.get('leads',id);
+    lead.leadGrade=b.dataset.g;
+    await B2B.save('leads',lead);
+    toast(t('aiApplied'));
+    await openLead(id);
+    renderLeads(); renderHome();
+  }
+});
+
+/* ---- batch (the "analyse later" path from spec 27) ---- */
+async function aiBatchPaint(){
+  const btn=$('ldBatch'); if(!btn)return;
+  if(!(cfg.b2bApi||'').trim()){ btn.hidden=true; return; }
+  const list=await B2B.unanalyzedLeads(ldScope==='all'?'':cfg.eventId);
+  btn.hidden=!list.length;
+  if(list.length)btn.textContent=t('aiBatch').replace('%n',list.length);
+}
+
+$('ldBatch').addEventListener('click',async()=>{
+  const btn=$('ldBatch');
+  const list=await B2B.unanalyzedLeads(ldScope==='all'?'':cfg.eventId);
+  if(!list.length)return;
+  let ok=0,bad=0;
+  btn.disabled=true;
+  for(let i=0;i<list.length;i++){
+    btn.textContent=t('aiBatchRun').replace('%i',i+1).replace('%n',list.length);
+    try{ await B2B.analyzeLead(list[i].id); ok++; }
+    catch(err){ bad++; if(String(err.message||'')==='OFFLINE'||String(err.message||'')==='NO_ENDPOINT')break; }
+  }
+  btn.disabled=false;
+  await aiBatchPaint(); renderLeads(); renderHome();
+  await renderFollowUps();
+  toast(t('aiBatchDone').replace('%ok',ok).replace('%fail',bad?t('aiBatchFail').replace('%n',bad):''));
+});
+
+/* ---- after a capture (spec 27) ----
+   A sheet here would put a decision between the staff and the next visitor,
+   so the offer is a bar that can simply be ignored; ignoring it means later,
+   which is the documented default. */
+let aiBarTimer=null;
+function aiOffer(leadId){
+  if(!(cfg.b2bApi||'').trim())return;
+  const bar=$('aiBar');
+  $('aiBarMsg').textContent=t('aiLaterHint');
+  $('aiBarBtn').textContent=t('aiNowBtn');
+  $('aiBarBtn').onclick=async()=>{
+    bar.hidden=true;
+    try{ await B2B.analyzeLead(leadId); toast(t('aiBatchDone').replace('%ok',1).replace('%fail','')); }
+    catch(err){ toast(t('aiFail')+' — '+aiReadable(err)); }
+    renderFollowUps(); renderHome();
+  };
+  bar.hidden=false;
+  clearTimeout(aiBarTimer);
+  aiBarTimer=setTimeout(()=>{ bar.hidden=true; },8000);
+}
+
 /* ═════ 서버 연결 (Ver 3.0) ═════ */
 function b2bStat(msg,cls){
   const e=$('b2bStatus'); if(!e)return;
@@ -2205,7 +2503,9 @@ async function renderFollowUps(){
           (l.leadGrade?'<span class="gbadge '+esc(l.leadGrade)+'">'+esc(l.leadGrade)+'</span>':'')+
         '</div>'+
         '<p class="who">'+esc([l.fullName,l.jobTitle].filter(Boolean).join(' · ')||'—')+'</p>'+
-        '<p class="why"><b>'+esc(t('ft_'+f.type))+'</b> · '+esc(t('fu_'+f.reason))+
+        '<p class="why"><b>'+esc(t('ft_'+f.type))+'</b> · '+
+          (f.aiRecommended?'<i class="aitag">'+esc(t('aiRecommended'))+'</i> '+esc(f.aiReason||'')
+                          :esc(t('fu_'+f.reason)))+
           '<br><span class="fudate'+(k==='fuOverdue'?' late':'')+'">'+
           esc(t('fuDue'))+' '+esc(shortDate(f.scheduledAt))+'</span></p>'+
         '<div class="acts">'+
@@ -2224,7 +2524,7 @@ $('fuBody').addEventListener('click',async e=>{
 
   if(btn.dataset.act==='snooze'){
     f.scheduledAt=(f.scheduledAt||Date.now())+3*86400000;
-    f.status='pending';
+    f.status='pending'; f.adjusted=true;
     await B2B.save('followups',f);
     toast(t('fuSnoozeMsg'));
   }else{
@@ -2311,15 +2611,30 @@ async function renderHome(){
       '<u>'+esc(t('hOfFmt').replace('%n',reached(st)).replace('%t',mine.length))+'</u></div>').join('')+
     '</div></div>';
 
-  const waiting=mine.filter(l=>l.leadGrade==='A'&&FUNNEL.indexOf(l.status||'new')<FUNNEL.indexOf('contacted'))
-    .sort((a,b)=>(a.createdAt||0)-(b.createdAt||0));
+  /* lost and nurture sit off the funnel and index as -1, which would read
+     as "earlier than contacted" and put closed leads on the to-do list. */
+  const uncontacted=mine.filter(l=>{
+    const i=FUNNEL.indexOf(l.status||'new');
+    return i>=0&&i<FUNNEL.indexOf('contacted');
+  });
+  const scored=uncontacted.filter(l=>Number(l.leadScore)>0);
+  /* Once leads have been scored the list ranks by score; before that it is
+     the plain grade-A rule. The note says which one is in effect, so the
+     ordering is never unexplained. */
+  const byScore=scored.length>=Math.max(3,Math.ceil(uncontacted.length/2));
+  const waiting=(byScore?scored.slice():uncontacted.filter(l=>l.leadGrade==='A'))
+    .sort(byScore
+      ? (a,b)=>Number(b.leadScore||0)-Number(a.leadScore||0)
+      : (a,b)=>(a.createdAt||0)-(b.createdAt||0));
   const attention='<div class="hblock"><h4>'+t('hAttention')+'</h4>'+
     (waiting.length
-      ? '<p class="hnote">'+t('hAttentionS')+'</p>'+waiting.slice(0,5).map(l=>
+      ? '<p class="hnote">'+t(byScore?'hAttentionAi':'hAttentionS')+'</p>'+waiting.slice(0,5).map(l=>
           '<div class="hlead" data-lead="'+esc(l.id)+'"><div class="n"><b>'+
           esc(coName.get(l.companyId)||t('coNoName'))+'</b><span>'+
           esc([l.fullName,l.jobTitle].filter(Boolean).join(' · ')||'—')+'</span></div>'+
-          '<span class="gbadge A">A</span></div>').join('')
+          (byScore&&Number(l.leadScore)
+            ? '<span class="gbadge '+esc(l.aiGrade||l.leadGrade||'')+'">'+Number(l.leadScore)+'</span>'
+            : '<span class="gbadge A">A</span>')+'</div>').join('')
       : '<p class="hnote">'+t('hAttentionNone')+'</p>')+'</div>';
 
   const fus=await B2B.openFollowUps(ev.id);
@@ -2367,6 +2682,7 @@ async function ldFilterPaint(){
 
 async function renderLeads(){
   await ldFilterPaint();
+  aiBatchPaint();
   const [leads,cos]=await Promise.all([B2B.live('leads'),B2B.live('companies')]);
   const coName=new Map(cos.map(c=>[c.id,c.companyName]));
   const q=ldQuery.trim().toLowerCase();
@@ -2450,6 +2766,8 @@ async function openLead(id){
   h+=dsec(t('lGrade'), l.leadGrade
       ? '<span class="gbadge '+esc(l.leadGrade)+'">'+esc(gradeLabel(l.leadGrade))+'</span>'
       : t('dNoValue'));
+  h+='<div class="drow"><span>'+esc(t('aiSection'))+'</span>'+
+     '<div id="aiHost" data-lead="'+esc(l.id)+'"></div></div>';
   h+=dsec(t('dStatus'),'<select class="dsel" id="ldStatus">'+
       LEAD_STATUS.map(k=>'<option value="'+k+'"'+((l.status||'new')===k?' selected':'')+'>'+esc(stLabel(k))+'</option>').join('')+
       '</select>');
@@ -2469,6 +2787,7 @@ async function openLead(id){
   $('b2bBody').innerHTML=h;
   $('b2bDetail').hidden=false;
   $('b2bBody').scrollTop=0;
+  aiPaint(l.id);
 
   $('ldStatus').addEventListener('change',async e=>{
     const cur=await B2B.get('leads',l.id);
