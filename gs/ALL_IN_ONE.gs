@@ -1,0 +1,534 @@
+/**
+ * BOOTH DESK B2B — 서버 (합본)
+ *
+ * Apps Script 편집기에 이 파일 하나만 붙여넣으면 됩니다.
+ * 원본은 7개 파일로 나뉘어 있고, 이 파일은 그것을 순서대로 이어붙인 것입니다.
+ * 내용은 완전히 같습니다.
+ *
+ * 설치 순서는 README.md 를 보세요. 요약하면:
+ *   1) 이 내용을 코드.gs 에 통째로 붙여넣기
+ *   2) 프로젝트 설정 > 스크립트 속성에 SHARED_TOKEN, ANTHROPIC_API_KEY 추가
+ *   3) 함수 목록에서 setup 실행 (권한 허용)
+ *   4) 배포 > 새 배포 > 웹 앱 (실행: 나, 액세스: 모든 사용자)
+ */
+
+/* ═══════════ Config.gs ═══════════ */
+/**
+ * BOOTH DESK B2B — configuration.
+ *
+ * Nothing secret lives in this file. Keys are read from Script Properties,
+ * which stay inside the customer's own Apps Script project:
+ *   File > Project settings > Script properties
+ *
+ *   ANTHROPIC_API_KEY   required for the AI actions
+ *   SHARED_TOKEN        required; the app sends it on every request
+ *   SPREADSHEET_ID      optional; defaults to the bound spreadsheet
+ */
+var CONFIG = {
+  AI: {
+    model: 'claude-sonnet-5',
+    maxTokens: 1200,
+    temperature: 0,
+    apiVersion: '2023-06-01',
+    endpoint: 'https://api.anthropic.com/v1/messages'
+  },
+  SHEETS: {
+    Events:       ['eventId','eventName','startDate','endDate','venue','country','status','description','createdAt','updatedAt','deleted'],
+    Leads:        ['leadId','eventId','companyId','fullName','jobTitle','email','phone','country','website','leadGrade','leadScore','status','assignedTo','interests','requests','notes','nextAction','nextActionDate','createdAt','updatedAt','deleted'],
+    Companies:    ['companyId','companyName','website','country','industry','businessType','products','markets','employeeSize','description','aiSummary','aiFitScore','aiResearchStatus','researchSource','researchedAt','createdAt','updatedAt','deleted'],
+    Interactions: ['interactionId','leadId','eventId','type','summary','notes','interests','requests','createdBy','createdAt','updatedAt','deleted'],
+    FollowUps:    ['followUpId','leadId','eventId','type','scheduledAt','status','priority','reason','aiRecommended','aiReason','subject','body','approvedAt','sentAt','sentBy','gmailMessageId','errorMessage','createdAt','updatedAt','deleted'],
+    EmailLogs:    ['emailId','followUpId','leadId','recipient','subject','status','provider','messageId','sentAt','errorMessage'],
+    SyncLogs:     ['syncId','deviceId','entityType','entityId','action','status','timestamp','errorMessage']
+  },
+  /* Which object store maps onto which sheet and id column. */
+  ENTITIES: {
+    events:       {sheet:'Events',       idCol:'eventId'},
+    leads:        {sheet:'Leads',        idCol:'leadId'},
+    companies:    {sheet:'Companies',    idCol:'companyId'},
+    interactions: {sheet:'Interactions', idCol:'interactionId'},
+    followups:    {sheet:'FollowUps',    idCol:'followUpId'}
+  },
+  MAX_BATCH: 500
+};
+
+function prop_(name) {
+  return PropertiesService.getScriptProperties().getProperty(name) || '';
+}
+
+/* ═══════════ Utils.gs ═══════════ */
+/**
+ * Shared helpers. Kept free of Apps Script services where possible so the
+ * logic can be unit-tested outside the editor.
+ */
+var Utils = (function () {
+
+  /* A cell beginning with = + - @ is executed as a formula by Sheets and by
+     Excel when the sheet is exported. Everything written from the app is
+     visitor-supplied text, so it is neutralised on the way in. */
+  function safeCell(v) {
+    if (v === null || v === undefined) return '';
+    if (typeof v === 'number' || typeof v === 'boolean') return v;
+    var s = String(v);
+    return /^[=+\-@\t\r]/.test(s) ? "'" + s : s;
+  }
+
+  function asList(v) {
+    if (Array.isArray(v)) return v.join(' / ');
+    return v === null || v === undefined ? '' : String(v);
+  }
+
+  function parseList(v) {
+    if (!v) return [];
+    return String(v).split('/').map(function (x) { return x.trim(); }).filter(Boolean);
+  }
+
+  function isEmail(v) {
+    return typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+  }
+
+  /* Ids come from the device and are echoed into sheet formulas and logs, so
+     they are restricted rather than trusted. */
+  function isId(v) {
+    return typeof v === 'string' && v.length > 0 && v.length <= 64 && /^[A-Za-z0-9_\-]+$/.test(v);
+  }
+
+  function num(v, dflt) {
+    var n = Number(v);
+    return isFinite(n) ? n : (dflt === undefined ? 0 : dflt);
+  }
+
+  function ok(data) {
+    return { success: true, data: data === undefined ? null : data, error: null,
+             timestamp: new Date().toISOString() };
+  }
+
+  function fail(code, message) {
+    return { success: false, data: null, error: { code: code, message: String(message || '') },
+             timestamp: new Date().toISOString() };
+  }
+
+  /* A plain [] lookup on an object literal also finds inherited keys, so
+     'constructor' and '__proto__' pass an "is it a known name?" check and
+     'constructor' is even callable. Every dispatch table is read through
+     this instead. */
+  function own(obj, key) {
+    return Object.prototype.hasOwnProperty.call(obj, key) ? obj[key] : null;
+  }
+
+  return { own: own, safeCell: safeCell, asList: asList, parseList: parseList,
+           isEmail: isEmail, isId: isId, num: num, ok: ok, fail: fail };
+})();
+
+/* ═══════════ SheetService.gs ═══════════ */
+/**
+ * Sheet access. One sheet per entity, header row fixed by CONFIG.SHEETS.
+ */
+var SheetService = (function () {
+
+  function book() {
+    var id = prop_('SPREADSHEET_ID');
+    return id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+  }
+
+  function ensure(name) {
+    var ss = book(), sh = ss.getSheetByName(name);
+    var headers = CONFIG.SHEETS[name];
+    if (!headers) throw new Error('unknown sheet: ' + name);
+    if (!sh) {
+      sh = ss.insertSheet(name);
+      sh.getRange(1, 1, 1, headers.length).setValues([headers]);
+      sh.setFrozenRows(1);
+      return sh;
+    }
+    /* Widen an existing sheet rather than rewriting it, so a sheet the
+       customer already added columns to is left alone. */
+    var have = sh.getLastColumn()
+      ? sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String)
+      : [];
+    var missing = headers.filter(function (h) { return have.indexOf(h) < 0; });
+    if (missing.length) {
+      sh.getRange(1, have.length + 1, 1, missing.length).setValues([missing]);
+      sh.setFrozenRows(1);
+    }
+    return sh;
+  }
+
+  function ensureAll() {
+    Object.keys(CONFIG.SHEETS).forEach(ensure);
+  }
+
+  function headers(sh) {
+    return sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].map(String);
+  }
+
+  function readAll(name) {
+    var sh = ensure(name);
+    if (sh.getLastRow() < 2) return { headers: headers(sh), rows: [] };
+    var head = headers(sh);
+    var values = sh.getRange(2, 1, sh.getLastRow() - 1, head.length).getValues();
+    var rows = values.map(function (r, i) {
+      var o = { __row: i + 2 };
+      head.forEach(function (h, c) { o[h] = r[c]; });
+      return o;
+    });
+    return { headers: head, rows: rows };
+  }
+
+  /* Upsert by id. Last write wins on updatedAt, matching the client, except
+     that a row the server has never seen is always inserted. */
+  function upsert(name, idCol, records) {
+    var sh = ensure(name);
+    var head = headers(sh);
+    var existing = readAll(name);
+    var byId = {};
+    existing.rows.forEach(function (r) { byId[String(r[idCol])] = r; });
+
+    var appends = [], applied = [], skipped = [];
+
+    records.forEach(function (rec) {
+      var id = String(rec[idCol] || '');
+      if (!id) { skipped.push({ id: '', why: 'missing id' }); return; }
+      var row = head.map(function (h) { return Utils.safeCell(rec[h]); });
+      var cur = byId[id];
+      if (!cur) {
+        appends.push(row);
+        applied.push(id);
+      } else if (Utils.num(rec.updatedAt) >= Utils.num(cur.updatedAt)) {
+        sh.getRange(cur.__row, 1, 1, head.length).setValues([row]);
+        applied.push(id);
+      } else {
+        skipped.push({ id: id, why: 'older' });
+      }
+    });
+
+    if (appends.length) {
+      sh.getRange(sh.getLastRow() + 1, 1, appends.length, head.length).setValues(appends);
+    }
+    return { applied: applied, skipped: skipped };
+  }
+
+  function since(name, ts) {
+    var data = readAll(name);
+    return data.rows.filter(function (r) {
+      return Utils.num(r.updatedAt) > Utils.num(ts);
+    }).map(function (r) { delete r.__row; return r; });
+  }
+
+  function append(name, rec) {
+    var sh = ensure(name);
+    var head = headers(sh);
+    sh.appendRow(head.map(function (h) { return Utils.safeCell(rec[h]); }));
+  }
+
+  return { ensure: ensure, ensureAll: ensureAll, readAll: readAll,
+           upsert: upsert, since: since, append: append, book: book };
+})();
+
+/* ═══════════ SyncService.gs ═══════════ */
+/**
+ * Offline queue drain. The device sends queue entries; the server upserts
+ * them and returns whatever changed since the device last pulled.
+ */
+var SyncService = (function () {
+
+  /* The device stores richer objects than the sheet needs. Only mapped
+     columns cross over, so a future client field cannot widen the sheet by
+     accident. */
+  function toRow(entity, p) {
+    var common = {
+      createdAt: Utils.num(p.createdAt), updatedAt: Utils.num(p.updatedAt),
+      deleted: p.deleted ? true : false
+    };
+    if (entity === 'leads') return Object.assign(common, {
+      leadId: p.id, eventId: p.eventId || '', companyId: p.companyId || '',
+      fullName: p.fullName || '', jobTitle: p.jobTitle || '',
+      email: p.email || '', phone: p.phone || '', country: p.country || '',
+      website: p.website || '', leadGrade: p.leadGrade || '',
+      leadScore: p.leadScore === null || p.leadScore === undefined ? '' : p.leadScore,
+      status: p.status || 'new', assignedTo: p.assignedTo || '',
+      interests: Utils.asList(p.interests), requests: Utils.asList(p.requests),
+      notes: p.notes || '', nextAction: p.nextAction || '',
+      nextActionDate: p.nextActionDate || ''
+    });
+    if (entity === 'companies') return Object.assign(common, {
+      companyId: p.id, companyName: p.companyName || '', website: p.website || '',
+      country: p.country || '', industry: p.industry || '',
+      businessType: p.businessType || '', products: Utils.asList(p.products),
+      markets: Utils.asList(p.markets), employeeSize: p.employeeSize || '',
+      description: p.description || '', aiSummary: p.aiSummary || '',
+      aiFitScore: p.aiFitScore === null || p.aiFitScore === undefined ? '' : p.aiFitScore,
+      aiResearchStatus: p.aiResearchStatus || 'none',
+      researchSource: p.researchSource || '', researchedAt: p.researchedAt || ''
+    });
+    if (entity === 'events') return Object.assign(common, {
+      eventId: p.id, eventName: p.eventName || '', startDate: p.startDate || '',
+      endDate: p.endDate || '', venue: p.venue || '', country: p.country || '',
+      status: p.status || 'active', description: p.description || ''
+    });
+    if (entity === 'interactions') return Object.assign(common, {
+      interactionId: p.id, leadId: p.leadId || '', eventId: p.eventId || '',
+      type: p.type || 'note', summary: p.summary || '', notes: p.notes || '',
+      interests: Utils.asList(p.interests), requests: Utils.asList(p.requests),
+      createdBy: p.createdBy || ''
+    });
+    if (entity === 'followups') return Object.assign(common, {
+      followUpId: p.id, leadId: p.leadId || '', eventId: p.eventId || '',
+      type: p.type || '', scheduledAt: Utils.num(p.scheduledAt),
+      status: p.status || 'pending', priority: p.priority || 'normal',
+      reason: p.reason || '', aiRecommended: p.aiRecommended ? true : false,
+      aiReason: p.aiReason || '', subject: p.emailSubject || '',
+      body: p.emailBody || '', approvedAt: p.approvedAt || '',
+      sentAt: p.sentAt || '', sentBy: p.sentBy || '',
+      gmailMessageId: p.gmailMessageId || '', errorMessage: p.errorMessage || ''
+    });
+    return null;
+  }
+
+  function sync(payload, deviceId) {
+    var queue = payload.queue || [];
+    if (queue.length > CONFIG.MAX_BATCH) return Utils.fail('BATCH_TOO_LARGE',
+      'queue of ' + queue.length + ' exceeds ' + CONFIG.MAX_BATCH);
+
+    var grouped = {}, order = [];
+    queue.forEach(function (q) {
+      var ent = Utils.own(CONFIG.ENTITIES, q.entityType);
+      if (!ent) return;
+      if (!Utils.isId(String(q.entityId || ''))) return;
+      var row = toRow(q.entityType, q.payload || {});
+      if (!row) return;
+      /* DELETE is a soft delete on the client; carry the flag rather than
+         removing the row, so the sheet keeps the audit trail. */
+      if (q.action === 'DELETE') row.deleted = true;
+      if (!grouped[q.entityType]) { grouped[q.entityType] = []; order.push(q.entityType); }
+      grouped[q.entityType].push(row);
+    });
+
+    /* Companies and events before leads, leads before what points at them,
+       so a sheet read never sees an orphan. */
+    var priority = ['events', 'companies', 'leads', 'interactions', 'followups'];
+    order.sort(function (a, b) { return priority.indexOf(a) - priority.indexOf(b); });
+
+    var applied = [], stale = [], failed = [];
+    order.forEach(function (entity) {
+      var ent = Utils.own(CONFIG.ENTITIES, entity);
+      try {
+        var r = SheetService.upsert(ent.sheet, ent.idCol, grouped[entity]);
+        applied = applied.concat(r.applied);
+        /* An edit the sheet already has a newer version of is settled, not
+           failed. Reported separately so the device stops resending it and
+           takes the newer row instead of retrying until it gives up. */
+        stale = stale.concat(r.skipped
+          .filter(function (x) { return x.why === 'older'; })
+          .map(function (x) { return x.id; }));
+      } catch (err) {
+        failed.push({ entity: entity, message: String(err && err.message || err) });
+      }
+    });
+
+    logSync_(deviceId, queue, failed);
+
+    var since = Utils.num(payload.since);
+    var rows = {};
+    Object.keys(CONFIG.ENTITIES).forEach(function (entity) {
+      rows[entity] = SheetService.since(CONFIG.ENTITIES[entity].sheet, since);
+    });
+
+    return Utils.ok({ applied: applied, stale: stale, failed: failed, rows: rows, now: Date.now() });
+  }
+
+  function logSync_(deviceId, queue, failed) {
+    try {
+      SheetService.append('SyncLogs', {
+        syncId: Utilities.getUuid(), deviceId: deviceId || '',
+        entityType: 'batch', entityId: '', action: 'SYNC',
+        status: failed.length ? 'partial' : 'ok',
+        timestamp: new Date().toISOString(),
+        errorMessage: failed.length ? JSON.stringify(failed).slice(0, 400) : ''
+      });
+    } catch (e) { /* logging must never fail the sync itself */ }
+  }
+
+  return { sync: sync, toRow: toRow };
+})();
+
+/* ═══════════ AIService.gs ═══════════ */
+/**
+ * Claude proxy.
+ *
+ * The API key never leaves Script Properties, and the client cannot send a
+ * prompt: it names a task and passes fields, and the prompt is built here.
+ * That keeps the endpoint from becoming a free Claude relay for anyone who
+ * finds the URL, and keeps prompt wording versioned with the server.
+ */
+var AIService = (function () {
+
+  function call_(system, userText, maxTokens) {
+    var key = prop_('ANTHROPIC_API_KEY');
+    if (!key) throw new Error('ANTHROPIC_API_KEY is not set in Script properties');
+
+    var res = UrlFetchApp.fetch(CONFIG.AI.endpoint, {
+      method: 'post',
+      contentType: 'application/json',
+      muteHttpExceptions: true,
+      headers: { 'x-api-key': key, 'anthropic-version': CONFIG.AI.apiVersion },
+      payload: JSON.stringify({
+        model: CONFIG.AI.model,
+        max_tokens: maxTokens || CONFIG.AI.maxTokens,
+        temperature: CONFIG.AI.temperature,
+        system: system,
+        messages: [{ role: 'user', content: userText }]
+      })
+    });
+
+    var code = res.getResponseCode();
+    var body = res.getContentText();
+    if (code !== 200) throw new Error('Claude ' + code + ' ' + body.slice(0, 200));
+
+    var parsed = JSON.parse(body);
+    return (parsed.content || []).map(function (c) { return c.text || ''; }).join('');
+  }
+
+  /* Models wrap JSON in prose often enough that the braces are located
+     rather than assumed. */
+  function json_(text) {
+    var t = String(text || '').replace(/```json|```/g, '').trim();
+    var a = t.indexOf('{'), b = t.lastIndexOf('}');
+    if (a < 0 || b <= a) throw new Error('no JSON in model reply');
+    return JSON.parse(t.slice(a, b + 1));
+  }
+
+  var SYSTEM_LEAD =
+    'You analyse a trade show booth conversation for a B2B sales team.\n' +
+    'Rules you must not break:\n' +
+    '- Use only the facts given. Never invent products, prices, promises or company details.\n' +
+    '- If the notes do not support a conclusion, say so through a lower confidence.\n' +
+    '- recommendedDays must reflect what the visitor actually asked for.\n' +
+    'Reply with JSON only, no prose:\n' +
+    '{"leadScore":0-100,"grade":"A|B|C","summary":"","nextAction":"",' +
+    '"recommendedDays":number,"priority":"high|normal|low","reason":"",' +
+    '"factors":[{"name":"","points":0}],"confidence":0-1}';
+
+  /* Scored on the weights in spec 15; the model is told the weights so the
+     score and the factor list agree with each other. */
+  var WEIGHTS =
+    'Weights: interest 30, request specificity 20, purchase intent 20, ' +
+    'product fit 15, company fit 10, job position 5. ' +
+    'Grade: 80-100 A, 50-79 B, 0-49 C.';
+
+  function leadAnalysis(p) {
+    var lines = [
+      WEIGHTS, '',
+      'Our company: ' + (p.ourCompany || '(not set)'),
+      'Our products: ' + (p.ourProducts || '(not set)'),
+      '', 'Visitor:',
+      '- Company: ' + (p.company || '(unknown)'),
+      '- Job title: ' + (p.jobTitle || '(unknown)'),
+      '- Interests: ' + (p.interests || '(none recorded)'),
+      '- Requests: ' + (p.requests || '(none recorded)'),
+      '- Grade given by staff: ' + (p.leadGrade || '(none)'),
+      '- Consultation notes: ' + (p.notes || '(none recorded)'),
+      '- Event: ' + (p.event || '(unknown)'),
+      '', 'Reply language: ' + (p.lang === 'en' ? 'English' : p.lang === 'zh' ? 'Simplified Chinese' : 'Korean')
+    ].join('\n');
+
+    var out = json_(call_(SYSTEM_LEAD, lines, 900));
+    out.leadScore = Math.max(0, Math.min(100, Utils.num(out.leadScore)));
+    if (['A', 'B', 'C'].indexOf(out.grade) < 0) {
+      out.grade = out.leadScore >= 80 ? 'A' : out.leadScore >= 50 ? 'B' : 'C';
+    }
+    out.recommendedDays = Math.max(1, Math.min(90, Utils.num(out.recommendedDays, 3)));
+    if (['high', 'normal', 'low'].indexOf(out.priority) < 0) out.priority = 'normal';
+    out.confidence = Math.max(0, Math.min(1, Utils.num(out.confidence, 0.5)));
+    return out;
+  }
+
+  function run(type, payload) {
+    if (type === 'lead_analysis') return leadAnalysis(payload || {});
+    throw new Error('unsupported analysis type: ' + type);
+  }
+
+  return { run: run, json_: json_ };
+})();
+
+/* ═══════════ ApiRouter.gs ═══════════ */
+/**
+ * Request envelope, auth and dispatch (spec 52, 53).
+ *
+ * Every reply is {success, data, error, timestamp} and always HTTP 200:
+ * Apps Script turns a thrown error into an HTML page the app cannot parse.
+ */
+var ApiRouter = (function () {
+
+  var ACTIONS = {
+    ping:            function () { return Utils.ok({ pong: true, version: '3.0' }); },
+    setup:           function ()  { SheetService.ensureAll(); return Utils.ok({ sheets: Object.keys(CONFIG.SHEETS) }); },
+    sync:            function (p, ctx) { return SyncService.sync(p, ctx.deviceId); },
+    generateLeadAnalysis: function (p) { return Utils.ok(AIService.run('lead_analysis', p)); }
+  };
+
+  function reply_(obj) {
+    return ContentService.createTextOutput(JSON.stringify(obj))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+
+  function parse_(e) {
+    if (!e || !e.postData || !e.postData.contents) return null;
+    try { return JSON.parse(e.postData.contents); } catch (err) { return null; }
+  }
+
+  function handle(e) {
+    var body = parse_(e);
+    if (!body) return reply_(Utils.fail('INVALID_REQUEST', 'body is not JSON'));
+
+    var expected = prop_('SHARED_TOKEN');
+    if (!expected) return reply_(Utils.fail('NOT_CONFIGURED',
+      'SHARED_TOKEN is not set in Script properties'));
+    if (String(body.token || '') !== expected) {
+      return reply_(Utils.fail('UNAUTHORIZED', 'token mismatch'));
+    }
+
+    var fn = Utils.own(ACTIONS, body.action);
+    if (typeof fn !== 'function') return reply_(Utils.fail('UNKNOWN_ACTION', String(body.action || '')));
+
+    /* One writer at a time: two phones draining their queues at once would
+       otherwise read the same last row and overwrite each other. */
+    var lock = LockService.getScriptLock();
+    try {
+      lock.waitLock(25000);
+    } catch (err) {
+      return reply_(Utils.fail('BUSY', 'another sync is running, try again'));
+    }
+    try {
+      return reply_(fn(body.payload || {}, {
+        deviceId: String(body.deviceId || ''), userId: String(body.userId || '')
+      }));
+    } catch (err) {
+      return reply_(Utils.fail('SERVER_ERROR', err && err.message || err));
+    } finally {
+      lock.releaseLock();
+    }
+  }
+
+  /* GET exists only so a browser can confirm the deployment is reachable. */
+  function handleGet(e) {
+    return reply_(Utils.ok({ service: 'BOOTH DESK B2B', version: '3.0',
+      configured: !!prop_('SHARED_TOKEN'), ai: !!prop_('ANTHROPIC_API_KEY') }));
+  }
+
+  return { handle: handle, handleGet: handleGet };
+})();
+
+/* ═══════════ Code.gs ═══════════ */
+/**
+ * Entry points. Apps Script requires these to be global.
+ */
+function doPost(e) { return ApiRouter.handle(e); }
+function doGet(e)  { return ApiRouter.handleGet(e); }
+
+/** Run once from the editor to create the sheets. */
+function setup() {
+  SheetService.ensureAll();
+  return 'ok';
+}
+
