@@ -584,6 +584,18 @@ section[hidden]{display:none}
     <button id="s-scan">불러오는 중</button>
   </div>
   <div class="setrow">
+    <h4 data-i18n="sB2bH">서버 연결 (Ver 3.0)</h4>
+    <p data-i18n="sB2bP">회사 구글 계정에 Apps Script를 설치하면…</p>
+    <input id="b2b-url" type="url" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="b2bUrlPh" placeholder="https://script.google.com/.../exec">
+    <input id="b2b-token" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" data-i18n-ph="b2bTokenPh" placeholder="SHARED_TOKEN" style="margin-top:8px">
+    <div class="keyrow" style="margin-top:8px">
+      <button class="sec" id="b2b-test" data-i18n="b2bTest">연결 확인</button>
+      <button id="b2b-sync" data-i18n="b2bSyncNow">지금 동기화</button>
+    </div>
+    <div class="ai" id="b2bStatus"></div>
+  </div>
+
+  <div class="setrow">
     <h4 data-i18n="sSyncH">실시간 공유 (구글 시트)</h4>
     <p>연결하면 접수 기록이 자동으로 구글 시트에 올라가고, 다른 직원의 기록도 자동으로 내려받아 명부에 함께 표시됩니다. 인터넷이 끊겨도 폰에는 정상 저장되며, 연결되는 순간 밀린 기록이 알아서 올라갑니다.<br><br>
     <b>사진은 올라가지 않습니다.</b> 용량이 커서 폰에만 보관됩니다.</p>
@@ -810,6 +822,13 @@ ko:{evCurrent:'현재 전시회',evPickTitle:'전시회 선택',evNew:'+ 새 전
  ft_thank_you:'감사 인사',ft_sample_followup:'샘플 후속',ft_quotation_followup:'견적 후속',
  ft_general_followup:'일반 후속',ft_recontact:'재연락',
  hFollow:'후속 연락',
+ sB2bH:'서버 연결 (Ver 3.0)',
+ sB2bP:'회사 구글 계정에 Apps Script를 설치하면 리드·회사·후속 일정이 구글 시트로 모이고, AI 기능이 켜집니다. Claude API 키는 그 스크립트 안에만 저장됩니다.',
+ b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'스크립트에 설정한 SHARED_TOKEN',
+ b2bTest:'연결 확인',b2bSyncNow:'지금 동기화',
+ b2bOk:'연결됨',b2bBad:'연결 실패',b2bNoUrl:'주소를 먼저 넣어 주세요',
+ b2bSynced:'보냄 %p건 · 받음 %g건',b2bQueue:'대기 %n건',b2bFailed:'실패 %n건',
+ b2bOffline:'오프라인 — 연결되면 자동으로 보냅니다',b2bAiOn:'AI 사용 가능',b2bAiOff:'AI 키 미설정',
  hTotal:'전체',hToday:'오늘',hGradeA:'A등급',hReq:'요청 있음',
  hGrade:'등급 분포',hPipe:'진행 단계',hConv:'전환율',hAttention:'먼저 챙길 리드',
  hAttentionS:'A등급인데 아직 연락 전인 리드입니다',hAttentionNone:'A등급 리드를 모두 챙겼습니다',
@@ -846,6 +865,13 @@ en:{evCurrent:'Current event',evPickTitle:'Select event',evNew:'+ New event',
  ft_thank_you:'Thank you',ft_sample_followup:'Sample',ft_quotation_followup:'Quotation',
  ft_general_followup:'General',ft_recontact:'Re-contact',
  hFollow:'Follow-up',
+ sB2bH:'Server connection (Ver 3.0)',
+ sB2bP:'Installing the Apps Script in your own Google account collects leads, companies and follow-ups into a Google Sheet and switches the AI features on. The Claude API key is stored only inside that script.',
+ b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'The SHARED_TOKEN you set in the script',
+ b2bTest:'Test connection',b2bSyncNow:'Sync now',
+ b2bOk:'Connected',b2bBad:'Connection failed',b2bNoUrl:'Enter the address first',
+ b2bSynced:'Sent %p · received %g',b2bQueue:'%n waiting',b2bFailed:'%n failed',
+ b2bOffline:'Offline — will send once reconnected',b2bAiOn:'AI available',b2bAiOff:'AI key not set',
  hTotal:'Total',hToday:'Today',hGradeA:'Grade A',hReq:'With requests',
  hGrade:'Grades',hPipe:'Pipeline',hConv:'Conversion',hAttention:'Needs attention',
  hAttentionS:'Grade A leads with no contact yet',hAttentionNone:'Every grade A lead has been picked up',
@@ -882,6 +908,13 @@ zh:{evCurrent:'当前展会',evPickTitle:'选择展会',evNew:'+ 新建展会',
  ft_thank_you:'致谢',ft_sample_followup:'样品跟进',ft_quotation_followup:'报价跟进',
  ft_general_followup:'常规跟进',ft_recontact:'再联系',
  hFollow:'跟进',
+ sB2bH:'服务器连接 (Ver 3.0)',
+ sB2bP:'在贵公司的谷歌账号中安装 Apps Script 后，客户、公司与跟进计划会汇总到谷歌表格，并启用 AI 功能。Claude API 密钥仅保存在该脚本中。',
+ b2bUrlPh:'https://script.google.com/.../exec',b2bTokenPh:'脚本中设置的 SHARED_TOKEN',
+ b2bTest:'测试连接',b2bSyncNow:'立即同步',
+ b2bOk:'已连接',b2bBad:'连接失败',b2bNoUrl:'请先填写地址',
+ b2bSynced:'已发送%p条 · 已接收%g条',b2bQueue:'待发送%n条',b2bFailed:'失败%n条',
+ b2bOffline:'离线 — 恢复后会自动发送',b2bAiOn:'AI 可用',b2bAiOff:'未设置 AI 密钥',
  hTotal:'合计',hToday:'今日',hGradeA:'A级',hReq:'有需求',
  hGrade:'等级分布',hPipe:'进展阶段',hConv:'转化率',hAttention:'优先跟进',
  hAttentionS:'A级但尚未联系的客户',hAttentionNone:'A级客户均已跟进',
@@ -1262,7 +1295,8 @@ async function importRow(r,eventId,opt){
   if(!found){
     await save('interactions',{leadId:lead.id,eventId:lead.eventId,type:'booth_visit',
       summary:(r.memo||'').slice(0,200),notes:r.memo||'',interests:r.items||[],
-      requests:r.books||[],attachments:[],createdBy:r.staff||'',createdAt:when},{queue:false});
+      requests:r.books||[],attachments:[],createdBy:r.staff||'',createdAt:when});
+    /* Photos stay on the device (spec 73); only the text travels. */
     if(r.photo)await save('attachments',{leadId:lead.id,kind:'business_card',
       blob:r.photo,name:(cname||'card')+'.jpg'},{queue:false});
   }
@@ -1276,6 +1310,181 @@ async function captureFromV2(rec,eventId){
   const out=await importRow(rec,ev.id,{update:true});
   if(out&&out.created&&out.lead)await scheduleFollowUp(out.lead);
   return out;
+}
+
+/* ---- Server API ---------------------------------------------------------
+   text/plain dodges the CORS preflight that Apps Script cannot answer; the
+   body is still JSON. Ver 2.0 does the same thing against its own endpoint. */
+async function api(action,payload){
+  const url=(cfg.b2bApi||'').trim();
+  if(!url)throw new Error('NO_ENDPOINT');
+  if(!navigator.onLine)throw new Error('OFFLINE');
+  const res=await fetch(url,{method:'POST',
+    headers:{'content-type':'text/plain;charset=utf-8'},
+    body:JSON.stringify({action,token:cfg.b2bToken||'',deviceId:deviceId(),
+      userId:cfg.staff||'',payload:payload||{}})});
+  if(!res.ok)throw new Error('HTTP '+res.status);
+  const out=await res.json();
+  if(!out.success)throw new Error((out.error&&out.error.code||'ERROR')+': '+(out.error&&out.error.message||''));
+  return out.data;
+}
+
+function deviceId(){
+  let d='';
+  try{ d=localStorage.getItem(NS.cfg+'-device')||''; }catch(e){}
+  if(!d){ d='dev-'+newId(); try{ localStorage.setItem(NS.cfg+'-device',d); }catch(e){} }
+  return d;
+}
+
+/* ---- Queue drain --------------------------------------------------------
+   Ver 2.0 marked records dirty and reset the flag on a successful POST, so a
+   failure had no record and a delete never travelled at all. Entries here
+   carry a retry count and the last error, and are only cleared once the
+   server confirms the id. */
+const MAX_RETRY=5;
+let flushing=false;
+
+async function flushQueue(opt){
+  opt=opt||{};
+  if(flushing)return {ok:false,reason:'busy'};
+  if(!(cfg.b2bApi||'').trim())return {ok:false,reason:'no-endpoint'};
+  if(!navigator.onLine)return {ok:false,reason:'offline'};
+
+  flushing=true;
+  try{
+    const queue=(await all('syncQueue'))
+      .filter(q=>q.status==='pending'&&q.retryCount<MAX_RETRY)
+      .sort((a,b)=>(a.createdAt||0)-(b.createdAt||0))
+      .slice(0,200);
+    let data;
+    try{
+      data=await api('sync',{queue:queue.map(q=>({entityType:q.entityType,
+        entityId:q.entityId,action:q.action,payload:q.payload})),
+        since:cfg.b2bSince||0});
+    }catch(err){
+      /* The batch failed as a whole; count it against every entry so a
+         permanently broken record eventually stops blocking the rest. */
+      for(const q of queue){
+        q.retryCount=(q.retryCount||0)+1;
+        q.lastError=String(err.message||err).slice(0,200);
+        if(q.retryCount>=MAX_RETRY)q.status='failed';
+        q.updatedAt=Date.now();
+        await save('syncQueue',q,{queue:false});
+      }
+      throw err;
+    }
+
+    const done=new Set(data.applied||[]);
+    /* Rejected as older: the sheet already holds a newer version, so this
+       entry is finished. Resending it would fail identically five times and
+       then strand the record as failed. */
+    const stale=new Set(data.stale||[]);
+    let cleared=0, dropped=0;
+    for(const q of queue){
+      if(stale.has(q.entityId)&&!done.has(q.entityId)){
+        q.status='superseded'; q.updatedAt=Date.now();
+        await save('syncQueue',q,{queue:false});
+        dropped++;
+      }else if(done.has(q.entityId)){
+        q.status='sent'; q.updatedAt=Date.now();
+        await save('syncQueue',q,{queue:false});
+        const rec=await get(q.entityType,q.entityId);
+        if(rec&&!rec.deleted){ rec.syncStatus='synced'; rec.syncedAt=Date.now();
+          await save(q.entityType,rec,{queue:false}); }
+        cleared++;
+      }else{
+        q.retryCount=(q.retryCount||0)+1;
+        q.lastError='not acknowledged';
+        if(q.retryCount>=MAX_RETRY)q.status='failed';
+        q.updatedAt=Date.now();
+        await save('syncQueue',q,{queue:false});
+      }
+    }
+
+    const stillQueued=new Set((await all('syncQueue'))
+      .filter(q=>q.status==='pending'||q.status==='failed')
+      .map(q=>q.entityId));
+    const pulled=await applyPull(data.rows||{},stillQueued);
+    cfg.b2bSince=data.now||Date.now();
+    if(typeof cfgSave==='function')cfgSave();
+    return {ok:true,pushed:cleared,pulled,superseded:dropped};
+  }finally{
+    flushing=false;
+  }
+}
+
+/* Rows coming back from the sheet. Local edits that have not synced yet win,
+   otherwise the newer updatedAt wins — and interactions are never
+   overwritten, only added (spec 68). */
+async function applyPull(rows,stillQueued){
+  stillQueued=stillQueued||new Set();
+  let n=0;
+  for(const entity of ['events','companies','leads','interactions','followups']){
+    const idCol={events:'eventId',companies:'companyId',leads:'leadId',
+                 interactions:'interactionId',followups:'followUpId'}[entity];
+    for(const r of (rows[entity]||[])){
+      const id=String(r[idCol]||''); if(!id)continue;
+      const cur=await get(entity,id);
+      /* Append-only: a consultation record is never rewritten (spec 68). */
+      if(cur&&entity==='interactions')continue;
+      /* Local work that has not reached the server yet outranks the sheet. */
+      if(stillQueued.has(id))continue;
+      if(cur&&Number(cur.updatedAt||0)>=Number(r.updatedAt||0))continue;
+      await save(entity,fromRow(entity,id,r,cur),{queue:false});
+      n++;
+    }
+  }
+  return n;
+}
+
+function fromRow(entity,id,r,cur){
+  const list=v=>String(v||'').split('/').map(x=>x.trim()).filter(Boolean);
+  const base={...(cur||{}),id,updatedAt:Number(r.updatedAt||0),
+    createdAt:Number(r.createdAt||(cur&&cur.createdAt)||0),
+    deleted:r.deleted===true||r.deleted==='TRUE'||r.deleted==='true',
+    syncStatus:'synced',syncedAt:Date.now()};
+  if(entity==='leads')return {...base,eventId:r.eventId||'',companyId:r.companyId||'',
+    fullName:r.fullName||'',jobTitle:r.jobTitle||'',email:r.email||'',phone:r.phone||'',
+    country:r.country||'',website:r.website||'',leadGrade:r.leadGrade||'',
+    leadScore:r.leadScore===''?null:Number(r.leadScore),status:r.status||'new',
+    assignedTo:r.assignedTo||'',interests:list(r.interests),requests:list(r.requests),
+    notes:r.notes||'',nextAction:r.nextAction||'',nextActionDate:r.nextActionDate||null};
+  if(entity==='companies')return {...base,companyName:r.companyName||'',
+    normalizedName:normalizeName(r.companyName),website:r.website||'',country:r.country||'',
+    industry:r.industry||'',businessType:r.businessType||'',products:list(r.products),
+    markets:list(r.markets),employeeSize:r.employeeSize||'',description:r.description||'',
+    aiSummary:r.aiSummary||'',aiFitScore:r.aiFitScore===''?null:Number(r.aiFitScore),
+    aiResearchStatus:r.aiResearchStatus||'none',researchSource:r.researchSource||'',
+    researchedAt:r.researchedAt||null};
+  if(entity==='events')return {...base,eventName:r.eventName||'',startDate:r.startDate||'',
+    endDate:r.endDate||'',venue:r.venue||'',country:r.country||'',status:r.status||'active',
+    description:r.description||''};
+  if(entity==='interactions')return {...base,leadId:r.leadId||'',eventId:r.eventId||'',
+    type:r.type||'note',summary:r.summary||'',notes:r.notes||'',
+    interests:list(r.interests),requests:list(r.requests),createdBy:r.createdBy||''};
+  return {...base,leadId:r.leadId||'',eventId:r.eventId||'',type:r.type||'',
+    scheduledAt:Number(r.scheduledAt||0),status:r.status||'pending',
+    priority:r.priority||'normal',reason:r.reason||'',aiRecommended:r.aiRecommended===true,
+    aiReason:r.aiReason||'',emailSubject:r.subject||'',emailBody:r.body||'',
+    approvedAt:r.approvedAt||null,sentAt:r.sentAt||null,sentBy:r.sentBy||'',
+    gmailMessageId:r.gmailMessageId||'',errorMessage:r.errorMessage||''};
+}
+
+/* Automatic draining gives up after MAX_RETRY so one poisoned record cannot
+   spin forever, but a six-minute outage would otherwise strand good records
+   for good. Pressing sync by hand puts them back in the queue. */
+async function retryFailed(){
+  const q=(await all('syncQueue')).filter(x=>x.status==='failed');
+  for(const x of q){ x.status='pending'; x.retryCount=0; x.lastError='';
+    x.updatedAt=Date.now(); await save('syncQueue',x,{queue:false}); }
+  return q.length;
+}
+
+async function queueStatus(){
+  const q=await all('syncQueue');
+  return {pending:q.filter(x=>x.status==='pending').length,
+          failed:q.filter(x=>x.status==='failed').length,
+          sent:q.filter(x=>x.status==='sent').length};
 }
 
 /* ---- Follow-up scheduling ------------------------------------------------
@@ -1383,6 +1592,7 @@ return {NS,AI_CONFIG,SCHEMA,LEGACY_DB,open,get,all,byIndex,live,save,remove,
         enqueue,normalizeName,readLegacyRows,migrate,counts,newId,plain,
         events,ensureEvent,importRow,captureFromV2,
         fuPlan,fuType,scheduleFollowUp,ensureFollowUps,openFollowUps,FU_OPEN,
+        api,flushQueue,queueStatus,retryFailed,deviceId,applyPull,fromRow,MAX_RETRY,
         error:()=>lastError};
 })();
 
@@ -1890,6 +2100,70 @@ $('ev-save').addEventListener('click',async()=>{
   toast(t(prev?'evSaved':'evCreated'));
 });
 
+/* ═════ 서버 연결 (Ver 3.0) ═════ */
+function b2bStat(msg,cls){
+  const e=$('b2bStatus'); if(!e)return;
+  e.className='ai'+(cls?' '+cls:''); e.textContent=msg;
+}
+
+async function b2bPaintQueue(){
+  const q=await B2B.queueStatus();
+  const bits=[];
+  if(q.pending)bits.push(t('b2bQueue').replace('%n',q.pending));
+  if(q.failed) bits.push(t('b2bFailed').replace('%n',q.failed));
+  if(!navigator.onLine&&q.pending)bits.push(t('b2bOffline'));
+  if(bits.length)b2bStat(bits.join(' · '),q.failed?'bad':'');
+  return q;
+}
+
+$('b2b-test').addEventListener('click',async()=>{
+  cfg.b2bApi=$('b2b-url').value.trim();
+  cfg.b2bToken=$('b2b-token').value.trim();
+  cfgSave();
+  if(!cfg.b2bApi){ b2bStat(t('b2bNoUrl'),'bad'); return; }
+  b2bStat('…');
+  try{
+    const d=await B2B.api('ping',{});
+    b2bStat(t('b2bOk')+' · '+(d&&d.version?'v'+d.version:'')+' · '+
+      t(await b2bAiReady()?'b2bAiOn':'b2bAiOff'),'on');
+  }catch(err){
+    b2bStat(t('b2bBad')+' — '+String(err.message||err).slice(0,90),'bad');
+  }
+});
+
+/* doGet reports whether the key is present without revealing it. */
+async function b2bAiReady(){
+  try{
+    const r=await fetch(cfg.b2bApi,{method:'GET'});
+    const j=await r.json();
+    return !!(j&&j.data&&j.data.ai);
+  }catch(e){ return false; }
+}
+
+$('b2b-sync').addEventListener('click',async()=>{
+  cfg.b2bApi=$('b2b-url').value.trim();
+  cfg.b2bToken=$('b2b-token').value.trim();
+  cfgSave();
+  if(!cfg.b2bApi){ b2bStat(t('b2bNoUrl'),'bad'); return; }
+  b2bStat('…');
+  try{
+    await B2B.retryFailed();
+    const r=await B2B.flushQueue();
+    if(r.ok){
+      b2bStat(t('b2bSynced').replace('%p',r.pushed||0).replace('%g',r.pulled||0),'on');
+      renderHome(); renderLeads(); renderCompanies();
+    }else b2bStat(String(r.reason||''),'bad');
+  }catch(err){
+    b2bStat(t('b2bBad')+' — '+String(err.message||err).slice(0,90),'bad');
+    b2bPaintQueue();
+  }
+});
+
+/* Same cadence as Ver 2.0's sheet sync, and a drain the moment the network
+   comes back — the whole point of the queue is that the booth never waits. */
+setInterval(()=>{ if(cfg.b2bApi&&navigator.onLine)B2B.flushQueue().catch(()=>{}); },60000);
+window.addEventListener('online',()=>{ if(cfg.b2bApi)B2B.flushQueue().catch(()=>{}); });
+
 /* ═════ 후속 연락 (Ver 3.0) ═════
    Dates come from the rules in B2B.fuPlan and the reason is shown on every
    card, so the schedule is something the user can check rather than trust. */
@@ -1962,7 +2236,7 @@ $('fuBody').addEventListener('click',async e=>{
     const l=await B2B.get('leads',f.leadId);
     if(l)await B2B.save('interactions',{leadId:l.id,eventId:l.eventId,type:'followup',
       summary:t('ft_'+f.type),notes:'',interests:[],requests:[],attachments:[],
-      createdBy:cfg.staff||'',createdAt:Date.now()},{queue:false});
+      createdBy:cfg.staff||'',createdAt:Date.now()});
     toast(t('fuDoneMsg'));
   }
   renderFollowUps();
@@ -3054,6 +3328,8 @@ paintBar('new');
   render(); usage(); renderChips(); renderBooks(); paintScanBtn(); paintBar('new');
   evPaint();
   $('s-sync').value=cfg.sync||''; pill();
+  $('b2b-url').value=cfg.b2bApi||''; $('b2b-token').value=cfg.b2bToken||'';
+  b2bPaintQueue(); if(cfg.b2bApi&&navigator.onLine)B2B.flushQueue().catch(()=>{});
   if(cfg.sync)syncNow(true);
   paintKeyState();
   if(!cfg.staff){$('t-set').click();toast(t('tSetStaff'));}
