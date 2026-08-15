@@ -1450,10 +1450,10 @@ function makeVCard(r){
     r.spec?('['+t('lSpec')+'] '+r.spec):'',
     r.grade?('['+t('lGrade')+'] '+(gmap[r.grade]||r.grade)):'',
     r.memo?('['+t('lMemo')+'] '+r.memo):'',
-    'K-print 2026 · '+(r.at||'')+(r.staff?(' · '+r.staff):'')
+    [P().event,r.at||'',r.staff||''].filter(Boolean).join(' · ')
   ].filter(Boolean).join('\n');
 
-  const name=(r.name||r.company||'K-print').trim();
+  const name=(r.name||r.company||t('noName')).trim();
   const L=['BEGIN:VCARD','VERSION:3.0'];
   L.push('N:'+vEsc(name)+';;;;');
   L.push('FN:'+vEsc(name));
@@ -1466,7 +1466,7 @@ function makeVCard(r){
   if(r.email)L.push('EMAIL;TYPE=WORK,INTERNET:'+vEsc(r.email));
   if(r.addr)L.push('ADR;TYPE=WORK:;;'+vEsc(r.addr)+';;;;');
   L.push('NOTE:'+vEsc(note));
-  L.push('CATEGORIES:K-print 2026');
+  if(P().event)L.push('CATEGORIES:'+vEsc(P().event));
   L.push('END:VCARD');
   return L.join('\r\n');
 }
